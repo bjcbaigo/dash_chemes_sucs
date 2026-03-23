@@ -445,7 +445,7 @@ tr:hover td { background: var(--gray-50); }
         </div>
         <div class="table-wrap">
           <table>
-            <thead><tr><th>#</th><th>Artículo</th><th class="num">Unidades</th><th class="num">Neto s/imp.</th></tr></thead>
+            <thead><tr><th>#</th><th>SKU</th><th>Artículo</th><th class="num">Unidades</th><th class="num">Neto s/imp.</th></tr></thead>
             <tbody id="tbody-top-art"></tbody>
           </table>
         </div>
@@ -466,7 +466,7 @@ tr:hover td { background: var(--gray-50); }
         <div class="card-header"><span class="card-title">Sin stock y bajo punto de pedido</span></div>
         <div class="table-wrap">
           <table>
-            <thead><tr><th>Artículo</th><th>Depósito</th><th class="num">Stock</th><th class="num">P.Pedido</th><th>Estado</th></tr></thead>
+            <thead><tr><th>SKU</th><th>Artículo</th><th>Depósito</th><th class="num">Stock</th><th class="num">P.Pedido</th><th>Estado</th></tr></thead>
             <tbody id="tbody-criticos"></tbody>
           </table>
         </div>
@@ -489,7 +489,7 @@ tr:hover td { background: var(--gray-50); }
         <div class="card-header"><span class="card-title">Stock inmovilizado — +90 días sin movimiento</span></div>
         <div class="table-wrap">
           <table>
-            <thead><tr><th>Artículo</th><th class="num">Stock</th><th class="num">Días sin mov.</th></tr></thead>
+            <thead><tr><th>SKU</th><th>Artículo</th><th class="num">Stock</th><th class="num">Días sin mov.</th></tr></thead>
             <tbody id="tbody-inmovilizado"></tbody>
           </table>
         </div>
@@ -611,15 +611,18 @@ tr:hover td { background: var(--gray-50); }
 
 <script>
 // ═══════════════════════════════════════════════════════════════════════
-// CONFIGURACIÓN — EDITAR ANTES DE DESPLEGAR
+// CONFIGURACIÓN — leer ID de sucursal desde URL (?id=3)
 // ═══════════════════════════════════════════════════════════════════════
-var CONFIG = {
-  // URL del Apps Script Web App — pegar aquí tras publicar
-  WEB_APP_URL: "https://script.google.com/macros/s/AKfycbyaDF1IWOdTceS-rXuzrQnxE4nolMdkhxNA0T5_iDM710AZCjEY79BG2t6YQeyAeCHjwQ/exec",
-  SUCURSAL:    "VERA",
-  // Modo demo: usa datos de ejemplo cuando WEB_APP_URL tiene el placeholder
-  DEMO_MODE:   false
-};
+var CONFIG = (function() {
+  var params = new URLSearchParams(window.location.search);
+  var id     = parseInt(params.get("id") || "3", 10);
+  var demo   = params.get("demo") === "1";
+  return {
+    WEB_APP_URL: "https://script.google.com/macros/s/AKfycbyaDF1IWOdTceS-rXuzrQnxE4nolMdkhxNA0T5_iDM710AZCjEY79BG2t6YQeyAeCHjwQ/exec",
+    SUCURSAL_ID: id,
+    DEMO_MODE:   demo
+  };
+})();
 
 // ═══════════════════════════════════════════════════════════════════════
 // PERÍODO — calcula fechas según selección
@@ -1184,8 +1187,7 @@ function fetchData() {
     return;
   }
 
-  // Fase 1: KPIs procesados — rápido, entra en cache
-  var url = CONFIG.WEB_APP_URL + "?modulo=todos&sucursal=" + CONFIG.SUCURSAL + "&_=" + Date.now();
+  var url = CONFIG.WEB_APP_URL + "?modulo=todos&id=" + CONFIG.SUCURSAL_ID + "&_=" + Date.now();
   fetch(url)
     .then(function(r){ return r.json(); })
     .then(function(d) {
@@ -1193,7 +1195,6 @@ function fetchData() {
       STATE.data = d;
       STATE.loading = false;
       onDataReady();
-      // Fase 2: raw CSV en segundo plano para filtrado por período
       cargarRawData();
     })
     .catch(function(err) {
@@ -1206,32 +1207,26 @@ function fetchData() {
 }
 
 function cargarRawData() {
-  // Carga los CSV completos en background para habilitar filtrado por período
   var modulos = [
     { mod: "raw_ventas",      key: "_raw_ventas",      tabs: ["ventas","resumen"] },
     { mod: "raw_ventas_art",  key: "_raw_ventas_art",  tabs: ["ventas"] },
     { mod: "raw_seguros",     key: "_raw_seguros",     tabs: ["seguros","resumen"] },
     { mod: "raw_garantias",   key: "_raw_garantias",   tabs: ["seguros","resumen"] }
-    // raw_morosidad NO se carga — la mora es acumulada histórica, no se filtra por período
   ];
-
   modulos.forEach(function(m) {
     var url = CONFIG.WEB_APP_URL + "?modulo=" + m.mod +
-              "&sucursal=" + CONFIG.SUCURSAL + "&_=" + Date.now();
+              "&id=" + CONFIG.SUCURSAL_ID + "&_=" + Date.now();
     fetch(url)
       .then(function(r){ return r.json(); })
       .then(function(d) {
         if (d.ok && d.rows && d.rows.length) {
           STATE.data[m.key] = d.rows;
-          // Re-renderizar si la pestaña activa usa estos datos
           if (m.tabs.indexOf(STATE.activeTab) !== -1) {
             renderSection(STATE.activeTab);
           }
         }
       })
-      .catch(function() {
-        // Raw no disponible — el dashboard sigue funcionando con KPIs del servidor
-      });
+      .catch(function() {});
   });
 }
 
@@ -1242,17 +1237,21 @@ function onDataReady() {
   hide("global-loading");
   var d = STATE.data;
 
-  // Guardar datos raw para filtrado por período
-  // El Apps Script devuelve _raw_* cuando publica los CSV completos
-  // En modo demo no hay raw — se usan los kpis precalculados
   if (d._raw_ventas)    STATE.data._raw_ventas    = d._raw_ventas;
   if (d._raw_morosidad) STATE.data._raw_morosidad = d._raw_morosidad;
   if (d._raw_seguros)   STATE.data._raw_seguros   = d._raw_seguros;
   if (d._raw_garantias) STATE.data._raw_garantias = d._raw_garantias;
 
-  // Topbar
+  // Topbar — nombre de sucursal devuelto por el servidor
+  var nombre = d.sucursal_nombre || d.sucursal || ("Sucursal #" + CONFIG.SUCURSAL_ID);
   var el = document.getElementById("chip-sucursal");
-  if (el) el.textContent = d.sucursal || CONFIG.SUCURSAL;
+  if (el) el.textContent = nombre;
+
+  // Actualizar título de la página y brand-sub con el nombre real
+  document.title = "Chemes — " + nombre;
+  var brandSub = document.querySelector(".brand-sub");
+  if (brandSub) brandSub.textContent = nombre;
+
   var upd = document.getElementById("chip-update");
   if (upd && d.ultima_actualizacion) {
     var ts = d.ultima_actualizacion.replace("T"," ").slice(0,16);
@@ -1362,11 +1361,13 @@ function renderVentas(v) {
 
   var rows = "";
   (v.top_articulos||[]).slice(0,30).forEach(function(a,i){
-    rows += "<tr><td>" + (i+1) + "</td><td>" + (a.desc||a.cod||"—") + "</td>" +
+    rows += "<tr><td>" + (i+1) + "</td>" +
+      "<td style='font-family:var(--font-mono,monospace);font-size:11px;color:var(--text-muted)'>" + (a.cod||"—") + "</td>" +
+      "<td>" + (a.desc||a.cod||"—") + "</td>" +
       '<td class="num">' + fmtNum(a.unidades) + "</td>" +
       '<td class="num">' + fmtPeso(a.importe) + "</td></tr>";
   });
-  html("tbody-top-art", rows || "<tr><td colspan='4' style='text-align:center;color:var(--text-muted);padding:16px'>Sin datos de artículos</td></tr>");
+  html("tbody-top-art", rows || "<tr><td colspan='5' style='text-align:center;color:var(--text-muted);padding:16px'>Sin datos de artículos</td></tr>");
   var br = document.getElementById("badge-ranking-periodo");
   if (br) br.textContent = PERIODO.label();
 }
@@ -1422,20 +1423,24 @@ function renderStock(s) {
   (s.criticos||[]).forEach(function(a){
     var cls = a.estado==="NEGATIVO"?"danger":a.estado==="SIN STOCK"?"danger":"warn";
     var p   = pill(a.estado, cls);
-    rowsCrit += "<tr><td>" + (a.desc||a.cod) + "</td>" +
+    rowsCrit += "<tr>" +
+      "<td style='font-family:var(--font-mono,monospace);font-size:11px;color:var(--text-muted)'>" + (a.cod||"—") + "</td>" +
+      "<td>" + (a.desc||a.cod) + "</td>" +
       "<td>" + (a.deposito||"—") + "</td>" +
       '<td class="num">' + fmtNum(a.stock) + "</td>" +
       '<td class="num">' + fmtNum(a.minimo) + "</td><td>" + p + "</td></tr>";
   });
-  html("tbody-criticos", rowsCrit || "<tr><td colspan='5' style='text-align:center;color:var(--text-muted);padding:16px'>Sin artículos críticos</td></tr>");
+  html("tbody-criticos", rowsCrit || "<tr><td colspan='6' style='text-align:center;color:var(--text-muted);padding:16px'>Sin artículos críticos</td></tr>");
 
   var rowsInm = "";
   (s.inmovilizados||[]).forEach(function(a){
-    rowsInm += "<tr><td>" + (a.desc||a.cod) + "</td>" +
+    rowsInm += "<tr>" +
+      "<td style='font-family:var(--font-mono,monospace);font-size:11px;color:var(--text-muted)'>" + (a.cod||"—") + "</td>" +
+      "<td>" + (a.desc||a.cod) + "</td>" +
       '<td class="num">' + fmtNum(a.stock) + "</td>" +
       '<td class="num">' + a.dias + " días</td></tr>";
   });
-  html("tbody-inmovilizado", rowsInm || "<tr><td colspan='3' style='text-align:center;color:var(--text-muted);padding:16px'>Sin stock inmovilizado</td></tr>");
+  html("tbody-inmovilizado", rowsInm || "<tr><td colspan='4' style='text-align:center;color:var(--text-muted);padding:16px'>Sin stock inmovilizado</td></tr>");
 }
 
 // ═══════════════════════════════════════════════════════════════════════
