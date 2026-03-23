@@ -2029,13 +2029,25 @@ function renderResumen(d, ventasData, moraData, segurosData) {
   var pctVentas  = objV > 0 ? Math.min(Math.round((vk.ventas_neto||0)/objV*100),130) : 0;
   var pctPolizas = objP > 0 ? Math.min(Math.round((sgk.total_polizas||0)/objP*100),130) : 0;
   var pctGarant  = objG > 0 ? Math.min(Math.round((sgk.total_garantias||0)/objG*100),130) : 0;
-  // Cobro puntual = % del saldo que está vigente (no vencido)
-  var pctCobro   = mk.saldo_total > 0
-    ? Math.round((1 - (mk.vencido_total||0)/mk.saldo_total)*100) : 0;
+
+  // Cobro puntual = % cobrado sobre total emitido (Crédito Chemes + Cta Cte)
+  // Fuente: módulo cuotas — emitido vs cobrado de los últimos 6 meses
+  var pctCobro = 0;
+  var showCobro = false;
+  if (d.cuotas) {
+    var cc  = (d.cuotas.cred_chemes && d.cuotas.cred_chemes.kpis) || {};
+    var cta = (d.cuotas.cta_cte     && d.cuotas.cta_cte.kpis)     || {};
+    var totalEmitido = (cc.emitido || 0) + (cta.emitido || 0);
+    var totalCobrado = (cc.cobrado || 0) + (cta.cobrado || 0);
+    if (totalEmitido > 0) {
+      pctCobro  = Math.round(totalCobrado / totalEmitido * 100);
+      showCobro = true;
+    }
+  }
 
   var progItems = [
     { label: "Ventas vs obj.",  pct: pctVentas,  show: objV > 0 },
-    { label: "Cobro puntual",   pct: pctCobro,   show: mk.saldo_total > 0 },
+    { label: "Cobro cuotas",    pct: pctCobro,   show: showCobro },
     { label: "Garantías ext.",  pct: pctGarant,  show: objG > 0 },
     { label: "Pólizas Qualia",  pct: pctPolizas, show: objP > 0 }
   ];
