@@ -1,0 +1,1788 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="theme-color" content="#2596be">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<title>Chemes — Panel Gerencial</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+
+<style>
+/* ─── RESET & BASE ──────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --blue:       #2596be;
+  --blue-light: #7ecfe0;
+  --blue-pale:  #e8f6fb;
+  --blue-dark:  #185FA5;
+  --teal:       #1D9E75;
+  --teal-light: #E1F5EE;
+  --amber:      #BA7517;
+  --amber-light:#FAEEDA;
+  --red:        #D85A30;
+  --red-light:  #FCEBEB;
+  --gray-50:    #f8f9fa;
+  --gray-100:   #f1f3f5;
+  --gray-200:   #e9ecef;
+  --gray-400:   #868e96;
+  --gray-600:   #495057;
+  --gray-900:   #212529;
+  --text:       #1a2332;
+  --text-muted: #6c757d;
+  --border:     rgba(0,0,0,0.08);
+  --radius-sm:  8px;
+  --radius-md:  12px;
+  --radius-lg:  16px;
+  --shadow-sm:  0 1px 3px rgba(0,0,0,0.08);
+  --shadow-md:  0 4px 12px rgba(0,0,0,0.1);
+  --font:       'DM Sans', system-ui, sans-serif;
+  --font-mono:  'DM Mono', monospace;
+  --topbar-h:   56px;
+  --nav-h:      48px;
+}
+html { font-size: 15px; -webkit-text-size-adjust: 100%; }
+body {
+  font-family: var(--font);
+  background: var(--gray-50);
+  color: var(--text);
+  min-height: 100vh;
+  padding-bottom: 80px;
+}
+a { color: inherit; text-decoration: none; }
+
+/* ─── TOPBAR ────────────────────────────────────────────────────────── */
+.topbar {
+  position: sticky; top: 0; z-index: 100;
+  background: var(--blue);
+  height: var(--topbar-h);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 16px;
+  box-shadow: var(--shadow-md);
+}
+.topbar-brand { display: flex; align-items: center; gap: 10px; }
+.brand-logo {
+  width: 36px; height: 36px;
+  background: rgba(255,255,255,0.2);
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 600; font-size: 13px; color: #fff;
+  letter-spacing: 0.02em;
+  flex-shrink: 0;
+}
+.brand-info { line-height: 1.25; }
+.brand-name { font-size: 14px; font-weight: 600; color: #fff; }
+.brand-sub  { font-size: 11px; color: rgba(255,255,255,0.7); }
+.topbar-meta { display: flex; gap: 6px; align-items: center; flex-shrink: 0; }
+.meta-chip {
+  background: rgba(255,255,255,0.18);
+  color: rgba(255,255,255,0.9);
+  font-size: 11px; padding: 4px 9px;
+  border-radius: 20px;
+}
+.meta-chip.green { background: rgba(29,158,117,0.4); }
+
+/* ─── NAV TABS ──────────────────────────────────────────────────────── */
+.nav-wrapper {
+  position: sticky; top: var(--topbar-h); z-index: 90;
+  background: #fff;
+  border-bottom: 1px solid var(--border);
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.nav-wrapper::-webkit-scrollbar { display: none; }
+.nav-tabs {
+  display: flex; gap: 0;
+  padding: 0 12px;
+  min-width: max-content;
+}
+.nav-tab {
+  display: flex; align-items: center; gap: 6px;
+  padding: 0 14px;
+  height: var(--nav-h);
+  font-size: 13px; font-weight: 500;
+  color: var(--text-muted);
+  cursor: pointer;
+  border-bottom: 2.5px solid transparent;
+  transition: color 0.15s, border-color 0.15s;
+  white-space: nowrap;
+  user-select: none;
+}
+.nav-tab:hover { color: var(--blue); }
+.nav-tab.active { color: var(--blue); border-bottom-color: var(--blue); }
+.tab-icon { font-size: 14px; }
+
+/* ─── MAIN CONTENT ──────────────────────────────────────────────────── */
+.main { padding: 16px; max-width: 960px; margin: 0 auto; }
+.section { display: none; }
+.section.active { display: block; animation: fadeIn 0.2s ease; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+
+/* ─── LOADING / ERROR ───────────────────────────────────────────────── */
+.loading-wrap {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 60px 20px; gap: 12px;
+}
+.spinner {
+  width: 32px; height: 32px;
+  border: 3px solid var(--border);
+  border-top-color: var(--blue);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.loading-text { font-size: 13px; color: var(--text-muted); }
+.error-banner {
+  background: var(--red-light); color: var(--red);
+  border: 1px solid rgba(216,90,48,0.2);
+  border-radius: var(--radius-md);
+  padding: 14px 16px; font-size: 13px;
+  margin-bottom: 16px;
+}
+
+/* ─── KPI GRID ──────────────────────────────────────────────────────── */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.kpi-card {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 14px;
+  position: relative;
+  overflow: hidden;
+}
+.kpi-card::before {
+  content: "";
+  position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  background: var(--blue);
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
+}
+.kpi-card.accent::before { background: var(--blue); }
+.kpi-card.danger::before { background: var(--red); }
+.kpi-card.warn::before   { background: var(--amber); }
+.kpi-card.ok::before     { background: var(--teal); }
+.kpi-label {
+  font-size: 11px; font-weight: 500; letter-spacing: 0.04em;
+  color: var(--text-muted); text-transform: uppercase;
+  margin-bottom: 6px;
+}
+.kpi-value {
+  font-size: 22px; font-weight: 600; color: var(--text);
+  line-height: 1.1; margin-bottom: 4px;
+  font-variant-numeric: tabular-nums;
+}
+.kpi-delta { font-size: 11px; }
+.delta-up   { color: var(--teal); }
+.delta-down { color: var(--red); }
+.delta-flat { color: var(--text-muted); }
+
+/* ─── CARDS ─────────────────────────────────────────────────────────── */
+.card {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  margin-bottom: 12px;
+}
+.card-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 14px;
+}
+.card-title {
+  font-size: 12px; font-weight: 600; letter-spacing: 0.05em;
+  text-transform: uppercase; color: var(--text-muted);
+}
+.card-badge {
+  font-size: 11px; padding: 2px 8px;
+  border-radius: 20px;
+  background: var(--blue-pale); color: var(--blue-dark);
+  font-weight: 500;
+}
+.row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+@media (max-width: 540px) { .row-2 { grid-template-columns: 1fr; } }
+
+/* ─── PROGRESS BARS ─────────────────────────────────────────────────── */
+.prog-list { display: flex; flex-direction: column; gap: 10px; }
+.prog-item { display: flex; align-items: center; gap: 10px; }
+.prog-label { font-size: 12px; color: var(--text); min-width: 100px; max-width: 110px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex-shrink: 0; }
+.prog-track { flex: 1; height: 7px; background: var(--gray-100); border-radius: 4px; overflow: hidden; }
+.prog-fill  { height: 100%; border-radius: 4px; transition: width 0.6s cubic-bezier(.4,0,.2,1); }
+.prog-pct   { font-size: 12px; font-weight: 500; color: var(--text); min-width: 36px; text-align: right; font-variant-numeric: tabular-nums; flex-shrink: 0; }
+
+/* ─── TABLE ─────────────────────────────────────────────────────────── */
+.table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+th {
+  font-size: 11px; font-weight: 600; letter-spacing: 0.04em;
+  text-transform: uppercase; color: var(--text-muted);
+  text-align: left; padding: 6px 8px;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+td {
+  padding: 9px 8px;
+  border-bottom: 1px solid var(--gray-100);
+  color: var(--text);
+  vertical-align: middle;
+}
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: var(--gray-50); }
+.num { font-family: var(--font-mono); text-align: right; }
+
+/* ─── PILLS ─────────────────────────────────────────────────────────── */
+.pill {
+  display: inline-block; padding: 2px 8px; border-radius: 20px;
+  font-size: 11px; font-weight: 500; white-space: nowrap;
+}
+.pill-ok     { background: var(--teal-light);  color: #0F6E56; }
+.pill-warn   { background: var(--amber-light); color: #854F0B; }
+.pill-danger { background: var(--red-light);   color: #A32D2D; }
+.pill-info   { background: var(--blue-pale);   color: var(--blue-dark); }
+.pill-gray   { background: var(--gray-100);    color: var(--gray-600); }
+
+/* ─── LEGEND ────────────────────────────────────────────────────────── */
+.legend { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 10px; }
+.legend-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--text-muted); }
+.legend-dot  { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
+
+/* ─── RESUMEN ALERTS ────────────────────────────────────────────────── */
+.alert-list { display: flex; flex-direction: column; gap: 8px; }
+.alert-item {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  border-left: 3px solid;
+}
+.alert-item.alta   { background: #fff5f5; border-color: var(--red);   }
+.alert-item.media  { background: #fffbf0; border-color: var(--amber); }
+.alert-item.ok     { background: #f0fdf8; border-color: var(--teal);  }
+.alert-area  { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; min-width: 70px; margin-top: 1px; }
+.alert-item.alta  .alert-area  { color: var(--red);   }
+.alert-item.media .alert-area  { color: var(--amber); }
+.alert-item.ok    .alert-area  { color: var(--teal);  }
+.alert-text  { font-size: 12.5px; color: var(--text); line-height: 1.4; }
+
+/* ─── TIMESTAMP ─────────────────────────────────────────────────────── */
+.timestamp {
+  text-align: center; font-size: 11px; color: var(--text-muted);
+  padding: 16px 0 4px;
+}
+
+/* ─── SUB-TABS (navegación interna por sección) ─────────────────────── */
+.sub-nav {
+  display: flex; gap: 4px; flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+.sub-tab {
+  padding: 5px 12px; font-size: 12px; font-weight: 500;
+  border-radius: var(--radius-sm); cursor: pointer;
+  border: 1px solid var(--border); color: var(--text-muted);
+  background: var(--gray-50); transition: all 0.12s; user-select: none;
+}
+.sub-tab:hover { border-color: var(--blue); color: var(--blue); }
+.sub-tab.active { background: var(--blue-pale); color: var(--blue-dark); border-color: var(--blue-light); font-weight: 600; }
+.sub-pane { display: none; }
+.sub-pane.active { display: block; animation: fadeIn 0.15s ease; }
+
+/* ─── CHART CONTAINER ───────────────────────────────────────────────── */
+.chart-box { position: relative; width: 100%; }
+
+/* ─── PERIOD SELECTOR BAR ───────────────────────────────────────────── */
+.period-bar {
+  background: #fff;
+  border-bottom: 1px solid var(--border);
+  padding: 8px 16px;
+  display: flex; align-items: center; gap: 8px;
+  flex-wrap: wrap;
+}
+.period-label { font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.04em; flex-shrink: 0; }
+.period-pills { display: flex; gap: 5px; flex-wrap: wrap; flex: 1; }
+.period-pill {
+  padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 500;
+  cursor: pointer; border: 1px solid var(--border);
+  color: var(--text-muted); background: var(--gray-50);
+  transition: all 0.12s; white-space: nowrap; user-select: none;
+}
+.period-pill:hover { border-color: var(--blue); color: var(--blue); background: var(--blue-pale); }
+.period-pill.active { background: var(--blue); color: #fff; border-color: var(--blue); }
+.period-custom { display: none; align-items: center; gap: 6px; flex-wrap: wrap; }
+.period-custom.visible { display: flex; }
+.period-custom input[type="date"] {
+  padding: 4px 8px; border-radius: 6px; border: 1px solid var(--border);
+  font-size: 12px; color: var(--text); background: #fff;
+  font-family: var(--font);
+}
+.period-custom input[type="date"]:focus { outline: none; border-color: var(--blue); }
+.period-custom-sep { font-size: 11px; color: var(--text-muted); }
+.period-apply {
+  padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 500;
+  background: var(--blue); color: #fff; border: none; cursor: pointer;
+}
+.period-apply:hover { background: var(--blue-dark); }
+.period-badge {
+  font-size: 11px; color: var(--blue-dark); background: var(--blue-pale);
+  padding: 3px 8px; border-radius: 20px; font-weight: 500; white-space: nowrap;
+}
+
+/* ─── MOBILE BOTTOM NAV (alternativa) ──────────────────────────────── */
+@media (max-width: 640px) {
+  .main { padding: 12px; }
+  .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+  .kpi-value { font-size: 19px; }
+  .period-bar { padding: 8px 12px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════ TOPBAR ════════════════════════════════════════ -->
+<header class="topbar">
+  <div class="topbar-brand">
+    <div class="brand-logo">CH</div>
+    <div class="brand-info">
+      <div class="brand-name">Casa Luis Chemes S.A.</div>
+      <div class="brand-sub">Panel Gerencial</div>
+    </div>
+  </div>
+  <div class="topbar-meta">
+    <span class="meta-chip" id="chip-sucursal">Cargando...</span>
+    <span class="meta-chip green" id="chip-update" title="Última actualización">—</span>
+  </div>
+</header>
+
+<!-- ═══════════════════ NAV ══════════════════════════════════════════ -->
+<nav class="nav-wrapper">
+  <div class="nav-tabs">
+    <div class="nav-tab active" data-tab="ventas">
+      <span class="tab-icon">📈</span> Ventas
+    </div>
+    <div class="nav-tab" data-tab="stock">
+      <span class="tab-icon">📦</span> Stock
+    </div>
+    <div class="nav-tab" data-tab="morosidad">
+      <span class="tab-icon">⚠️</span> Morosidad
+    </div>
+    <div class="nav-tab" data-tab="objetivos">
+      <span class="tab-icon">🎯</span> Objetivos
+    </div>
+    <div class="nav-tab" data-tab="seguros">
+      <span class="tab-icon">🛡️</span> Seguros
+    </div>
+    <div class="nav-tab" data-tab="resumen">
+      <span class="tab-icon">📋</span> Resumen
+    </div>
+  </div>
+</nav>
+
+<!-- ═══════════════════ PERIOD SELECTOR ══════════════════════════════ -->
+<div class="period-bar" id="period-bar">
+  <span class="period-label">Período</span>
+  <div class="period-pills">
+    <span class="period-pill active" data-period="mes_actual">Mes actual</span>
+    <span class="period-pill" data-period="mes_anterior">Mes anterior</span>
+    <span class="period-pill" data-period="trimestre">Trimestre</span>
+    <span class="period-pill" data-period="semestre">6 meses</span>
+    <span class="period-pill" data-period="anio">Año actual</span>
+    <span class="period-pill" data-period="custom">Personalizado</span>
+  </div>
+  <div class="period-custom" id="period-custom">
+    <span class="period-custom-sep">Desde</span>
+    <input type="date" id="fecha-desde">
+    <span class="period-custom-sep">hasta</span>
+    <input type="date" id="fecha-hasta">
+    <button class="period-apply" onclick="aplicarPeriodoCustom()">Aplicar</button>
+  </div>
+  <span class="period-badge" id="period-badge">—</span>
+</div>
+
+<!-- ═══════════════════ MAIN ══════════════════════════════════════════ -->
+<main class="main">
+
+  <!-- Cargando inicial -->
+  <div id="global-loading" class="loading-wrap">
+    <div class="spinner"></div>
+    <div class="loading-text">Conectando con el servidor de datos…</div>
+  </div>
+  <div id="global-error" class="error-banner" style="display:none;"></div>
+
+  <!-- ── VENTAS ────────────────────────────────────────────────────── -->
+  <div id="sec-ventas" class="section">
+    <div class="kpi-grid" id="kpi-ventas"></div>
+    <div class="sub-nav" id="subnav-ventas">
+      <span class="sub-tab active" data-section="ventas" data-pane="evolucion">Evolución</span>
+      <span class="sub-tab" data-section="ventas" data-pane="familias">Por depósito</span>
+      <span class="sub-tab" data-section="ventas" data-pane="ranking">Ranking artículos</span>
+    </div>
+    <div id="vpane-evolucion" class="sub-pane active">
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Evolución — 6 meses</span>
+          <span class="card-badge" id="badge-ventas-mes">—</span>
+        </div>
+        <div class="chart-box" style="height:220px"><canvas id="chart-ventas-ev"></canvas></div>
+        <div class="legend" id="legend-ventas-ev"></div>
+      </div>
+    </div>
+    <div id="vpane-familias" class="sub-pane">
+      <div class="card">
+        <div class="card-header"><span class="card-title">Ventas por depósito</span></div>
+        <div class="chart-box" style="height:280px"><canvas id="chart-ventas-fam"></canvas></div>
+      </div>
+    </div>
+    <div id="vpane-ranking" class="sub-pane">
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Top 30 artículos</span>
+          <span class="card-badge" id="badge-ranking-periodo">—</span>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>#</th><th>Artículo</th><th class="num">Unidades</th><th class="num">Neto s/imp.</th></tr></thead>
+            <tbody id="tbody-top-art"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── STOCK ─────────────────────────────────────────────────────── -->
+  <div id="sec-stock" class="section">
+    <div class="kpi-grid" id="kpi-stock"></div>
+    <div class="sub-nav">
+      <span class="sub-tab active" data-section="stock" data-pane="criticos">Críticos</span>
+      <span class="sub-tab" data-section="stock" data-pane="distribucion">Distribución</span>
+      <span class="sub-tab" data-section="stock" data-pane="inmovilizado">Inmovilizado</span>
+    </div>
+    <div id="spane-criticos" class="sub-pane active">
+      <div class="card">
+        <div class="card-header"><span class="card-title">Sin stock y bajo punto de pedido</span></div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Artículo</th><th>Depósito</th><th class="num">Stock</th><th class="num">P.Pedido</th><th>Estado</th></tr></thead>
+            <tbody id="tbody-criticos"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <div id="spane-distribucion" class="sub-pane">
+      <div class="row-2">
+        <div class="card">
+          <div class="card-header"><span class="card-title">Stock por familia/depósito</span></div>
+          <div class="chart-box" style="height:260px"><canvas id="chart-stock-fam"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="card-header"><span class="card-title">Antigüedad del stock</span></div>
+          <div class="chart-box" style="height:260px"><canvas id="chart-stock-antig"></canvas></div>
+        </div>
+      </div>
+    </div>
+    <div id="spane-inmovilizado" class="sub-pane">
+      <div class="card">
+        <div class="card-header"><span class="card-title">Stock inmovilizado — +90 días sin movimiento</span></div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Artículo</th><th class="num">Stock</th><th class="num">Días sin mov.</th></tr></thead>
+            <tbody id="tbody-inmovilizado"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── MOROSIDAD ─────────────────────────────────────────────────── -->
+  <div id="sec-morosidad" class="section">
+    <div class="kpi-grid" id="kpi-morosidad"></div>
+    <div class="sub-nav">
+      <span class="sub-tab active" data-section="mora" data-pane="clientes">Clientes</span>
+      <span class="sub-tab" data-section="mora" data-pane="distribucion">Distribución</span>
+    </div>
+    <div id="mpane-clientes" class="sub-pane active">
+      <div class="card">
+        <div class="card-header"><span class="card-title">Clientes con mayor deuda vencida</span></div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Cliente</th><th>Teléfono</th><th class="num">Vencido</th><th class="num">Días mora</th><th>Estado</th></tr></thead>
+            <tbody id="tbody-mora-clientes"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <div id="mpane-distribucion" class="sub-pane">
+      <div class="row-2">
+        <div class="card">
+          <div class="card-header"><span class="card-title">Por tramo de mora</span></div>
+          <div class="chart-box" style="height:240px"><canvas id="chart-mora-dist"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="card-header"><span class="card-title">Composición</span></div>
+          <div class="chart-box" style="height:240px"><canvas id="chart-mora-comp"></canvas></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── OBJETIVOS ─────────────────────────────────────────────────── -->
+  <div id="sec-objetivos" class="section">
+    <div class="kpi-grid" id="kpi-objetivos"></div>
+    <div class="sub-nav">
+      <span class="sub-tab active" data-section="obj" data-pane="progreso">Progreso</span>
+      <span class="sub-tab" data-section="obj" data-pane="historico">Histórico</span>
+    </div>
+    <div id="opane-progreso" class="sub-pane active">
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Cumplimiento por categoría</span>
+          <span class="card-badge" id="badge-obj-mes">—</span>
+        </div>
+        <div class="prog-list" id="prog-obj"></div>
+        <div class="legend" style="margin-top:12px;">
+          <span class="legend-item"><span class="legend-dot" style="background:var(--teal)"></span>Superado</span>
+          <span class="legend-item"><span class="legend-dot" style="background:var(--blue)"></span>En camino</span>
+          <span class="legend-item"><span class="legend-dot" style="background:var(--amber)"></span>En riesgo</span>
+          <span class="legend-item"><span class="legend-dot" style="background:var(--red)"></span>Crítico</span>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><span class="card-title">Avance acumulado vs meta</span></div>
+        <div class="chart-box" style="height:200px"><canvas id="chart-obj-acum"></canvas></div>
+      </div>
+    </div>
+    <div id="opane-historico" class="sub-pane">
+      <div class="card">
+        <div class="card-header"><span class="card-title">Cumplimiento — últimos 6 meses</span></div>
+        <div class="chart-box" style="height:240px"><canvas id="chart-obj-hist"></canvas></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SEGUROS ───────────────────────────────────────────────────── -->
+  <div id="sec-seguros" class="section">
+    <div class="kpi-grid" id="kpi-seguros"></div>
+    <div class="sub-nav">
+      <span class="sub-tab active" data-section="seg" data-pane="polizas">Pólizas Qualia</span>
+      <span class="sub-tab" data-section="seg" data-pane="evolucion">Evolución</span>
+    </div>
+    <div id="sgpane-polizas" class="sub-pane active">
+      <div class="card">
+        <div class="card-header"><span class="card-title">Últimas pólizas emitidas — mes actual</span></div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Fecha</th><th>Cliente</th><th>Artículo</th><th class="num">Prima</th><th>Estado</th></tr></thead>
+            <tbody id="tbody-seg-detalle"></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="card" style="margin-top:12px">
+        <div class="card-header"><span class="card-title">Distribución por tipo de servicio</span></div>
+        <div class="chart-box" style="height:220px"><canvas id="chart-seg-fam"></canvas></div>
+      </div>
+    </div>
+    <div id="sgpane-evolucion" class="sub-pane">
+      <div class="card">
+        <div class="card-header"><span class="card-title">Evolución mensual — pólizas y garantías</span></div>
+        <div class="chart-box" style="height:240px"><canvas id="chart-seg-ev"></canvas></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── RESUMEN ───────────────────────────────────────────────────── -->
+  <div id="sec-resumen" class="section">
+    <div class="kpi-grid" id="kpi-resumen"></div>
+    <div class="card">
+      <div class="card-header"><span class="card-title">Estado general de la sucursal</span></div>
+      <div class="prog-list" id="prog-resumen"></div>
+    </div>
+    <div class="card">
+      <div class="card-header"><span class="card-title">Alertas y acciones recomendadas</span></div>
+      <div class="alert-list" id="alert-list"></div>
+    </div>
+    <div class="timestamp" id="timestamp-bottom"></div>
+  </div>
+
+</main>
+
+<script>
+// ═══════════════════════════════════════════════════════════════════════
+// CONFIGURACIÓN — EDITAR ANTES DE DESPLEGAR
+// ═══════════════════════════════════════════════════════════════════════
+var CONFIG = {
+  // URL del Apps Script Web App — pegar aquí tras publicar
+  WEB_APP_URL: "https://script.google.com/macros/s/AKfycbyaDF1IWOdTceS-rXuzrQnxE4nolMdkhxNA0T5_iDM710AZCjEY79BG2t6YQeyAeCHjwQ/exec",
+  SUCURSAL:    "VERA",
+  // Modo demo: usa datos de ejemplo cuando WEB_APP_URL tiene el placeholder
+  DEMO_MODE:   false
+};
+
+// ═══════════════════════════════════════════════════════════════════════
+// PERÍODO — calcula fechas según selección
+// ═══════════════════════════════════════════════════════════════════════
+var PERIODO = {
+  tipo:  "mes_actual",
+  desde: "",
+  hasta: "",
+
+  calcular: function(tipo) {
+    var hoy   = new Date();
+    var d, h;
+    switch (tipo) {
+      case "mes_actual":
+        d = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
+        h = new Date(hoy.getFullYear(), hoy.getMonth() + 1, 0);
+        break;
+      case "mes_anterior":
+        d = new Date(hoy.getFullYear(), hoy.getMonth() - 1, 1);
+        h = new Date(hoy.getFullYear(), hoy.getMonth(), 0);
+        break;
+      case "trimestre":
+        d = new Date(hoy.getFullYear(), hoy.getMonth() - 2, 1);
+        h = new Date(hoy.getFullYear(), hoy.getMonth() + 1, 0);
+        break;
+      case "semestre":
+        d = new Date(hoy.getFullYear(), hoy.getMonth() - 5, 1);
+        h = new Date(hoy.getFullYear(), hoy.getMonth() + 1, 0);
+        break;
+      case "anio":
+        d = new Date(hoy.getFullYear(), 0, 1);
+        h = new Date(hoy.getFullYear(), 11, 31);
+        break;
+      default:
+        return; // custom — no recalcular
+    }
+    this.tipo  = tipo;
+    this.desde = this.fmt(d);
+    this.hasta = this.fmt(h);
+  },
+
+  fmt: function(d) {
+    return d.getFullYear() + "-" +
+      String(d.getMonth() + 1).padStart(2, "0") + "-" +
+      String(d.getDate()).padStart(2, "0");
+  },
+
+  label: function() {
+    var labels = {
+      mes_actual:   "Mes actual",
+      mes_anterior: "Mes anterior",
+      trimestre:    "Últimos 3 meses",
+      semestre:     "Últimos 6 meses",
+      anio:         "Año " + new Date().getFullYear(),
+      custom:       ""
+    };
+    if (this.tipo === "custom") {
+      return this.desde + "  →  " + this.hasta;
+    }
+    return labels[this.tipo] || "";
+  },
+
+  // Filtra un array de filas por campo de fecha (string yyyy-mm-dd)
+  filtrar: function(rows, campoFecha) {
+    var d = this.desde, h = this.hasta;
+    return rows.filter(function(r) {
+      var f = (r[campoFecha] || "").slice(0, 10);
+      return f >= d && f <= h;
+    });
+  }
+};
+
+// Inicializar con mes actual
+PERIODO.calcular("mes_actual");
+
+// ═══════════════════════════════════════════════════════════════════════
+// ESTADO GLOBAL
+// ═══════════════════════════════════════════════════════════════════════
+var STATE = {
+  data:      null,
+  loading:   true,
+  activeTab: "ventas",
+  charts:    {}
+};
+
+// ═══════════════════════════════════════════════════════════════════════
+// PALETA
+// ═══════════════════════════════════════════════════════════════════════
+var C = {
+  blue:    "#2596be",
+  celeste: "#7ecfe0",
+  pale:    "#b5d9ea",
+  teal:    "#1D9E75",
+  amber:   "#BA7517",
+  red:     "#D85A30",
+  gray:    "#adb5bd",
+  FAMS:    ["#2596be","#7ecfe0","#5DCAA5","#85B7EB","#B5D4F4","#1D9E75","#BA7517","#D3D1C7"]
+};
+
+// ═══════════════════════════════════════════════════════════════════════
+// UTILIDADES
+// ═══════════════════════════════════════════════════════════════════════
+function fmtPeso(n) {
+  if (n === undefined || n === null) return "—";
+  var abs  = Math.abs(n);
+  var sign = n < 0 ? "-" : "";
+  if (abs >= 1000000000) return sign + "$" + (abs/1000000000).toFixed(1).replace(".0","") + "B";
+  if (abs >= 1000000)    return sign + "$" + (abs/1000000).toFixed(1).replace(".0","") + "M";
+  if (abs >= 1000)       return sign + "$" + Math.round(abs/1000) + "k";
+  return sign + "$" + Math.round(abs).toLocaleString("es-AR");
+}
+function fmtNum(n) {
+  if (n === undefined || n === null) return "—";
+  return Math.round(n).toLocaleString("es-AR");
+}
+function fmtPct(n) { return Math.round(n) + "%"; }
+function pill(txt, cls) { return '<span class="pill pill-' + cls + '">' + txt + '</span>'; }
+function progColor(pct) {
+  if (pct >= 100) return C.teal;
+  if (pct >= 70)  return C.blue;
+  if (pct >= 50)  return C.amber;
+  return C.red;
+}
+function destroyChart(id) {
+  if (STATE.charts[id]) { STATE.charts[id].destroy(); delete STATE.charts[id]; }
+}
+function mkChart(id, config) {
+  destroyChart(id);
+  var el = document.getElementById(id);
+  if (!el) return;
+  STATE.charts[id] = new Chart(el, config);
+}
+function show(id) { var el=document.getElementById(id); if(el) el.style.display=""; }
+function hide(id) { var el=document.getElementById(id); if(el) el.style.display="none"; }
+function html(id, h) { var el=document.getElementById(id); if(el) el.innerHTML=h; }
+
+// ═══════════════════════════════════════════════════════════════════════
+// DATOS DEMO (cuando no hay Web App configurado)
+// ═══════════════════════════════════════════════════════════════════════
+function getDemoData() {
+  // Valores de referencia escala real CHEMES — Marzo 2026
+  // Total ventas mes: $346.535.647 (confirmado vs Tango live)
+  var meses = ["Oct 2025","Nov 2025","Dic 2025","Ene 2026","Feb 2026","Mar 2026"];
+  return {
+    ok: true,
+    ultima_actualizacion: new Date().toISOString().slice(0,19),
+    sucursal: "VERA",
+    ventas: {
+      kpis: {
+        ventas_mes:        346535647,
+        ventas_neto:       289245635,
+        ticket_promedio:   5620905,
+        comprobantes_mes:  1169,
+        nc_cantidad:       681,
+        nc_importe:        48064996
+      },
+      evolucion_mensual: [
+        {mes:"Oct 2025",total:515963494,neto:430373000,cant:1591},
+        {mes:"Nov 2025",total:430940542,neto:359274000,cant:1382},
+        {mes:"Dic 2025",total:724712180,neto:604434000,cant:2216},
+        {mes:"Ene 2026",total:469050763,neto:391035000,cant:1479},
+        {mes:"Feb 2026",total:446169024,neto:372168000,cant:1256},
+        {mes:"Mar 2026",total:346535647,neto:289245635,cant:1169}
+      ],
+      top_articulos: [
+        {desc:"HEL SAMSUNG SBS RS27T5561B1",     unidades:1,  importe:4692561},
+        {desc:"REFINANCIACION DE DEUDA",          unidades:1,  importe:3728926},
+        {desc:"MOTO SIAM NOMAD 150CC ENDURO",     unidades:1,  importe:5018182},
+        {desc:"PLANC GA-MA LED BELLA TOURMALINE", unidades:1,  importe:4490000},
+        {desc:"SILLA MILANO NEGRA SML017",        unidades:6,  importe:2280991},
+        {desc:"COL APP 80x20 EX CONSTANZA",       unidades:2,  importe:1652893},
+        {desc:"PROTECCION CHEMES 2 AÑOS",         unidades:1,  importe:2400803},
+        {desc:"PROTECCION CHEMES 1 AÑO",          unidades:1,  importe:2371860},
+        {desc:"HEL LG GT57BPSX 595L",             unidades:1,  importe:1199999},
+        {desc:"S02017039",                        unidades:6,  importe:2289917}
+      ],
+      por_familia: [
+        {familia:"Línea Blanca",   importe:120000000},
+        {familia:"Tecnología",     importe:80000000},
+        {familia:"Muebles",        importe:55000000},
+        {familia:"Colchones",      importe:45000000},
+        {familia:"Climatización",  importe:30000000}
+      ]
+    },
+    stock: {
+      kpis: {
+        skus_activos:       29419,
+        sin_stock:          8500,
+        negativos:          500,
+        bajo_minimo:        718,
+        inmovilizado_valor: 0,
+        total_valor:        0
+      },
+      criticos: [
+        {desc:"SILLA MILANO NEGRA SML017",      stock:-2, minimo:0, estado:"NEGATIVO",    dias:5},
+        {desc:"LAV INV DREAN LFDR0814SB0",      stock:-1, minimo:0, estado:"NEGATIVO",    dias:8},
+        {desc:"HEL LG GT57BPSX 595L",           stock:0,  minimo:1, estado:"SIN_STOCK",   dias:12},
+        {desc:"MOTO SIAM NOMAD 150CC",          stock:0,  minimo:2, estado:"SIN_STOCK",   dias:15},
+        {desc:"PLANC GA-MA LED BELLA",          stock:1,  minimo:3, estado:"BAJO_MINIMO", dias:3}
+      ],
+      inmovilizados: [],
+      por_familia: [
+        {familia:"Línea Blanca", valor:0},{familia:"Tecnología",valor:0},
+        {familia:"Muebles",valor:0},{familia:"Colchones",valor:0}
+      ],
+      por_antiguedad: [
+        {tramo:"0–30 días",valor:0},{tramo:"31–60 días",valor:0},
+        {tramo:"61–90 días",valor:0},{tramo:"+90 días",valor:0}
+      ]
+    },
+    morosidad: {
+      kpis: {
+        saldo_total:      1893260819,
+        vencido_total:     463310797,
+        pct_mora:          24.5,
+        mora_1_30:         139855638,
+        mora_31_90:        116168574,
+        mora_mas_90:       207286585,
+        clientes_morosos:  850
+      },
+      distribucion: [
+        {tramo:"1–30 días",  importe:139855638},
+        {tramo:"31–90 días", importe:116168574},
+        {tramo:"+90 días",   importe:207286585}
+      ],
+      clientes: [
+        {nombre:"ESPINDOLA SERGIO ALEJANDRO", vencido:8000000, dias_mora:95,  estado:"ALTO RIESGO"},
+        {nombre:"PITTAU IVAN DENISE",         vencido:6000000, dias_mora:88,  estado:"ALTO RIESGO"},
+        {nombre:"BLED ADRIAN EDUARDO",        vencido:5000000, dias_mora:45,  estado:"SEGUIMIENTO"},
+        {nombre:"ALASIA MARCELO RUBEN",       vencido:3000000, dias_mora:22,  estado:"GESTION"},
+        {nombre:"SPIES DIEGO ORLANDO",        vencido:2000000, dias_mora:15,  estado:"GESTION"}
+      ]
+    },
+    objetivos: {
+      anio:2026, mes:3, sucursal:"VERA",
+      categorias: [
+        {categoria:"Línea Blanca",   obj_ventas:400000000},
+        {categoria:"Tecnología",     obj_ventas:100000000},
+        {categoria:"Muebles",        obj_ventas:60000000},
+        {categoria:"Colchones",      obj_ventas:50000000},
+        {categoria:"Climatización",  obj_ventas:40000000},
+        {categoria:"Telefonía",      obj_ventas:30000000},
+        {categoria:"Garantías ext.", obj_garantias:700},
+        {categoria:"Seguros Qualia", obj_polizas:500}
+      ],
+      realVentas:  [120000000,80000000,55000000,45000000,30000000,20000000],
+      realEtiquetas: ["Línea Blanca","Tecnología","Muebles","Colchones","Climatización","Telefonía"]
+    },
+    seguros: {
+      kpis: {
+        total_polizas:     0,
+        importe_polizas:   0,
+        total_garantias:   0,
+        importe_garantias: 0
+      },
+      polizas_por_familia:   [],
+      evolucion_mensual: meses.map(function(m){ return {mes:m,polizas:0,garantias:0}; }),
+      detalle_polizas:       []
+    }
+  };
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// SUB-TABS — navegación interna por sección
+// ═══════════════════════════════════════════════════════════════════════
+var PANE_MAP = {
+  ventas: { prefix: "vpane", default: "evolucion" },
+  stock:  { prefix: "spane", default: "criticos"  },
+  mora:   { prefix: "mpane", default: "clientes"  },
+  obj:    { prefix: "opane", default: "progreso"  },
+  seg:    { prefix: "sgpane",default: "polizas"   }
+};
+
+document.addEventListener("click", function(e) {
+  var t = e.target;
+  if (!t.classList.contains("sub-tab")) return;
+  var section = t.getAttribute("data-section");
+  var pane    = t.getAttribute("data-pane");
+  if (!section || !pane) return;
+
+  var map = PANE_MAP[section];
+  if (!map) return;
+
+  // Desactivar tabs del mismo grupo
+  t.closest(".sub-nav").querySelectorAll(".sub-tab").forEach(function(st) {
+    st.classList.remove("active");
+  });
+  t.classList.add("active");
+
+  // Mostrar pane correspondiente, ocultar hermanos
+  var prefix = map.prefix;
+  // Buscar todos los panes con este prefijo dentro del mismo section container
+  var container = t.closest(".section");
+  container.querySelectorAll('[id^="' + prefix + '"]').forEach(function(p) {
+    p.classList.remove("active");
+  });
+  var target = document.getElementById(prefix + "-" + pane);
+  if (target) {
+    target.classList.add("active");
+    // Forzar re-render de charts al hacerse visibles
+    setTimeout(function() {
+      Object.values(STATE.charts).forEach(function(ch) {
+        if (ch && ch.resize) ch.resize();
+      });
+    }, 50);
+  }
+});
+
+// ═══════════════════════════════════════════════════════════════════════
+// EVENTOS DEL SELECTOR DE PERÍODO
+// ═══════════════════════════════════════════════════════════════════════
+function actualizarBadgePeriodo() {
+  var badge = document.getElementById("period-badge");
+  if (badge) badge.textContent = PERIODO.label();
+}
+
+function seleccionarPeriodo(tipo) {
+  // Marcar pill activa
+  document.querySelectorAll(".period-pill").forEach(function(p) {
+    p.classList.toggle("active", p.getAttribute("data-period") === tipo);
+  });
+  // Mostrar/ocultar custom
+  var custom = document.getElementById("period-custom");
+  if (custom) custom.classList.toggle("visible", tipo === "custom");
+
+  if (tipo !== "custom") {
+    PERIODO.calcular(tipo);
+    actualizarBadgePeriodo();
+    // Re-renderizar sección activa con el nuevo período
+    if (STATE.data) renderSection(STATE.activeTab);
+  }
+}
+
+function aplicarPeriodoCustom() {
+  var desde = document.getElementById("fecha-desde").value;
+  var hasta = document.getElementById("fecha-hasta").value;
+  if (!desde || !hasta || desde > hasta) {
+    alert("Seleccioná un rango de fechas válido.");
+    return;
+  }
+  PERIODO.tipo  = "custom";
+  PERIODO.desde = desde;
+  PERIODO.hasta = hasta;
+  actualizarBadgePeriodo();
+  if (STATE.data) renderSection(STATE.activeTab);
+}
+
+// Inicializar fechas del input custom con mes actual
+(function() {
+  var hoy = new Date();
+  var primerDia = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
+  var ultimoDia = new Date(hoy.getFullYear(), hoy.getMonth() + 1, 0);
+  var fmt = function(d) {
+    return d.getFullYear() + "-" +
+      String(d.getMonth()+1).padStart(2,"0") + "-" +
+      String(d.getDate()).padStart(2,"0");
+  };
+  document.getElementById("fecha-desde").value = fmt(primerDia);
+  document.getElementById("fecha-hasta").value  = fmt(ultimoDia);
+})();
+
+document.querySelectorAll(".period-pill").forEach(function(pill) {
+  pill.addEventListener("click", function() {
+    seleccionarPeriodo(this.getAttribute("data-period"));
+  });
+});
+
+actualizarBadgePeriodo();
+
+// ═══════════════════════════════════════════════════════════════════════
+// HELPERS DE FILTRADO POR PERÍODO — aplican PERIODO.filtrar() a los datos
+// ═══════════════════════════════════════════════════════════════════════
+function calcularKpisVentas(filas) {
+  var ventasMes = 0, netoMes = 0, cntMes = 0, ncCant = 0, ncImporte = 0;
+  var porMes = {};
+  // top_articulos y por_familia se calculan desde _raw_ventas_art si disponible
+  // sino se mantienen los del servidor
+  var topArt = {}, porFam = {};
+
+  filas.forEach(function(r) {
+    var total = parseFloat(r.Total || 0);
+    var neto  = parseFloat(r.Neto  || 0);
+    var tipo  = r.TipoComprobante || "";
+    var mes   = r.MesAnio || (r.Fecha || "").slice(0, 7);
+
+    if (tipo === "FAC" || tipo === "FCE") {
+      ventasMes += total;
+      netoMes   += neto;
+      cntMes++;
+      if (!porMes[mes]) porMes[mes] = { total: 0, neto: 0, cant: 0 };
+      porMes[mes].total += total;
+      porMes[mes].neto  += neto;
+      porMes[mes].cant++;
+    } else if (tipo === "N/C") {
+      ventasMes += total;
+      netoMes   += neto;
+      ncCant++;
+      ncImporte += Math.abs(total);
+      if (!porMes[mes]) porMes[mes] = { total: 0, neto: 0, cant: 0 };
+      porMes[mes].total += total;
+      porMes[mes].neto  += neto;
+    }
+  });
+
+  // Calcular top_articulos desde _raw ventas_articulos si disponible
+  var rawArt = STATE.data && STATE.data._raw_ventas_art;
+  if (rawArt && rawArt.length) {
+    var artFiltrados = PERIODO.filtrar(rawArt, "Fecha");
+    artFiltrados.forEach(function(r) {
+      var cod  = r.CodArticulo || "";
+      var desc = r.DescripcionLarga || r.Descripcion || cod;
+      var dep  = r.Deposito || "S/D";
+      var imp  = parseFloat(r.ImporteNeto || 0);
+      var cant = parseFloat(r.Cantidad    || 0);
+      if (!topArt[cod]) topArt[cod] = { cod: cod, desc: desc, familia: dep, importe: 0, unidades: 0 };
+      topArt[cod].importe  += imp;
+      topArt[cod].unidades += cant;
+      if (!porFam[dep]) porFam[dep] = 0;
+      porFam[dep] += imp;
+    });
+  }
+
+  var topArr = Object.values(topArt).sort(function(a,b){return b.importe-a.importe;}).slice(0,30);
+  var famArr = Object.entries(porFam).map(function(e){return {familia:e[0],importe:e[1]};})
+    .sort(function(a,b){return b.importe-a.importe;}).slice(0,8);
+
+  var ticketProm = cntMes > 0 ? ventasMes / cntMes : 0;
+  var evolucion  = Object.keys(porMes).sort().map(function(m) {
+    return { mes: m, total: Math.round(porMes[m].total), neto: Math.round(porMes[m].neto), cant: porMes[m].cant };
+  });
+
+  return {
+    kpis: {
+      ventas_mes:        Math.round(ventasMes),
+      ventas_neto:       Math.round(netoMes),
+      ticket_promedio:   Math.round(ticketProm),
+      comprobantes_mes:  cntMes,
+      nc_cantidad:       ncCant,
+      nc_importe:        Math.round(ncImporte)
+    },
+    evolucion_mensual: evolucion,
+    top_articulos:     topArr.length ? topArr : (STATE.data && STATE.data.ventas ? (STATE.data.ventas.top_articulos||[]) : []),
+    por_familia:       famArr.length ? famArr  : (STATE.data && STATE.data.ventas ? (STATE.data.ventas.por_familia   ||[]) : [])
+  };
+}
+
+function calcularKpisMorosidad(filas) {
+  var saldoTotal = 0, mora130 = 0, mora3190 = 0, moraMas90 = 0;
+  var clientes = {};
+
+  filas.forEach(function(r) {
+    var imp   = parseFloat(r.ImporteCuota || 0);
+    var tramo = r.TramoMora || "";
+    var cod   = r.CodCliente || "";
+    var nom   = r.NombreCliente || cod;
+    var tel   = r.Telefono || "";
+    var dias  = parseInt(r.DiasVencido || 0, 10);
+
+    saldoTotal += imp;
+    if (tramo === "MORA_1_30")   mora130   += imp;
+    if (tramo === "MORA_31_90")  mora3190  += imp;
+    if (tramo === "MORA_MAS_90") moraMas90 += imp;
+
+    if (tramo !== "VIGENTE") {
+      if (!clientes[cod]) clientes[cod] = { cod: cod, nom: nom, tel: tel, vencido: 0, diasMax: 0 };
+      clientes[cod].vencido += imp;
+      if (dias > clientes[cod].diasMax) clientes[cod].diasMax = dias;
+    }
+  });
+
+  var vencidoTotal = mora130 + mora3190 + moraMas90;
+  var pctMora = saldoTotal > 0 ? parseFloat((vencidoTotal / saldoTotal * 100).toFixed(1)) : 0;
+
+  var clientesArr = Object.values(clientes)
+    .sort(function(a, b) { return b.vencido - a.vencido; })
+    .slice(0, 20)
+    .map(function(c) {
+      return {
+        nombre:    c.nom,
+        telefono:  c.tel,
+        vencido:   Math.round(c.vencido),
+        dias_mora: c.diasMax,
+        estado:    c.diasMax > 90 ? "ALTO RIESGO" : c.diasMax > 30 ? "SEGUIMIENTO" : "GESTION"
+      };
+    });
+
+  return {
+    kpis: {
+      saldo_total:      Math.round(saldoTotal),
+      vencido_total:    Math.round(vencidoTotal),
+      pct_mora:         pctMora,
+      mora_1_30:        Math.round(mora130),
+      mora_31_90:       Math.round(mora3190),
+      mora_mas_90:      Math.round(moraMas90),
+      clientes_morosos: clientesArr.length
+    },
+    distribucion: [
+      { tramo: "1–30 días",  importe: Math.round(mora130)   },
+      { tramo: "31–90 días", importe: Math.round(mora3190)  },
+      { tramo: "+90 días",   importe: Math.round(moraMas90) }
+    ],
+    clientes: clientesArr
+  };
+}
+
+function calcularKpisSeguros(filasS, filasG) {
+  var totPol = 0, impPol = 0, totGar = 0, impGar = 0;
+  var polFam = {}, garFam = {}, evol = {}, detalle = [];
+
+  filasS.forEach(function(r) {
+    var imp = parseFloat(r.ImporteTotal || 0);
+    var fam = r.Descripcion || "SEGURO";
+    var mes = (r.FechaEmision || "").slice(0, 7);
+    totPol++; impPol += imp;
+    polFam[fam] = (polFam[fam] || 0) + 1;
+    if (!evol[mes]) evol[mes] = { polizas: 0, garantias: 0 };
+    evol[mes].polizas++;
+    detalle.push({
+      fecha:    r.FechaEmision || "",
+      cliente:  r.NombreCliente || "",
+      articulo: r.Descripcion  || "",
+      prima:    parseFloat(r.PrimaMensual || 0),
+      vigencia: "—",
+      estado:   r.Estado || "ACTIVA"
+    });
+  });
+
+  filasG.forEach(function(r) {
+    var imp  = parseFloat(r.Importe || 0);
+    var cant = parseFloat(r.Cantidad || 1);
+    var fam  = r.Descripcion || "GARANTIA";
+    var mes  = (r.FechaEmision || "").slice(0, 7);
+    totGar += cant; impGar += imp;
+    garFam[fam] = (garFam[fam] || 0) + cant;
+    if (!evol[mes]) evol[mes] = { polizas: 0, garantias: 0 };
+    evol[mes].garantias += cant;
+  });
+
+  return {
+    kpis: {
+      total_polizas:     totPol,
+      importe_polizas:   Math.round(impPol),
+      total_garantias:   Math.round(totGar),
+      importe_garantias: Math.round(impGar)
+    },
+    polizas_por_familia: Object.entries(polFam)
+      .map(function(e){ return { familia: e[0], cantidad: e[1] }; })
+      .sort(function(a,b){ return b.cantidad - a.cantidad; }).slice(0,8),
+    evolucion_mensual: Object.keys(evol).sort().map(function(m){
+      return { mes: m, polizas: evol[m].polizas, garantias: evol[m].garantias };
+    }),
+    detalle_polizas: detalle.slice(0, 10)
+  };
+}
+function fetchData() {
+  if (CONFIG.WEB_APP_URL.indexOf("PEGAR_URL") !== -1 || CONFIG.DEMO_MODE) {
+    setTimeout(function() {
+      STATE.data = getDemoData();
+      STATE.loading = false;
+      onDataReady();
+    }, 900);
+    return;
+  }
+
+  // Fase 1: KPIs procesados — rápido, entra en cache
+  var url = CONFIG.WEB_APP_URL + "?modulo=todos&sucursal=" + CONFIG.SUCURSAL + "&_=" + Date.now();
+  fetch(url)
+    .then(function(r){ return r.json(); })
+    .then(function(d) {
+      if (d.error) throw new Error(d.mensaje || "Error del servidor");
+      STATE.data = d;
+      STATE.loading = false;
+      onDataReady();
+      // Fase 2: raw CSV en segundo plano para filtrado por período
+      cargarRawData();
+    })
+    .catch(function(err) {
+      STATE.loading = false;
+      html("global-error", "Error al cargar datos: " + err.message +
+        " — Verificar SOURCE_FOLDER_ID en Apps Script.");
+      show("global-error");
+      hide("global-loading");
+    });
+}
+
+function cargarRawData() {
+  // Carga los CSV completos en background para habilitar filtrado por período
+  var modulos = [
+    { mod: "raw_ventas",      key: "_raw_ventas",      tabs: ["ventas","resumen"] },
+    { mod: "raw_ventas_art",  key: "_raw_ventas_art",  tabs: ["ventas"] },
+    { mod: "raw_seguros",     key: "_raw_seguros",     tabs: ["seguros","resumen"] },
+    { mod: "raw_garantias",   key: "_raw_garantias",   tabs: ["seguros","resumen"] }
+    // raw_morosidad NO se carga — la mora es acumulada histórica, no se filtra por período
+  ];
+
+  modulos.forEach(function(m) {
+    var url = CONFIG.WEB_APP_URL + "?modulo=" + m.mod +
+              "&sucursal=" + CONFIG.SUCURSAL + "&_=" + Date.now();
+    fetch(url)
+      .then(function(r){ return r.json(); })
+      .then(function(d) {
+        if (d.ok && d.rows && d.rows.length) {
+          STATE.data[m.key] = d.rows;
+          // Re-renderizar si la pestaña activa usa estos datos
+          if (m.tabs.indexOf(STATE.activeTab) !== -1) {
+            renderSection(STATE.activeTab);
+          }
+        }
+      })
+      .catch(function() {
+        // Raw no disponible — el dashboard sigue funcionando con KPIs del servidor
+      });
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// RENDER PRINCIPAL
+// ═══════════════════════════════════════════════════════════════════════
+function onDataReady() {
+  hide("global-loading");
+  var d = STATE.data;
+
+  // Guardar datos raw para filtrado por período
+  // El Apps Script devuelve _raw_* cuando publica los CSV completos
+  // En modo demo no hay raw — se usan los kpis precalculados
+  if (d._raw_ventas)    STATE.data._raw_ventas    = d._raw_ventas;
+  if (d._raw_morosidad) STATE.data._raw_morosidad = d._raw_morosidad;
+  if (d._raw_seguros)   STATE.data._raw_seguros   = d._raw_seguros;
+  if (d._raw_garantias) STATE.data._raw_garantias = d._raw_garantias;
+
+  // Topbar
+  var el = document.getElementById("chip-sucursal");
+  if (el) el.textContent = d.sucursal || CONFIG.SUCURSAL;
+  var upd = document.getElementById("chip-update");
+  if (upd && d.ultima_actualizacion) {
+    var ts = d.ultima_actualizacion.replace("T"," ").slice(0,16);
+    upd.textContent = ts;
+    upd.title = "Última actualización: " + ts;
+  }
+
+  actualizarBadgePeriodo();
+  showSection(STATE.activeTab);
+
+  var now = new Date().toLocaleString("es-AR");
+  html("timestamp-bottom", "Datos actualizados: " + (d.ultima_actualizacion||now) + " | Generado: " + now);
+}
+
+function showSection(tab) {
+  document.querySelectorAll(".section").forEach(function(s){ s.classList.remove("active"); });
+  document.querySelectorAll(".nav-tab").forEach(function(t){ t.classList.remove("active"); });
+  var sec = document.getElementById("sec-" + tab);
+  var navTab = document.querySelector('[data-tab="' + tab + '"]');
+  if (sec) sec.classList.add("active");
+  if (navTab) navTab.classList.add("active");
+  STATE.activeTab = tab;
+  if (STATE.data) renderSection(tab);
+}
+
+function renderSection(tab) {
+  var d = STATE.data;
+
+  // Si hay datos raw del CSV → filtrar por período y recalcular
+  // Si NO hay raw (Apps Script aún no los provee) → usar KPIs precalculados tal cual
+  var ventasData, moraData, segurosData;
+
+  if (d._raw_ventas && d._raw_ventas.length) {
+    var vf = PERIODO.filtrar(d._raw_ventas, "Fecha");
+    ventasData = calcularKpisVentas(vf);
+    // Mantener top_articulos y por_familia del servidor (no están en el raw filtrado)
+    ventasData.top_articulos = d.ventas ? (d.ventas.top_articulos || []) : [];
+    ventasData.por_familia   = d.ventas ? (d.ventas.por_familia   || []) : [];
+  } else {
+    ventasData = d.ventas;
+  }
+
+  // MOROSIDAD: nunca se filtra por período — es deuda acumulada histórica
+  // Filtrar por FechaVencimiento excluiría cuotas vencidas en meses anteriores
+  moraData = d.morosidad;
+
+  if (d._raw_seguros && d._raw_seguros.length) {
+    var sf = PERIODO.filtrar(d._raw_seguros,   "FechaEmision");
+    var gf = PERIODO.filtrar(d._raw_garantias || [], "FechaEmision");
+    segurosData = calcularKpisSeguros(sf, gf);
+  } else {
+    segurosData = d.seguros;
+  }
+
+  switch(tab) {
+    case "ventas":    renderVentas(ventasData);                              break;
+    case "stock":     renderStock(d.stock);                                  break;
+    case "morosidad": renderMorosidad(moraData);                             break;
+    case "objetivos": renderObjetivos(d.objetivos, ventasData, segurosData); break;
+    case "seguros":   renderSeguros(segurosData);                            break;
+    case "resumen":   renderResumen(d, ventasData, moraData, segurosData);   break;
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// VENTAS
+// ═══════════════════════════════════════════════════════════════════════
+function renderVentas(v) {
+  if (!v || v.error) { html("kpi-ventas","<p style='color:var(--text-muted);font-size:13px;padding:12px'>Sin datos de ventas.</p>"); return; }
+  var k = v.kpis;
+  html("kpi-ventas",
+    kpiCard("Ventas totales",      fmtPeso(k.ventas_mes),    PERIODO.label(),                               "up",   "accent") +
+    kpiCard("Ventas sin impuestos",fmtPeso(k.ventas_neto),   fmtNum(k.comprobantes_mes) + " FAC — " + fmtNum(k.nc_cantidad) + " NC",  "up",   "accent") +
+    kpiCard("Ticket promedio",     fmtPeso(k.ticket_promedio),"con IVA",                                    "flat", "accent") +
+    kpiCard("Notas de crédito",    k.nc_cantidad,             fmtPeso(k.nc_importe) + " en NC",             k.nc_cantidad>10?"down":"flat","warn")
+  );
+
+  var meses = v.evolucion_mensual.map(function(e){ return e.mes; });
+  var tots  = v.evolucion_mensual.map(function(e){ return e.total; });
+  var netos = v.evolucion_mensual.map(function(e){ return e.neto  || 0; });
+  var ult   = document.getElementById("badge-ventas-mes");
+  if (ult) ult.textContent = PERIODO.label();
+
+  mkChart("chart-ventas-ev",{type:"bar",data:{labels:meses,datasets:[
+    {label:"Total c/IVA", data:tots,  backgroundColor:C.blue,    borderRadius:5, barThickness:20},
+    {label:"Sin impuestos",data:netos,backgroundColor:C.celeste, borderRadius:5, barThickness:20}
+  ]},options:{responsive:true,maintainAspectRatio:false,
+    plugins:{legend:{display:false}},
+    scales:{x:{ticks:{autoSkip:false}}, y:{ticks:{callback:function(v){return fmtPeso(v);}}}}}});
+
+  html("legend-ventas-ev",
+    '<span class="legend-item"><span class="legend-dot" style="background:'+C.blue+'"></span>Total c/IVA</span>' +
+    '<span class="legend-item"><span class="legend-dot" style="background:'+C.celeste+'"></span>Sin impuestos</span>'
+  );
+
+  if (v.por_familia && v.por_familia.length) {
+    var fams = v.por_familia.slice(0,6);
+    mkChart("chart-ventas-fam",{type:"bar",data:{labels:fams.map(function(f){return f.familia;}),
+      datasets:[{data:fams.map(function(f){return f.importe;}),backgroundColor:C.FAMS.slice(0,fams.length),borderRadius:4}]},
+      options:{indexAxis:"y",responsive:true,maintainAspectRatio:false,
+        plugins:{legend:{display:false}},scales:{x:{ticks:{callback:function(v){return fmtPeso(v);}}}}}});
+  }
+
+  mkChart("chart-ventas-mp",{type:"doughnut",data:{labels:["Financiado propio","Tarjeta crédito","Efectivo/QR","Transferencia"],
+    datasets:[{data:[45,21,26,8],backgroundColor:[C.blue,C.celeste,"#5DCAA5","#B5D4F4"],borderWidth:0}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:"bottom",labels:{font:{size:11},boxWidth:10}}}}});
+
+  var rows = "";
+  (v.top_articulos||[]).slice(0,30).forEach(function(a,i){
+    rows += "<tr><td>" + (i+1) + "</td><td>" + (a.desc||a.cod||"—") + "</td>" +
+      '<td class="num">' + fmtNum(a.unidades) + "</td>" +
+      '<td class="num">' + fmtPeso(a.importe) + "</td></tr>";
+  });
+  html("tbody-top-art", rows || "<tr><td colspan='4' style='text-align:center;color:var(--text-muted);padding:16px'>Sin datos de artículos</td></tr>");
+  var br = document.getElementById("badge-ranking-periodo");
+  if (br) br.textContent = PERIODO.label();
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// STOCK
+// ═══════════════════════════════════════════════════════════════════════
+function renderStock(s) {
+  if (!s || s.error) return;
+  var k = s.kpis;
+  html("kpi-stock",
+    kpiCard("SKUs activos",    fmtNum(k.skus_activos || 0),   "en esta sucursal",            "flat",  "accent") +
+    kpiCard("Sin stock",       k.sin_stock    || 0,            "agotados",                    "down",  "danger") +
+    kpiCard("Stock negativo",  k.negativos    || 0,            "descargas sin existencia",    "down",  "danger") +
+    kpiCard("Bajo punto pedido",k.bajo_minimo || 0,            "requieren reposición",        "down",  "warn")   +
+    kpiCard("Inmovilizados",   k.inmovilizados|| 0,            "artículos +90 días sin mov.", "down",  "warn")
+  );
+
+  if (s.por_familia && s.por_familia.length) {
+    var fams = s.por_familia.slice(0,8);
+    mkChart("chart-stock-fam",{type:"doughnut",data:{
+      labels:fams.map(function(f){return f.familia;}),
+      datasets:[{data:fams.map(function(f){
+        // Apps Script devuelve f.stock (cantidad) — f.valor es siempre 0 (sin precio en STA19)
+        return f.stock || f.valor || f.cantidad || 0;
+      }),backgroundColor:C.FAMS.slice(0,fams.length),borderWidth:0}]},
+      options:{responsive:true,maintainAspectRatio:false,
+        plugins:{legend:{position:"bottom",labels:{font:{size:11},boxWidth:10,
+          generateLabels:function(chart){
+            var ds=chart.data.datasets[0];
+            return chart.data.labels.map(function(l,i){
+              return {text:l+' ('+fmtNum(ds.data[i])+')',fillStyle:ds.backgroundColor[i],strokeStyle:ds.backgroundColor[i],lineWidth:0,index:i};
+            });
+          }
+        }}}}});
+  }
+
+  if (s.por_antiguedad) {
+    var antig = s.por_antiguedad;
+    mkChart("chart-stock-antig",{type:"bar",data:{
+      labels:antig.map(function(a){return a.tramo;}),
+      datasets:[{data:antig.map(function(a){
+        // Apps Script devuelve cantidad de artículos (no valor monetario)
+        return a.valor || a.cantidad || 0;
+      }),backgroundColor:[C.teal,C.blue,C.amber,C.red],borderRadius:5}]},
+      options:{responsive:true,maintainAspectRatio:false,
+        plugins:{legend:{display:false},
+          tooltip:{callbacks:{label:function(ctx){ return ctx.parsed.y + ' artículos'; }}}},
+        scales:{y:{ticks:{callback:function(v){return v + ' art.';}}}}}});
+  }
+
+  var rowsCrit = "";
+  (s.criticos||[]).forEach(function(a){
+    var cls = a.estado==="NEGATIVO"?"danger":a.estado==="SIN STOCK"?"danger":"warn";
+    var p   = pill(a.estado, cls);
+    rowsCrit += "<tr><td>" + (a.desc||a.cod) + "</td>" +
+      "<td>" + (a.deposito||"—") + "</td>" +
+      '<td class="num">' + fmtNum(a.stock) + "</td>" +
+      '<td class="num">' + fmtNum(a.minimo) + "</td><td>" + p + "</td></tr>";
+  });
+  html("tbody-criticos", rowsCrit || "<tr><td colspan='5' style='text-align:center;color:var(--text-muted);padding:16px'>Sin artículos críticos</td></tr>");
+
+  var rowsInm = "";
+  (s.inmovilizados||[]).forEach(function(a){
+    rowsInm += "<tr><td>" + (a.desc||a.cod) + "</td>" +
+      '<td class="num">' + fmtNum(a.stock) + "</td>" +
+      '<td class="num">' + a.dias + " días</td></tr>";
+  });
+  html("tbody-inmovilizado", rowsInm || "<tr><td colspan='3' style='text-align:center;color:var(--text-muted);padding:16px'>Sin stock inmovilizado</td></tr>");
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// MOROSIDAD
+// ═══════════════════════════════════════════════════════════════════════
+function renderMorosidad(m) {
+  if (!m || m.error) return;
+  var k = m.kpis;
+  html("kpi-morosidad",
+    kpiCard("Mora total vencida",  fmtPeso(k.saldo_total),  k.clientes_morosos + " clientes", "down","danger") +
+    kpiCard("Mora 1–30 días",      fmtPeso(k.mora_1_30),    "gestión inmediata",              "down","warn")   +
+    kpiCard("Mora 31–90 días",     fmtPeso(k.mora_31_90),   "seguimiento activo",             "down","warn")   +
+    kpiCard("Mora +90 días",       fmtPeso(k.mora_mas_90),  "alto riesgo",                    "down","danger")
+  );
+
+  if (m.distribucion) {
+    mkChart("chart-mora-dist",{type:"bar",data:{
+      labels:m.distribucion.map(function(d){return d.tramo;}),
+      datasets:[{data:m.distribucion.map(function(d){return d.importe;}),
+        backgroundColor:[C.amber,"#EF9F27",C.red],borderRadius:5}]},
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+        scales:{y:{ticks:{callback:function(v){return fmtPeso(v);}}}}}});
+
+    mkChart("chart-mora-comp",{type:"doughnut",data:{
+      labels:m.distribucion.map(function(d){return d.tramo;}),
+      datasets:[{data:m.distribucion.map(function(d){return d.importe;}),
+        backgroundColor:[C.amber,"#EF9F27",C.red],borderWidth:0}]},
+      options:{responsive:true,maintainAspectRatio:false,
+        plugins:{legend:{position:"bottom",labels:{font:{size:11},boxWidth:10}}}}});
+  }
+
+  var rows = "";
+  (m.clientes||[]).forEach(function(c){
+    var cls = c.estado==="ALTO RIESGO"?"danger":c.estado==="SEGUIMIENTO"?"warn":"info";
+    rows += "<tr><td>" + c.nombre + "</td>" +
+      "<td>" + (c.telefono||"—") + "</td>" +
+      '<td class="num">' + fmtPeso(c.vencido) + "</td>" +
+      '<td class="num">' + c.dias_mora + "d</td><td>" + pill(c.estado, cls) + "</td></tr>";
+  });
+  html("tbody-mora-clientes", rows || "<tr><td colspan='5' style='text-align:center;color:var(--text-muted);padding:16px'>Sin clientes morosos</td></tr>");
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// OBJETIVOS
+// ═══════════════════════════════════════════════════════════════════════
+function renderObjetivos(obj, ventas, seguros) {
+  if (!obj || obj.error) {
+    html("kpi-objetivos", "<p style='color:var(--text-muted);font-size:13px;padding:12px'>" +
+      (obj && obj.error ? obj.error : "Sin datos de objetivos.") + "</p>");
+    return;
+  }
+
+  var ventasMes = ventas && ventas.kpis ? ventas.kpis.ventas_neto  : 0; // sin impuestos
+  var ventasBrut= ventas && ventas.kpis ? ventas.kpis.ventas_mes   : 0; // con IVA
+
+  // Objetivos desde Google Sheets
+  var ok  = obj.kpis || {};
+  var objVentas = ok.obj_ventas        || 0;
+  var objColab  = ok.obj_colaboradores || 0;
+  var objM2     = ok.obj_m2            || 0;
+
+  // % de cumplimiento — ventas sin impuestos vs objetivo (que también es neto)
+  var pctV = objVentas > 0 ? Math.min(Math.round(ventasMes / objVentas * 100), 150) : 0;
+
+  var badge = document.getElementById("badge-obj-mes");
+  if (badge) badge.textContent = (obj.mes_nombre || "") + " " + (obj.anio || "");
+
+  html("kpi-objetivos",
+    kpiCard("Ventas vs objetivo",
+      fmtPct(pctV),
+      fmtPeso(ventasMes) + " / " + fmtPeso(objVentas),
+      pctV>=100?"up":pctV>=70?"flat":"down",
+      pctV>=100?"ok":pctV>=70?"accent":"warn") +
+    kpiCard("Objetivo del mes",
+      fmtPeso(objVentas),
+      "meta s/imp. — " + (obj.mes_nombre||""),
+      "flat","accent") +
+    (objColab > 0 ? kpiCard("Colaboradores",
+      objColab,
+      "planilla del mes",
+      "flat","accent") : "") +
+    (objM2 > 0 ? kpiCard("M² objetivo",
+      fmtNum(objM2) + " m²",
+      "superficie planificada",
+      "flat","accent") : "")
+  );
+
+  // Barra principal — ventas sin impuestos vs objetivo
+  var progHtml = "";
+  if (objVentas > 0) {
+    var c = progColor(pctV);
+    progHtml += '<div class="prog-item">' +
+      '<span class="prog-label">Ventas netas vs objetivo ' + (obj.mes_nombre||"") + '</span>' +
+      '<div class="prog-track"><div class="prog-fill" style="width:' + Math.min(pctV,100) + '%;background:' + c + '"></div></div>' +
+      '<span class="prog-pct">' + pctV + '%</span>' +
+      '</div>';
+
+    // Días transcurridos del mes → proyección lineal
+    var hoy     = new Date();
+    var diasMes = new Date(hoy.getFullYear(), hoy.getMonth()+1, 0).getDate();
+    var diaAct  = hoy.getDate();
+    var pctDias = Math.round(diaAct / diasMes * 100);
+    var ritmoNec= Math.round((objVentas - ventasMes) / Math.max(diasMes - diaAct, 1));
+    progHtml += '<div class="prog-item">' +
+      '<span class="prog-label">Días transcurridos del mes</span>' +
+      '<div class="prog-track"><div class="prog-fill" style="width:' + pctDias + '%;background:var(--text-muted)"></div></div>' +
+      '<span class="prog-pct">' + pctDias + '%</span>' +
+      '</div>';
+
+    if (pctV < 100) {
+      progHtml += '<p style="font-size:12px;color:var(--text-muted);margin-top:8px;padding:0 4px">' +
+        'Ritmo diario necesario para llegar al objetivo: <strong>' + fmtPeso(ritmoNec) + '/día</strong>' +
+        '</p>';
+    } else {
+      progHtml += '<p style="font-size:12px;color:var(--teal);margin-top:8px;padding:0 4px">✓ Objetivo cumplido</p>';
+    }
+  } else {
+    progHtml = '<p style="font-size:12px;color:var(--text-muted);padding:8px 0">Sin objetivo cargado para este mes.</p>';
+  }
+  html("prog-obj", progHtml);
+
+  // Gráfico acumulado — distribución lineal del objetivo vs real
+  if (objVentas > 0) {
+    var diasMes2  = new Date(new Date().getFullYear(), new Date().getMonth()+1, 0).getDate();
+    var diaAct2   = new Date().getDate();
+    var semanas   = ["Sem 1","Sem 2","Sem 3","Sem 4"];
+    var fracSem   = [Math.min(7,diasMes2)/diasMes2, Math.min(14,diasMes2)/diasMes2,
+                     Math.min(21,diasMes2)/diasMes2, 1];
+    var realAcum  = [], objAcum  = [];
+    fracSem.forEach(function(f, i){
+      var diasSem = Math.round(f * diasMes2);
+      // Real proporcional solo hasta el día actual
+      var real = diasSem <= diaAct2 ? Math.round(ventasMes * (diasSem/diaAct2)) : null;
+      realAcum.push(real);
+      objAcum.push(Math.round(objVentas * f));
+    });
+    mkChart("chart-obj-acum",{type:"line",data:{labels:semanas,datasets:[
+      {label:"Real s/imp.",data:realAcum,borderColor:C.blue,backgroundColor:"rgba(37,150,190,0.07)",
+       fill:true,tension:0.3,borderWidth:2,pointRadius:3,spanGaps:false},
+      {label:"Objetivo",  data:objAcum, borderColor:C.amber,borderDash:[5,3],
+       borderWidth:1.5,pointRadius:0,fill:false}
+    ]},options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{position:"bottom",labels:{font:{size:11},boxWidth:10}}},
+      scales:{y:{ticks:{callback:function(v){return fmtPeso(v);}}}}}});
+  }
+
+  // Histórico — por ahora solo muestra pct actual
+  var histPct   = [0,0,0,0,0,pctV];
+  var histMeses = ["","","","","",obj.mes_nombre||""];
+  mkChart("chart-obj-hist",{type:"bar",data:{labels:histMeses,datasets:[
+    {data:histPct,backgroundColor:histPct.map(function(p){return p>=100?C.teal:p>=70?C.blue:C.amber;}),borderRadius:5}
+  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+    scales:{y:{min:0,max:130,ticks:{callback:function(v){return v+"%";}}}}}});
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// SEGUROS
+// ═══════════════════════════════════════════════════════════════════════
+function renderSeguros(s) {
+  if (!s || s.error) return;
+  var k = s.kpis;
+  html("kpi-seguros",
+    kpiCard("Pólizas vendidas", k.total_polizas, "Qualia — mes actual","up","accent") +
+    kpiCard("Importe pólizas", fmtPeso(k.importe_polizas), "total acumulado","up","accent") +
+    kpiCard("Garantías ext.", k.total_garantias, "mes actual","up","ok") +
+    kpiCard("Ingreso garantías", fmtPeso(k.importe_garantias), "total acumulado","up","ok")
+  );
+
+  if (s.polizas_por_familia) {
+    var pf = s.polizas_por_familia;
+    mkChart("chart-seg-fam",{type:"bar",data:{
+      labels:pf.map(function(f){return f.familia;}),
+      datasets:[{data:pf.map(function(f){return f.cantidad;}),backgroundColor:C.FAMS.slice(0,pf.length),borderRadius:5}]},
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}}});
+  }
+
+  if (s.evolucion_mensual) {
+    var ev = s.evolucion_mensual;
+    mkChart("chart-seg-ev",{type:"line",data:{labels:ev.map(function(e){return e.mes;}),datasets:[
+      {label:"Pólizas",data:ev.map(function(e){return e.polizas;}),borderColor:C.blue,backgroundColor:"rgba(37,150,190,0.07)",fill:true,tension:0.3,borderWidth:2,pointRadius:3},
+      {label:"Garantías",data:ev.map(function(e){return e.garantias;}),borderColor:C.teal,backgroundColor:"rgba(29,158,117,0.07)",fill:true,tension:0.3,borderWidth:2,pointRadius:3}
+    ]},options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{position:"bottom",labels:{font:{size:11},boxWidth:10}}}}});
+  }
+
+  var rows = "";
+  (s.detalle_polizas||[]).forEach(function(p){
+    rows += "<tr><td>" + (p.fecha||"").slice(0,10) + "</td><td>" + p.cliente + "</td><td>" + p.articulo + "</td>" +
+      '<td class="num">' + fmtPeso(p.prima) + "</td>" +
+      "<td>" + p.vigencia + " meses</td><td>" + pill(p.estado,"ok") + "</td></tr>";
+  });
+  html("tbody-seg-detalle", rows);
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// RESUMEN EJECUTIVO
+// ═══════════════════════════════════════════════════════════════════════
+function renderResumen(d, ventasData, moraData, segurosData) {
+  var v   = ventasData  || d.ventas    || {};
+  var s   = d.stock     || {};
+  var m   = d.morosidad    || {};
+  var seg = segurosData || d.seguros   || {};
+
+  var vk  = v.kpis   || {};
+  var sk  = s.kpis   || {};
+  var mk  = m.kpis   || {};
+  var sgk = seg.kpis || {};
+
+  // ── KPI cards ──────────────────────────────────────────────────────
+  html("kpi-resumen",
+    kpiCard("Ventas " + PERIODO.label(),
+      fmtPeso(vk.ventas_mes   || 0), "sin imp: " + fmtPeso(vk.ventas_neto || 0), "up",   "accent") +
+    kpiCard("Mora vencida",
+      fmtPeso(mk.vencido_total|| 0), (mk.pct_mora||"—") + "% del saldo",          "down", "danger") +
+    kpiCard("Stock crítico",
+      (sk.sin_stock||0) + (sk.negativos||0),
+      (sk.bajo_minimo||0) + " bajo mínimo",                                        "down", "danger") +
+    kpiCard("Garantías / Pólizas",
+      (sgk.total_garantias||0) + " / " + (sgk.total_polizas||0),
+      fmtPeso((sgk.importe_garantias||0)+(sgk.importe_polizas||0)),                "up",   "ok")
+  );
+
+  // ── Barras de estado — calculadas desde datos reales ───────────────
+  // Objetivos: si existen datos de objetivos, calcular pct real
+  var objV = 0, objP = 0, objG = 0;
+  if (d.objetivos && d.objetivos.categorias) {
+    d.objetivos.categorias.forEach(function(c){
+      objV += (c.obj_ventas    || 0);
+      objP += (c.obj_polizas   || 0);
+      objG += (c.obj_garantias || 0);
+    });
+  }
+  var pctVentas  = objV > 0 ? Math.min(Math.round((vk.ventas_mes||0)/objV*100),130) : 0;
+  var pctPolizas = objP > 0 ? Math.min(Math.round((sgk.total_polizas||0)/objP*100),130) : 0;
+  var pctGarant  = objG > 0 ? Math.min(Math.round((sgk.total_garantias||0)/objG*100),130) : 0;
+  // Cobro puntual = % del saldo que está vigente (no vencido)
+  var pctCobro   = mk.saldo_total > 0
+    ? Math.round((1 - (mk.vencido_total||0)/mk.saldo_total)*100) : 0;
+
+  var progItems = [
+    { label: "Ventas vs obj.",  pct: pctVentas,  show: objV > 0 },
+    { label: "Cobro puntual",   pct: pctCobro,   show: mk.saldo_total > 0 },
+    { label: "Garantías ext.",  pct: pctGarant,  show: objG > 0 },
+    { label: "Pólizas Qualia",  pct: pctPolizas, show: objP > 0 }
+  ];
+  var progR = "";
+  progItems.forEach(function(it) {
+    if (!it.show) return;
+    var c = progColor(it.pct);
+    progR += '<div class="prog-item">' +
+      '<span class="prog-label">' + it.label + '</span>' +
+      '<div class="prog-track"><div class="prog-fill" style="width:' + Math.min(it.pct,100) + '%;background:' + c + '"></div></div>' +
+      '<span class="prog-pct">' + it.pct + '%</span>' +
+      '</div>';
+  });
+  if (!progR) progR = '<p style="font-size:12px;color:var(--text-muted);padding:8px 0">Cargá objetivos en objetivos.csv para ver el progreso.</p>';
+  html("prog-resumen", progR);
+
+  // ── Alertas generadas dinámicamente desde datos reales ─────────────
+  var alerts = [];
+
+  // Stock negativo
+  if ((sk.negativos || 0) > 0) {
+    alerts.push({ area:"Stock", nivel:"alta",
+      txt: (sk.negativos) + " artículo(s) con stock negativo — verificar descargas sin existencia" });
+  }
+  // Sin stock
+  if ((sk.sin_stock || 0) > 0) {
+    alerts.push({ area:"Stock", nivel:"alta",
+      txt: (sk.sin_stock) + " artículo(s) sin stock" +
+        (s.criticos && s.criticos.length ? " — ej: " + s.criticos.slice(0,2).map(function(c){return c.desc;}).join(", ") : "") });
+  }
+  // Mora alta
+  if ((mk.mora_mas_90 || 0) > 0) {
+    alerts.push({ area:"Morosidad", nivel:"alta",
+      txt: "Mora +90 días: " + fmtPeso(mk.mora_mas_90) +
+        (m.clientes && m.clientes.length ? " — " + m.clientes[0].nombre : "") });
+  }
+  if ((mk.mora_31_90 || 0) > 0) {
+    alerts.push({ area:"Morosidad", nivel:"media",
+      txt: "Mora 31–90 días: " + fmtPeso(mk.mora_31_90) + " — requiere seguimiento" });
+  }
+  // Objetivos ventas en riesgo
+  if (objV > 0 && pctVentas < 70) {
+    alerts.push({ area:"Ventas", nivel:"media",
+      txt: "Ventas al " + pctVentas + "% del objetivo — meta: " + fmtPeso(objV) });
+  }
+  // Objetivos pólizas
+  if (objP > 0 && pctPolizas < 70) {
+    alerts.push({ area:"Seguros", nivel:"media",
+      txt: "Pólizas Qualia al " + pctPolizas + "% del objetivo (" + (sgk.total_polizas||0) + "/" + objP + ")" });
+  }
+  // Bajo mínimo
+  if ((sk.bajo_minimo || 0) > 0) {
+    alerts.push({ area:"Stock", nivel:"media",
+      txt: (sk.bajo_minimo) + " artículo(s) bajo punto de pedido — revisar reposición" });
+  }
+  // Positivos
+  if (pctVentas >= 100) {
+    alerts.push({ area:"Ventas", nivel:"ok",
+      txt: "Objetivo de ventas cumplido al " + pctVentas + "% — " + fmtPeso(vk.ventas_mes) });
+  }
+  if ((sgk.total_garantias || 0) > 0) {
+    alerts.push({ area:"Garantías", nivel:"ok",
+      txt: (sgk.total_garantias) + " garantías extendidas vendidas — " + fmtPeso(sgk.importe_garantias) });
+  }
+
+  if (!alerts.length) {
+    alerts.push({ area:"Info", nivel:"ok", txt:"Sin alertas activas para el período seleccionado." });
+  }
+
+  var alertHtml = "";
+  alerts.forEach(function(a) {
+    alertHtml += '<div class="alert-item ' + a.nivel + '">' +
+      '<span class="alert-area">' + a.area + '</span>' +
+      '<span class="alert-text">' + a.txt + '</span>' +
+      '</div>';
+  });
+  html("alert-list", alertHtml);
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// HELPERS — KPI CARD
+// ═══════════════════════════════════════════════════════════════════════
+function kpiCard(label, value, sub, delta, type) {
+  var deltaClass = delta==="up"?"delta-up":delta==="down"?"delta-down":"delta-flat";
+  var cardClass  = "kpi-card " + (type||"accent");
+  return '<div class="' + cardClass + '">' +
+    '<div class="kpi-label">' + label + '</div>' +
+    '<div class="kpi-value">' + value + '</div>' +
+    '<div class="kpi-delta ' + deltaClass + '">' + sub + '</div>' +
+    '</div>';
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// EVENTOS
+// ═══════════════════════════════════════════════════════════════════════
+document.querySelectorAll(".nav-tab").forEach(function(tab) {
+  tab.addEventListener("click", function() {
+    showSection(this.getAttribute("data-tab"));
+  });
+});
+
+// ═══════════════════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════════════════
+fetchData();
+</script>
+</body>
+</html>
