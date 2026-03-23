@@ -427,7 +427,7 @@ tr.row-warn td { background: #fffbf0; }
     <div class="brand-logo">CH</div>
     <div class="brand-info">
       <div class="brand-name">Casa Luis Chemes S.A.</div>
-      <div class="brand-sub">Panel Gerencial - Sucursales</div>
+      <div class="brand-sub">Panel Gerencial</div>
     </div>
   </div>
   <div class="topbar-meta">
@@ -1178,9 +1178,6 @@ function calcularTopArticulos(filas) {
 function calcularKpisVentas(filas) {
   var ventasMes = 0, netoMes = 0, cntMes = 0, ncCant = 0, ncImporte = 0;
   var porMes = {};
-  // top_articulos y por_familia se calculan desde _raw_ventas_art si disponible
-  // sino se mantienen los del servidor
-  var topArt = {}, porFam = {};
 
   filas.forEach(function(r) {
     var total = parseFloat(r.Total || 0);
@@ -1207,27 +1204,10 @@ function calcularKpisVentas(filas) {
     }
   });
 
-  // Calcular top_articulos desde _raw ventas_articulos si disponible
-  var rawArt = STATE.data && STATE.data._raw_ventas_art;
-  if (rawArt && rawArt.length) {
-    var artFiltrados = PERIODO.filtrar(rawArt, "Fecha");
-    artFiltrados.forEach(function(r) {
-      var cod  = r.CodArticulo || "";
-      var desc = r.DescripcionLarga || r.Descripcion || cod;
-      var dep  = r.Deposito || "S/D";
-      var imp  = parseFloat(r.ImporteNeto || 0);
-      var cant = parseFloat(r.Cantidad    || 0);
-      if (!topArt[cod]) topArt[cod] = { cod: cod, desc: desc, familia: dep, importe: 0, unidades: 0 };
-      topArt[cod].importe  += imp;
-      topArt[cod].unidades += cant;
-      if (!porFam[dep]) porFam[dep] = 0;
-      porFam[dep] += imp;
-    });
-  }
-
-  var topArr = Object.values(topArt).sort(function(a,b){return b.importe-a.importe;}).slice(0,30);
-  var famArr = Object.entries(porFam).map(function(e){return {familia:e[0],importe:e[1]};})
-    .sort(function(a,b){return b.importe-a.importe;}).slice(0,8);
+  // top_articulos se calcula en renderSection desde _raw_ventas_art
+  // No recalcular aquí para evitar doble lógica y conflictos
+  var topArr = [];
+  var famArr = [];
 
   var ticketProm = cntMes > 0 ? ventasMes / cntMes : 0;
   var evolucion  = Object.keys(porMes).sort().map(function(m) {
@@ -1244,8 +1224,8 @@ function calcularKpisVentas(filas) {
       nc_importe:        Math.round(ncImporte)
     },
     evolucion_mensual: evolucion,
-    top_articulos:     topArr.length ? topArr : (STATE.data && STATE.data.ventas ? (STATE.data.ventas.top_articulos||[]) : []),
-    por_familia:       famArr.length ? famArr  : (STATE.data && STATE.data.ventas ? (STATE.data.ventas.por_familia   ||[]) : [])
+    top_articulos:     [],   // se asigna en renderSection
+    por_familia:       []    // se asigna en renderSection
   };
 }
 
@@ -1470,11 +1450,16 @@ function renderSection(tab) {
   if (d._raw_ventas && d._raw_ventas.length) {
     var vf = PERIODO.filtrar(d._raw_ventas, "Fecha");
     ventasData = calcularKpisVentas(vf);
-    // top_articulos — filtrar desde raw_ventas_art si disponible
+    // top_articulos — solo sobreescribir si hay raw art filtrado con datos
     if (d._raw_ventas_art && d._raw_ventas_art.length) {
       var af = PERIODO.filtrar(d._raw_ventas_art, "Fecha");
-      ventasData.top_articulos = calcularTopArticulos(af);
+      var topFiltrado = calcularTopArticulos(af);
+      // usar el filtrado solo si tiene datos; si no, usar el del servidor
+      ventasData.top_articulos = topFiltrado.length
+        ? topFiltrado
+        : (d.ventas ? (d.ventas.top_articulos || []) : []);
     } else {
+      // raw art no disponible aún — usar el del servidor
       ventasData.top_articulos = d.ventas ? (d.ventas.top_articulos || []) : [];
     }
     ventasData.por_familia = d.ventas ? (d.ventas.por_familia || []) : [];
