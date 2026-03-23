@@ -1101,17 +1101,18 @@ function actualizarBadgePeriodo() {
 }
 
 function seleccionarPeriodo(tipo) {
-  // Marcar pill activa
   document.querySelectorAll(".period-pill").forEach(function(p) {
     p.classList.toggle("active", p.getAttribute("data-period") === tipo);
   });
-  // Mostrar/ocultar custom
   var custom = document.getElementById("period-custom");
   if (custom) custom.classList.toggle("visible", tipo === "custom");
 
   if (tipo !== "custom") {
     PERIODO.calcular(tipo);
     actualizarBadgePeriodo();
+    // Actualizar chip del panel de comando
+    var cp = document.getElementById("cmd-periodo");
+    if (cp) cp.textContent = PERIODO.label();
     // Re-renderizar sección activa con el nuevo período
     if (STATE.data) renderSection(STATE.activeTab);
   }
@@ -1156,6 +1157,24 @@ actualizarBadgePeriodo();
 // ═══════════════════════════════════════════════════════════════════════
 // HELPERS DE FILTRADO POR PERÍODO — aplican PERIODO.filtrar() a los datos
 // ═══════════════════════════════════════════════════════════════════════
+function calcularTopArticulos(filas) {
+  var topArt = {}, porFam = {};
+  filas.forEach(function(r) {
+    var cod  = r.CodArticulo || "";
+    var desc = r.DescripcionLarga || r.Descripcion || cod;
+    var dep  = r.Deposito || "S/D";
+    var imp  = parseFloat(r.ImporteNeto || 0);
+    var cant = parseFloat(r.Cantidad    || 0);
+    if (!topArt[cod]) topArt[cod] = { cod: cod, desc: desc, familia: dep, importe: 0, unidades: 0 };
+    topArt[cod].importe  += imp;
+    topArt[cod].unidades += cant;
+  });
+  return Object.values(topArt)
+    .filter(function(a){ return a.importe !== 0; })
+    .sort(function(a,b){ return b.importe - a.importe; })
+    .slice(0, 30);
+}
+
 function calcularKpisVentas(filas) {
   var ventasMes = 0, netoMes = 0, cntMes = 0, ncCant = 0, ncImporte = 0;
   var porMes = {};
@@ -1421,7 +1440,11 @@ function onDataReady() {
   }
 
   actualizarBadgePeriodo();
-  renderCommandPanel(d);
+  // Calcular ventasData filtrado para el panel de comando
+  var initVentas = (d._raw_ventas && d._raw_ventas.length)
+    ? calcularKpisVentas(PERIODO.filtrar(d._raw_ventas, "Fecha"))
+    : d.ventas;
+  renderCommandPanel(d, initVentas);
   showSection(STATE.activeTab);
 
   var now = new Date().toLocaleString("es-AR");
@@ -1442,31 +1465,36 @@ function showSection(tab) {
 function renderSection(tab) {
   var d = STATE.data;
 
-  // Si hay datos raw del CSV → filtrar por período y recalcular
-  // Si NO hay raw (Apps Script aún no los provee) → usar KPIs precalculados tal cual
   var ventasData, moraData, segurosData;
 
   if (d._raw_ventas && d._raw_ventas.length) {
     var vf = PERIODO.filtrar(d._raw_ventas, "Fecha");
     ventasData = calcularKpisVentas(vf);
-    // Mantener top_articulos y por_familia del servidor (no están en el raw filtrado)
-    ventasData.top_articulos = d.ventas ? (d.ventas.top_articulos || []) : [];
-    ventasData.por_familia   = d.ventas ? (d.ventas.por_familia   || []) : [];
+    // top_articulos — filtrar desde raw_ventas_art si disponible
+    if (d._raw_ventas_art && d._raw_ventas_art.length) {
+      var af = PERIODO.filtrar(d._raw_ventas_art, "Fecha");
+      ventasData.top_articulos = calcularTopArticulos(af);
+    } else {
+      ventasData.top_articulos = d.ventas ? (d.ventas.top_articulos || []) : [];
+    }
+    ventasData.por_familia = d.ventas ? (d.ventas.por_familia || []) : [];
   } else {
     ventasData = d.ventas;
   }
 
   // MOROSIDAD: nunca se filtra por período — es deuda acumulada histórica
-  // Filtrar por FechaVencimiento excluiría cuotas vencidas en meses anteriores
   moraData = d.morosidad;
 
   if (d._raw_seguros && d._raw_seguros.length) {
-    var sf = PERIODO.filtrar(d._raw_seguros,   "FechaEmision");
+    var sf = PERIODO.filtrar(d._raw_seguros, "FechaEmision");
     var gf = PERIODO.filtrar(d._raw_garantias || [], "FechaEmision");
     segurosData = calcularKpisSeguros(sf, gf);
   } else {
     segurosData = d.seguros;
   }
+
+  // Actualizar panel de comando con los datos del período actual
+  renderCommandPanel(d, ventasData);
 
   switch(tab) {
     case "ventas":
@@ -1487,12 +1515,12 @@ function renderSection(tab) {
 // ═══════════════════════════════════════════════════════════════════════
 // PANEL DE COMANDO — resumen ejecutivo visible en todo momento
 // ═══════════════════════════════════════════════════════════════════════
-function renderCommandPanel(d) {
+function renderCommandPanel(d, ventasData) {
   var panel = document.getElementById("command-panel");
   if (!panel) return;
   panel.style.display = "block";
 
-  var v  = d.ventas    || {};
+  var v  = ventasData  || d.ventas    || {};
   var s  = d.stock     || {};
   var o  = d.objetivos || {};
   var vk = v.kpis || {};
