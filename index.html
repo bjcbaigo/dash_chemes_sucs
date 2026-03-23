@@ -19,30 +19,33 @@
   --blue-light: #7ecfe0;
   --blue-pale:  #e8f6fb;
   --blue-dark:  #185FA5;
+  --celeste:    #7ecfe0;
   --teal:       #1D9E75;
   --teal-light: #E1F5EE;
   --amber:      #BA7517;
   --amber-light:#FAEEDA;
-  --red:        #D85A30;
-  --red-light:  #FCEBEB;
-  --gray-50:    #f8f9fa;
-  --gray-100:   #f1f3f5;
-  --gray-200:   #e9ecef;
-  --gray-400:   #868e96;
-  --gray-600:   #495057;
-  --gray-900:   #212529;
-  --text:       #1a2332;
-  --text-muted: #6c757d;
-  --border:     rgba(0,0,0,0.08);
+  --red:        #C0392B;
+  --red-light:  #FDEDEC;
+  --red-mid:    #E74C3C;
+  --gray-50:    #f7f8fa;
+  --gray-100:   #f0f2f5;
+  --gray-200:   #e4e8ed;
+  --gray-400:   #8896a7;
+  --gray-600:   #4a5568;
+  --gray-900:   #1a202c;
+  --text:       #1a202c;
+  --text-muted: #718096;
+  --border:     rgba(0,0,0,0.07);
+  --border-md:  rgba(0,0,0,0.11);
   --radius-sm:  8px;
   --radius-md:  12px;
   --radius-lg:  16px;
-  --shadow-sm:  0 1px 3px rgba(0,0,0,0.08);
-  --shadow-md:  0 4px 12px rgba(0,0,0,0.1);
+  --shadow-sm:  0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md:  0 4px 16px rgba(0,0,0,0.09);
   --font:       'DM Sans', system-ui, sans-serif;
   --font-mono:  'DM Mono', monospace;
   --topbar-h:   56px;
-  --nav-h:      48px;
+  --nav-h:      46px;
 }
 html { font-size: 15px; -webkit-text-size-adjust: 100%; }
 body {
@@ -70,12 +73,11 @@ a { color: inherit; text-decoration: none; }
   border-radius: 10px;
   display: flex; align-items: center; justify-content: center;
   font-weight: 600; font-size: 13px; color: #fff;
-  letter-spacing: 0.02em;
   flex-shrink: 0;
 }
 .brand-info { line-height: 1.25; }
 .brand-name { font-size: 14px; font-weight: 600; color: #fff; }
-.brand-sub  { font-size: 11px; color: rgba(255,255,255,0.7); }
+.brand-sub  { font-size: 11px; color: rgba(255,255,255,0.72); }
 .topbar-meta { display: flex; gap: 6px; align-items: center; flex-shrink: 0; }
 .meta-chip {
   background: rgba(255,255,255,0.18);
@@ -83,7 +85,9 @@ a { color: inherit; text-decoration: none; }
   font-size: 11px; padding: 4px 9px;
   border-radius: 20px;
 }
-.meta-chip.green { background: rgba(29,158,117,0.4); }
+.meta-chip.green { background: rgba(29,158,117,0.35); }
+.meta-chip.red   { background: rgba(192,57,43,0.5); animation: pulse-chip 2s infinite; }
+@keyframes pulse-chip { 0%,100%{opacity:1} 50%{opacity:0.7} }
 
 /* ─── NAV TABS ──────────────────────────────────────────────────────── */
 .nav-wrapper {
@@ -95,32 +99,34 @@ a { color: inherit; text-decoration: none; }
   scrollbar-width: none;
 }
 .nav-wrapper::-webkit-scrollbar { display: none; }
-.nav-tabs {
-  display: flex; gap: 0;
-  padding: 0 12px;
-  min-width: max-content;
-}
+.nav-tabs { display: flex; padding: 0 12px; min-width: max-content; }
 .nav-tab {
-  display: flex; align-items: center; gap: 6px;
-  padding: 0 14px;
+  display: flex; align-items: center; gap: 5px;
+  padding: 0 13px;
   height: var(--nav-h);
   font-size: 13px; font-weight: 500;
   color: var(--text-muted);
   cursor: pointer;
   border-bottom: 2.5px solid transparent;
   transition: color 0.15s, border-color 0.15s;
-  white-space: nowrap;
-  user-select: none;
+  white-space: nowrap; user-select: none; position: relative;
 }
 .nav-tab:hover { color: var(--blue); }
 .nav-tab.active { color: var(--blue); border-bottom-color: var(--blue); }
 .tab-icon { font-size: 14px; }
+.tab-badge {
+  position: absolute; top: 8px; right: 4px;
+  background: var(--red); color: #fff;
+  font-size: 9px; font-weight: 600;
+  width: 15px; height: 15px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+}
 
 /* ─── MAIN CONTENT ──────────────────────────────────────────────────── */
-.main { padding: 16px; max-width: 960px; margin: 0 auto; }
+.main { padding: 14px; max-width: 980px; margin: 0 auto; }
 .section { display: none; }
-.section.active { display: block; animation: fadeIn 0.2s ease; }
-@keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+.section.active { display: block; animation: fadeIn 0.18s ease; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: none; } }
 
 /* ─── LOADING / ERROR ───────────────────────────────────────────────── */
 .loading-wrap {
@@ -138,39 +144,96 @@ a { color: inherit; text-decoration: none; }
 .loading-text { font-size: 13px; color: var(--text-muted); }
 .error-banner {
   background: var(--red-light); color: var(--red);
-  border: 1px solid rgba(216,90,48,0.2);
+  border: 1px solid rgba(192,57,43,0.2);
   border-radius: var(--radius-md);
   padding: 14px 16px; font-size: 13px;
   margin-bottom: 16px;
 }
 
+/* ─── PANEL DE COMANDO — hero visible en todas las secciones ────────── */
+.command-panel {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  margin-bottom: 14px;
+  overflow: hidden;
+}
+.command-header {
+  background: linear-gradient(135deg, #1a6e8a 0%, #2596be 100%);
+  padding: 14px 16px 12px;
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 10px;
+}
+.command-title { font-size: 12px; font-weight: 600; color: rgba(255,255,255,0.75); text-transform: uppercase; letter-spacing: 0.06em; }
+.command-periodo { font-size: 11px; color: rgba(255,255,255,0.65); background: rgba(255,255,255,0.15); padding: 3px 9px; border-radius: 20px; }
+.command-kpis {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0;
+}
+.cmd-kpi {
+  padding: 12px 14px;
+  border-right: 1px solid var(--border);
+}
+.cmd-kpi:last-child { border-right: none; }
+.cmd-kpi-label { font-size: 10px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
+.cmd-kpi-value { font-size: 20px; font-weight: 600; color: var(--text); line-height: 1; font-variant-numeric: tabular-nums; }
+.cmd-kpi-sub   { font-size: 11px; color: var(--text-muted); margin-top: 3px; }
+.cmd-kpi.highlight .cmd-kpi-value { color: var(--blue); }
+.cmd-kpi.danger-hi .cmd-kpi-value { color: var(--red); }
+.cmd-kpi.success-hi .cmd-kpi-value { color: var(--teal); }
+
+/* Barra de progreso objetivo dentro del command panel */
+.cmd-obj-bar {
+  padding: 10px 14px 12px;
+  border-top: 1px solid var(--border);
+  background: var(--gray-50);
+}
+.cmd-obj-track {
+  height: 8px; background: var(--gray-200); border-radius: 4px; overflow: hidden;
+  margin: 6px 0 4px;
+}
+.cmd-obj-fill {
+  height: 100%; border-radius: 4px;
+  transition: width 1s cubic-bezier(.4,0,.2,1);
+}
+.cmd-obj-meta {
+  display: flex; justify-content: space-between;
+  font-size: 11px; color: var(--text-muted);
+}
+.cmd-obj-pct { font-weight: 600; color: var(--text); }
+
 /* ─── KPI GRID ──────────────────────────────────────────────────────── */
 .kpi-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(145px, 1fr));
   gap: 10px;
-  margin-bottom: 16px;
+  margin-bottom: 14px;
 }
 .kpi-card {
   background: #fff;
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
-  padding: 14px;
-  position: relative;
-  overflow: hidden;
+  padding: 14px 14px 12px;
+  position: relative; overflow: hidden;
 }
 .kpi-card::before {
   content: "";
   position: absolute; top: 0; left: 0; right: 0; height: 3px;
-  background: var(--blue);
   border-radius: var(--radius-md) var(--radius-md) 0 0;
 }
 .kpi-card.accent::before { background: var(--blue); }
 .kpi-card.danger::before { background: var(--red); }
 .kpi-card.warn::before   { background: var(--amber); }
 .kpi-card.ok::before     { background: var(--teal); }
+/* Tarjeta de alerta crítica — borde izquierdo prominente */
+.kpi-card.alert-critical {
+  border-left: 4px solid var(--red);
+  background: #fff9f9;
+}
+.kpi-card.alert-critical::before { display: none; }
 .kpi-label {
-  font-size: 11px; font-weight: 500; letter-spacing: 0.04em;
+  font-size: 10px; font-weight: 600; letter-spacing: 0.05em;
   color: var(--text-muted); text-transform: uppercase;
   margin-bottom: 6px;
 }
@@ -179,7 +242,8 @@ a { color: inherit; text-decoration: none; }
   line-height: 1.1; margin-bottom: 4px;
   font-variant-numeric: tabular-nums;
 }
-.kpi-delta { font-size: 11px; }
+.kpi-card.danger .kpi-value { color: var(--red); }
+.kpi-delta { font-size: 11px; line-height: 1.3; }
 .delta-up   { color: var(--teal); }
 .delta-down { color: var(--red); }
 .delta-flat { color: var(--text-muted); }
@@ -197,7 +261,7 @@ a { color: inherit; text-decoration: none; }
   margin-bottom: 14px;
 }
 .card-title {
-  font-size: 12px; font-weight: 600; letter-spacing: 0.05em;
+  font-size: 11px; font-weight: 600; letter-spacing: 0.05em;
   text-transform: uppercase; color: var(--text-muted);
 }
 .card-badge {
@@ -209,23 +273,37 @@ a { color: inherit; text-decoration: none; }
 .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 @media (max-width: 540px) { .row-2 { grid-template-columns: 1fr; } }
 
+/* ─── SECCIÓN TÍTULO con contador ───────────────────────────────────── */
+.section-heading {
+  display: flex; align-items: center; gap: 8px;
+  margin-bottom: 10px;
+}
+.section-heading-text { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); }
+.count-chip {
+  font-size: 11px; padding: 2px 8px; border-radius: 20px; font-weight: 600;
+}
+.count-chip.danger { background: var(--red-light); color: var(--red); }
+.count-chip.warn   { background: var(--amber-light); color: var(--amber); }
+.count-chip.ok     { background: var(--teal-light); color: var(--teal); }
+.count-chip.info   { background: var(--blue-pale); color: var(--blue-dark); }
+
 /* ─── PROGRESS BARS ─────────────────────────────────────────────────── */
 .prog-list { display: flex; flex-direction: column; gap: 10px; }
 .prog-item { display: flex; align-items: center; gap: 10px; }
-.prog-label { font-size: 12px; color: var(--text); min-width: 100px; max-width: 110px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex-shrink: 0; }
+.prog-label { font-size: 12px; color: var(--text); min-width: 120px; max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex-shrink: 0; }
 .prog-track { flex: 1; height: 7px; background: var(--gray-100); border-radius: 4px; overflow: hidden; }
-.prog-fill  { height: 100%; border-radius: 4px; transition: width 0.6s cubic-bezier(.4,0,.2,1); }
-.prog-pct   { font-size: 12px; font-weight: 500; color: var(--text); min-width: 36px; text-align: right; font-variant-numeric: tabular-nums; flex-shrink: 0; }
+.prog-fill  { height: 100%; border-radius: 4px; transition: width 0.8s cubic-bezier(.4,0,.2,1); }
+.prog-pct   { font-size: 12px; font-weight: 600; color: var(--text); min-width: 36px; text-align: right; font-variant-numeric: tabular-nums; flex-shrink: 0; }
 
 /* ─── TABLE ─────────────────────────────────────────────────────────── */
 .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
 table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
 th {
-  font-size: 11px; font-weight: 600; letter-spacing: 0.04em;
+  font-size: 10.5px; font-weight: 600; letter-spacing: 0.04em;
   text-transform: uppercase; color: var(--text-muted);
-  text-align: left; padding: 6px 8px;
-  border-bottom: 1px solid var(--border);
-  white-space: nowrap;
+  text-align: left; padding: 7px 8px;
+  border-bottom: 1.5px solid var(--gray-200);
+  white-space: nowrap; background: var(--gray-50);
 }
 td {
   padding: 9px 8px;
@@ -234,17 +312,21 @@ td {
   vertical-align: middle;
 }
 tr:last-child td { border-bottom: none; }
-tr:hover td { background: var(--gray-50); }
+tr:hover td { background: var(--blue-pale); }
 .num { font-family: var(--font-mono); text-align: right; }
+/* Fila de alerta en tabla */
+tr.row-danger td { background: #fff5f5; }
+tr.row-danger:hover td { background: #fee; }
+tr.row-warn td { background: #fffbf0; }
 
 /* ─── PILLS ─────────────────────────────────────────────────────────── */
 .pill {
-  display: inline-block; padding: 2px 8px; border-radius: 20px;
-  font-size: 11px; font-weight: 500; white-space: nowrap;
+  display: inline-block; padding: 3px 9px; border-radius: 20px;
+  font-size: 11px; font-weight: 600; white-space: nowrap;
 }
 .pill-ok     { background: var(--teal-light);  color: #0F6E56; }
 .pill-warn   { background: var(--amber-light); color: #854F0B; }
-.pill-danger { background: var(--red-light);   color: #A32D2D; }
+.pill-danger { background: var(--red-light);   color: var(--red); }
 .pill-info   { background: var(--blue-pale);   color: var(--blue-dark); }
 .pill-gray   { background: var(--gray-100);    color: var(--gray-600); }
 
@@ -264,28 +346,22 @@ tr:hover td { background: var(--gray-50); }
 .alert-item.alta   { background: #fff5f5; border-color: var(--red);   }
 .alert-item.media  { background: #fffbf0; border-color: var(--amber); }
 .alert-item.ok     { background: #f0fdf8; border-color: var(--teal);  }
-.alert-area  { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; min-width: 70px; margin-top: 1px; }
+.alert-area  { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; min-width: 72px; margin-top: 1px; flex-shrink: 0; }
 .alert-item.alta  .alert-area  { color: var(--red);   }
 .alert-item.media .alert-area  { color: var(--amber); }
 .alert-item.ok    .alert-area  { color: var(--teal);  }
 .alert-text  { font-size: 12.5px; color: var(--text); line-height: 1.4; }
 
 /* ─── TIMESTAMP ─────────────────────────────────────────────────────── */
-.timestamp {
-  text-align: center; font-size: 11px; color: var(--text-muted);
-  padding: 16px 0 4px;
-}
+.timestamp { text-align: center; font-size: 11px; color: var(--text-muted); padding: 16px 0 4px; }
 
-/* ─── SUB-TABS (navegación interna por sección) ─────────────────────── */
-.sub-nav {
-  display: flex; gap: 4px; flex-wrap: wrap;
-  margin-bottom: 14px;
-}
+/* ─── SUB-TABS ──────────────────────────────────────────────────────── */
+.sub-nav { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 14px; }
 .sub-tab {
-  padding: 5px 12px; font-size: 12px; font-weight: 500;
+  padding: 5px 13px; font-size: 12px; font-weight: 500;
   border-radius: var(--radius-sm); cursor: pointer;
-  border: 1px solid var(--border); color: var(--text-muted);
-  background: var(--gray-50); transition: all 0.12s; user-select: none;
+  border: 1px solid var(--border-md); color: var(--text-muted);
+  background: #fff; transition: all 0.12s; user-select: none;
 }
 .sub-tab:hover { border-color: var(--blue); color: var(--blue); }
 .sub-tab.active { background: var(--blue-pale); color: var(--blue-dark); border-color: var(--blue-light); font-weight: 600; }
@@ -300,10 +376,9 @@ tr:hover td { background: var(--gray-50); }
   background: #fff;
   border-bottom: 1px solid var(--border);
   padding: 8px 16px;
-  display: flex; align-items: center; gap: 8px;
-  flex-wrap: wrap;
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
 }
-.period-label { font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.04em; flex-shrink: 0; }
+.period-label { font-size: 10px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; flex-shrink: 0; }
 .period-pills { display: flex; gap: 5px; flex-wrap: wrap; flex: 1; }
 .period-pill {
   padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 500;
@@ -317,8 +392,7 @@ tr:hover td { background: var(--gray-50); }
 .period-custom.visible { display: flex; }
 .period-custom input[type="date"] {
   padding: 4px 8px; border-radius: 6px; border: 1px solid var(--border);
-  font-size: 12px; color: var(--text); background: #fff;
-  font-family: var(--font);
+  font-size: 12px; color: var(--text); background: #fff; font-family: var(--font);
 }
 .period-custom input[type="date"]:focus { outline: none; border-color: var(--blue); }
 .period-custom-sep { font-size: 11px; color: var(--text-muted); }
@@ -326,18 +400,22 @@ tr:hover td { background: var(--gray-50); }
   padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 500;
   background: var(--blue); color: #fff; border: none; cursor: pointer;
 }
-.period-apply:hover { background: var(--blue-dark); }
 .period-badge {
   font-size: 11px; color: var(--blue-dark); background: var(--blue-pale);
   padding: 3px 8px; border-radius: 20px; font-weight: 500; white-space: nowrap;
 }
 
-/* ─── MOBILE BOTTOM NAV (alternativa) ──────────────────────────────── */
+/* ─── RESPONSIVE ────────────────────────────────────────────────────── */
 @media (max-width: 640px) {
-  .main { padding: 12px; }
+  .main { padding: 10px; }
   .kpi-grid { grid-template-columns: repeat(2, 1fr); }
   .kpi-value { font-size: 19px; }
-  .period-bar { padding: 8px 12px; }
+  .period-bar { padding: 7px 10px; }
+  .command-kpis { grid-template-columns: repeat(3, 1fr); }
+  .cmd-kpi-value { font-size: 17px; }
+}
+@media (max-width: 400px) {
+  .command-kpis { grid-template-columns: 1fr 1fr; }
 }
 </style>
 </head>
@@ -406,7 +484,43 @@ tr:hover td { background: var(--gray-50); }
 <!-- ═══════════════════ MAIN ══════════════════════════════════════════ -->
 <main class="main">
 
-  <!-- Cargando inicial -->
+  <!-- ── PANEL DE COMANDO — visible en todas las secciones ─────────── -->
+  <div class="command-panel" id="command-panel" style="display:none">
+    <div class="command-header">
+      <span class="command-title">Panel de comando</span>
+      <span class="command-periodo" id="cmd-periodo">—</span>
+    </div>
+    <div class="command-kpis">
+      <div class="cmd-kpi highlight">
+        <div class="cmd-kpi-label">Ventas netas</div>
+        <div class="cmd-kpi-value" id="cmd-ventas">—</div>
+        <div class="cmd-kpi-sub" id="cmd-ventas-sub">—</div>
+      </div>
+      <div class="cmd-kpi" id="cmd-obj-kpi">
+        <div class="cmd-kpi-label">Objetivo</div>
+        <div class="cmd-kpi-value" id="cmd-obj-pct">—</div>
+        <div class="cmd-kpi-sub" id="cmd-obj-sub">—</div>
+      </div>
+      <div class="cmd-kpi" id="cmd-stock-kpi">
+        <div class="cmd-kpi-label">Stock crítico</div>
+        <div class="cmd-kpi-value" id="cmd-stock-val">—</div>
+        <div class="cmd-kpi-sub" id="cmd-stock-sub">—</div>
+      </div>
+    </div>
+    <div class="cmd-obj-bar" id="cmd-obj-bar" style="display:none">
+      <div class="cmd-obj-meta">
+        <span id="cmd-obj-label" style="font-size:11px;color:var(--text-muted)">Objetivo del mes</span>
+        <span class="cmd-obj-pct" id="cmd-obj-pct2">0%</span>
+      </div>
+      <div class="cmd-obj-track">
+        <div class="cmd-obj-fill" id="cmd-obj-fill" style="width:0%;background:var(--blue)"></div>
+      </div>
+      <div class="cmd-obj-meta">
+        <span id="cmd-obj-real" style="font-size:11px;color:var(--text-muted)"></span>
+        <span id="cmd-obj-meta-right" style="font-size:11px;color:var(--text-muted)"></span>
+      </div>
+    </div>
+  </div>
   <div id="global-loading" class="loading-wrap">
     <div class="spinner"></div>
     <div class="loading-text">Conectando con el servidor de datos…</div>
@@ -420,6 +534,7 @@ tr:hover td { background: var(--gray-50); }
       <span class="sub-tab active" data-section="ventas" data-pane="evolucion">Evolución</span>
       <span class="sub-tab" data-section="ventas" data-pane="familias">Por depósito</span>
       <span class="sub-tab" data-section="ventas" data-pane="ranking">Ranking artículos</span>
+      <span class="sub-tab" data-section="ventas" data-pane="vendedor">Por vendedor</span>
     </div>
     <div id="vpane-evolucion" class="sub-pane active">
       <div class="card">
@@ -451,6 +566,27 @@ tr:hover td { background: var(--gray-50); }
         </div>
       </div>
     </div>
+    <div id="vpane-vendedor" class="sub-pane">
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Ranking por vendedor — mes actual</span>
+          <span class="card-badge" id="badge-vendedor-mes">—</span>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr>
+              <th>#</th><th>Vendedor</th>
+              <th class="num">Venta neta</th>
+              <th class="num">Intangibles</th>
+              <th class="num">Pólizas $</th>
+              <th class="num">Pólizas u.</th>
+              <th class="num">FAC</th>
+            </tr></thead>
+            <tbody id="tbody-vendedor"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- ── STOCK ─────────────────────────────────────────────────────── -->
@@ -463,7 +599,11 @@ tr:hover td { background: var(--gray-50); }
     </div>
     <div id="spane-criticos" class="sub-pane active">
       <div class="card">
-        <div class="card-header"><span class="card-title">Sin stock y bajo punto de pedido</span></div>
+        <div class="card-header">
+          <span class="card-title">Artículos críticos</span>
+          <span class="card-badge" id="badge-stock-criticos">—</span>
+        </div>
+        <div id="stock-criticos-chips" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px"></div>
         <div class="table-wrap">
           <table>
             <thead><tr><th>SKU</th><th>Artículo</th><th>Depósito</th><th class="num">Stock</th><th class="num">P.Pedido</th><th>Estado</th></tr></thead>
@@ -503,6 +643,7 @@ tr:hover td { background: var(--gray-50); }
     <div class="sub-nav">
       <span class="sub-tab active" data-section="mora" data-pane="clientes">Clientes</span>
       <span class="sub-tab" data-section="mora" data-pane="distribucion">Distribución</span>
+      <span class="sub-tab" data-section="mora" data-pane="cuotas">Cuotas emitidas/cobradas</span>
     </div>
     <div id="mpane-clientes" class="sub-pane active">
       <div class="card">
@@ -525,6 +666,26 @@ tr:hover td { background: var(--gray-50); }
           <div class="card-header"><span class="card-title">Composición</span></div>
           <div class="chart-box" style="height:240px"><canvas id="chart-mora-comp"></canvas></div>
         </div>
+      </div>
+    </div>
+    <div id="mpane-cuotas" class="sub-pane">
+      <!-- Crédito Chemes -->
+      <div class="card" style="margin-bottom:12px">
+        <div class="card-header">
+          <span class="card-title">Crédito Chemes — cuotas emitidas vs cobradas</span>
+        </div>
+        <div class="kpi-grid" id="kpi-cuotas-cc" style="margin-bottom:12px"></div>
+        <div class="chart-box" style="height:200px"><canvas id="chart-cuotas-cc"></canvas></div>
+        <div class="legend" id="legend-cuotas-cc" style="margin-top:8px"></div>
+      </div>
+      <!-- Cuenta Corriente -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Cuenta corriente — cuotas emitidas vs cobradas</span>
+        </div>
+        <div class="kpi-grid" id="kpi-cuotas-cta" style="margin-bottom:12px"></div>
+        <div class="chart-box" style="height:200px"><canvas id="chart-cuotas-cta"></canvas></div>
+        <div class="legend" id="legend-cuotas-cta" style="margin-top:8px"></div>
       </div>
     </div>
   </div>
@@ -1260,6 +1421,7 @@ function onDataReady() {
   }
 
   actualizarBadgePeriodo();
+  renderCommandPanel(d);
   showSection(STATE.activeTab);
 
   var now = new Date().toLocaleString("es-AR");
@@ -1307,12 +1469,99 @@ function renderSection(tab) {
   }
 
   switch(tab) {
-    case "ventas":    renderVentas(ventasData);                              break;
+    case "ventas":
+      renderVentas(ventasData);
+      renderVendedor(d.vendedor);
+      break;
     case "stock":     renderStock(d.stock);                                  break;
-    case "morosidad": renderMorosidad(moraData);                             break;
+    case "morosidad":
+      renderMorosidad(moraData, d.cuotas);
+      renderCuotas(d.cuotas);
+      break;
     case "objetivos": renderObjetivos(d.objetivos, ventasData, segurosData); break;
     case "seguros":   renderSeguros(segurosData);                            break;
     case "resumen":   renderResumen(d, ventasData, moraData, segurosData);   break;
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// PANEL DE COMANDO — resumen ejecutivo visible en todo momento
+// ═══════════════════════════════════════════════════════════════════════
+function renderCommandPanel(d) {
+  var panel = document.getElementById("command-panel");
+  if (!panel) return;
+  panel.style.display = "block";
+
+  var v  = d.ventas    || {};
+  var s  = d.stock     || {};
+  var o  = d.objetivos || {};
+  var vk = v.kpis || {};
+  var sk = s.kpis || {};
+  var ok = o.kpis || {};
+
+  // Período
+  var cp = document.getElementById("cmd-periodo");
+  if (cp) cp.textContent = PERIODO.label();
+
+  // Ventas netas
+  var cv = document.getElementById("cmd-ventas");
+  var cs = document.getElementById("cmd-ventas-sub");
+  if (cv) cv.textContent = fmtPeso(vk.ventas_neto || 0);
+  if (cs) cs.textContent = fmtNum(vk.comprobantes_mes || 0) + " FAC — " + fmtNum(vk.nc_cantidad || 0) + " NC";
+
+  // Objetivo %
+  var objV = ok.obj_ventas || 0;
+  var realV = vk.ventas_neto || 0;
+  var pctObj = objV > 0 ? Math.min(Math.round(realV / objV * 100), 150) : 0;
+  var cmdObj = document.getElementById("cmd-obj-kpi");
+  var cmdObjPct = document.getElementById("cmd-obj-pct");
+  var cmdObjSub = document.getElementById("cmd-obj-sub");
+  if (objV > 0) {
+    if (cmdObjPct) cmdObjPct.textContent = pctObj + "%";
+    if (cmdObjSub) cmdObjSub.textContent = "meta: " + fmtPeso(objV);
+    if (cmdObj) cmdObj.className = "cmd-kpi " + (pctObj >= 100 ? "success-hi" : pctObj < 60 ? "danger-hi" : "highlight");
+    // Barra de progreso
+    var bar = document.getElementById("cmd-obj-bar");
+    if (bar) {
+      bar.style.display = "block";
+      var fill = document.getElementById("cmd-obj-fill");
+      var color = pctObj >= 100 ? "var(--teal)" : pctObj >= 70 ? "var(--blue)" : pctObj >= 50 ? "var(--amber)" : "var(--red)";
+      if (fill) { fill.style.width = Math.min(pctObj, 100) + "%"; fill.style.background = color; }
+      var p2 = document.getElementById("cmd-obj-pct2"); if (p2) p2.textContent = pctObj + "%";
+      var lbl = document.getElementById("cmd-obj-label"); if (lbl) lbl.textContent = (o.mes_nombre || "") + " " + (o.anio || "");
+      var real = document.getElementById("cmd-obj-real"); if (real) real.textContent = "Real: " + fmtPeso(realV);
+      // Días restantes y ritmo
+      var hoy = new Date();
+      var diasMes = new Date(hoy.getFullYear(), hoy.getMonth()+1, 0).getDate();
+      var diasRest = diasMes - hoy.getDate();
+      var ritmo = diasRest > 0 ? Math.round((objV - realV) / diasRest) : 0;
+      var mr = document.getElementById("cmd-obj-meta-right");
+      if (mr) mr.textContent = pctObj >= 100 ? "✓ Objetivo cumplido" : (diasRest + "d restantes — " + fmtPeso(ritmo) + "/día");
+    }
+  } else {
+    if (cmdObjPct) cmdObjPct.textContent = "Sin obj.";
+    if (cmdObjSub) cmdObjSub.textContent = "cargar planilla";
+  }
+
+  // Stock crítico
+  var neg   = sk.negativos  || 0;
+  var sinSt = sk.sin_stock  || 0;
+  var bajo  = sk.bajo_minimo|| 0;
+  var total = neg + sinSt;
+  var csvSt = document.getElementById("cmd-stock-val");
+  var cssSub= document.getElementById("cmd-stock-sub");
+  var cskpi = document.getElementById("cmd-stock-kpi");
+  if (csvSt) csvSt.textContent = total;
+  if (cssSub) cssSub.textContent = neg + " neg. · " + sinSt + " sin st. · " + bajo + " bajo";
+  if (cskpi) cskpi.className = "cmd-kpi " + (neg > 0 ? "danger-hi" : total > 0 ? "danger-hi" : "highlight");
+
+  // Badge en tab Stock si hay negativos
+  var tabBadge = document.querySelector('[data-tab="stock"] .tab-badge');
+  if (neg > 0) {
+    if (!tabBadge) {
+      var stockTab = document.querySelector('[data-tab="stock"]');
+      if (stockTab) stockTab.innerHTML += '<span class="tab-badge">' + neg + '</span>';
+    }
   }
 }
 
@@ -1323,9 +1572,8 @@ function renderVentas(v) {
   if (!v || v.error) { html("kpi-ventas","<p style='color:var(--text-muted);font-size:13px;padding:12px'>Sin datos de ventas.</p>"); return; }
   var k = v.kpis;
   html("kpi-ventas",
-    kpiCard("Ventas totales",      fmtPeso(k.ventas_mes),    PERIODO.label(),                               "up",   "accent") +
-    kpiCard("Ventas sin impuestos",fmtPeso(k.ventas_neto),   fmtNum(k.comprobantes_mes) + " FAC — " + fmtNum(k.nc_cantidad) + " NC",  "up",   "accent") +
-    kpiCard("Ticket promedio",     fmtPeso(k.ticket_promedio),"con IVA",                                    "flat", "accent") +
+    kpiCard("Ventas del período",    fmtPeso(k.ventas_neto),    fmtNum(k.comprobantes_mes) + " FAC — " + fmtNum(k.nc_cantidad) + " NC", "up",   "accent") +
+    kpiCard("Ticket promedio",       fmtPeso(k.ticket_promedio),"sin IVA",                                    "flat", "accent") +
     kpiCard("Notas de crédito",    k.nc_cantidad,             fmtPeso(k.nc_importe) + " en NC",             k.nc_cantidad>10?"down":"flat","warn")
   );
 
@@ -1420,17 +1668,33 @@ function renderStock(s) {
   }
 
   var rowsCrit = "";
+  var cntNeg = 0, cntSin = 0, cntBajo = 0;
   (s.criticos||[]).forEach(function(a){
-    var cls = a.estado==="NEGATIVO"?"danger":a.estado==="SIN STOCK"?"danger":"warn";
-    var p   = pill(a.estado, cls);
-    rowsCrit += "<tr>" +
+    var cls, rowCls;
+    if (a.estado === "NEGATIVO")    { cls = "danger"; rowCls = "row-danger"; cntNeg++; }
+    else if (a.estado === "SIN STOCK") { cls = "danger"; rowCls = "row-danger"; cntSin++; }
+    else                            { cls = "warn";   rowCls = "row-warn";   cntBajo++; }
+    var p = pill(a.estado, cls);
+    rowsCrit += '<tr class="' + rowCls + '">' +
       "<td style='font-family:var(--font-mono,monospace);font-size:11px;color:var(--text-muted)'>" + (a.cod||"—") + "</td>" +
       "<td>" + (a.desc||a.cod) + "</td>" +
-      "<td>" + (a.deposito||"—") + "</td>" +
-      '<td class="num">' + fmtNum(a.stock) + "</td>" +
+      "<td style='font-size:12px;color:var(--text-muted)'>" + (a.deposito||"—") + "</td>" +
+      '<td class="num" style="color:' + (a.stock < 0 ? 'var(--red)' : 'inherit') + ';font-weight:600">' + fmtNum(a.stock) + "</td>" +
       '<td class="num">' + fmtNum(a.minimo) + "</td><td>" + p + "</td></tr>";
   });
-  html("tbody-criticos", rowsCrit || "<tr><td colspan='6' style='text-align:center;color:var(--text-muted);padding:16px'>Sin artículos críticos</td></tr>");
+  html("tbody-criticos", rowsCrit || "<tr><td colspan='6' style='text-align:center;color:var(--text-muted);padding:20px'>Sin artículos críticos</td></tr>");
+
+  // Badge total y chips por estado
+  var total = cntNeg + cntSin + cntBajo;
+  var badge = document.getElementById("badge-stock-criticos");
+  if (badge) badge.textContent = total + " artículos";
+  var chips = document.getElementById("stock-criticos-chips");
+  if (chips) {
+    chips.innerHTML =
+      (cntNeg  > 0 ? '<span class="count-chip danger">' + cntNeg  + ' negativos</span>' : '') +
+      (cntSin  > 0 ? '<span class="count-chip danger">' + cntSin  + ' sin stock</span>'  : '') +
+      (cntBajo > 0 ? '<span class="count-chip warn">'   + cntBajo + ' bajo mínimo</span>': '');
+  }
 
   var rowsInm = "";
   (s.inmovilizados||[]).forEach(function(a){
@@ -1446,7 +1710,84 @@ function renderStock(s) {
 // ═══════════════════════════════════════════════════════════════════════
 // MOROSIDAD
 // ═══════════════════════════════════════════════════════════════════════
-function renderMorosidad(m) {
+// ═══════════════════════════════════════════════════════════════════════
+// VENDEDOR
+// ═══════════════════════════════════════════════════════════════════════
+function renderVendedor(vd) {
+  if (!vd || vd.error || !vd.vendedores) return;
+  var badge = document.getElementById("badge-vendedor-mes");
+  if (badge) badge.textContent = vd.mes || "—";
+
+  // Calcular total para % de participación
+  var totalNeto = vd.vendedores.reduce(function(s,v){ return s + v.venta_neto; }, 0);
+
+  var rows = "";
+  vd.vendedores.forEach(function(v, i) {
+    var pct = totalNeto > 0 ? Math.round(v.venta_neto / totalNeto * 100) : 0;
+    var barW = Math.max(pct, 2);
+    rows += "<tr>" +
+      "<td><b>" + (i+1) + "</b></td>" +
+      "<td>" +
+        "<div style='font-size:13px;font-weight:500'>" + v.nombre + "</div>" +
+        "<div style='height:4px;background:var(--gray-100);border-radius:2px;margin-top:4px;width:100%'>" +
+          "<div style='height:100%;width:" + barW + "%;background:var(--blue);border-radius:2px'></div>" +
+        "</div>" +
+        "<div style='font-size:10px;color:var(--text-muted);margin-top:2px'>" + pct + "% del total · " + v.cant_fac + " FAC</div>" +
+      "</td>" +
+      '<td class="num" style="font-weight:600">' + fmtPeso(v.venta_neto) + "</td>" +
+      '<td class="num" style="color:var(--blue)">' + (v.intangibles > 0 ? fmtPeso(v.intangibles) : "—") + "</td>" +
+      '<td class="num" style="color:var(--teal)">' + (v.polizas > 0 ? fmtPeso(v.polizas) : "—") + "</td>" +
+      '<td class="num">' + (v.cant_polizas > 0 ? v.cant_polizas : "—") + "</td>" +
+      '<td class="num">' + v.cant_fac + "</td>" +
+      "</tr>";
+  });
+  html("tbody-vendedor", rows || "<tr><td colspan='7' style='text-align:center;color:var(--text-muted);padding:20px'>Sin datos de vendedores</td></tr>");
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// CUOTAS EMITIDAS VS COBRADAS
+// ═══════════════════════════════════════════════════════════════════════
+function renderCuotas(cuotas) {
+  if (!cuotas) return;
+
+  function renderBloque(data, prefijo) {
+    if (!data || data.error) return;
+    var k = data.kpis || {};
+    var pct = k.pct_cobro || 0;
+    var color = pct >= 80 ? "var(--teal)" : pct >= 60 ? "var(--blue)" : "var(--amber)";
+
+    html("kpi-cuotas-" + prefijo,
+      kpiCard("Emitido 6m",    fmtPeso(k.emitido    || 0), fmtNum(k.cant_cuotas || 0) + " cuotas", "flat", "accent") +
+      kpiCard("Cobrado 6m",    fmtPeso(k.cobrado    || 0), fmtPct(pct) + " cobrado",               "up",   "ok")    +
+      kpiCard("Saldo pendiente",fmtPeso(k.saldo     || 0), "sin cobrar",                            "down", "warn")
+    );
+
+    var meses  = (data.meses || []).map(function(m){ return m.mes; });
+    var emit   = (data.meses || []).map(function(m){ return m.emitido; });
+    var cobr   = (data.meses || []).map(function(m){ return m.cobrado; });
+
+    mkChart("chart-cuotas-" + prefijo, {
+      type: "bar",
+      data: { labels: meses, datasets: [
+        { label: "Emitido",  data: emit, backgroundColor: "rgba(37,150,190,0.3)", borderColor: C.blue,   borderWidth: 1.5, borderRadius: 4 },
+        { label: "Cobrado",  data: cobr, backgroundColor: C.teal,                borderRadius: 4 }
+      ]},
+      options: { responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: { y: { ticks: { callback: function(v){ return fmtPeso(v); } } } } }
+    });
+
+    html("legend-cuotas-" + prefijo,
+      '<span class="legend-item"><span class="legend-dot" style="background:rgba(37,150,190,0.4)"></span>Emitido</span>' +
+      '<span class="legend-item"><span class="legend-dot" style="background:' + C.teal + '"></span>Cobrado</span>'
+    );
+  }
+
+  renderBloque(cuotas.cred_chemes, "cc");
+  renderBloque(cuotas.cta_cte,     "cta");
+}
+
+function renderMorosidad(m, cuotas) {
   if (!m || m.error) return;
   var k = m.kpis;
   html("kpi-morosidad",
@@ -1493,8 +1834,7 @@ function renderObjetivos(obj, ventas, seguros) {
     return;
   }
 
-  var ventasMes = ventas && ventas.kpis ? ventas.kpis.ventas_neto  : 0; // sin impuestos
-  var ventasBrut= ventas && ventas.kpis ? ventas.kpis.ventas_mes   : 0; // con IVA
+  var ventasMes = ventas && ventas.kpis ? ventas.kpis.ventas_neto : 0; // sin IVA — igual que el objetivo
 
   // Objetivos desde Google Sheets
   var ok  = obj.kpis || {};
@@ -1652,7 +1992,7 @@ function renderResumen(d, ventasData, moraData, segurosData) {
   // ── KPI cards ──────────────────────────────────────────────────────
   html("kpi-resumen",
     kpiCard("Ventas " + PERIODO.label(),
-      fmtPeso(vk.ventas_mes   || 0), "sin imp: " + fmtPeso(vk.ventas_neto || 0), "up",   "accent") +
+      fmtPeso(vk.ventas_neto  || 0), fmtNum(vk.comprobantes_mes||0) + " FAC", "up",   "accent") +
     kpiCard("Mora vencida",
       fmtPeso(mk.vencido_total|| 0), (mk.pct_mora||"—") + "% del saldo",          "down", "danger") +
     kpiCard("Stock crítico",
@@ -1673,7 +2013,7 @@ function renderResumen(d, ventasData, moraData, segurosData) {
       objG += (c.obj_garantias || 0);
     });
   }
-  var pctVentas  = objV > 0 ? Math.min(Math.round((vk.ventas_mes||0)/objV*100),130) : 0;
+  var pctVentas  = objV > 0 ? Math.min(Math.round((vk.ventas_neto||0)/objV*100),130) : 0;
   var pctPolizas = objP > 0 ? Math.min(Math.round((sgk.total_polizas||0)/objP*100),130) : 0;
   var pctGarant  = objG > 0 ? Math.min(Math.round((sgk.total_garantias||0)/objG*100),130) : 0;
   // Cobro puntual = % del saldo que está vigente (no vencido)
@@ -1741,7 +2081,7 @@ function renderResumen(d, ventasData, moraData, segurosData) {
   // Positivos
   if (pctVentas >= 100) {
     alerts.push({ area:"Ventas", nivel:"ok",
-      txt: "Objetivo de ventas cumplido al " + pctVentas + "% — " + fmtPeso(vk.ventas_mes) });
+      txt: "Objetivo de ventas cumplido al " + pctVentas + "% — " + fmtPeso(vk.ventas_neto) });
   }
   if ((sgk.total_garantias || 0) > 0) {
     alerts.push({ area:"Garantías", nivel:"ok",
