@@ -468,202 +468,6 @@ body{background:linear-gradient(180deg,#eff3f8 0%,#f7f9fb 180px,#f3f5f7 100%);}
 @media (max-width: 620px){.topbar-meta{display:none}.period-badge{margin-left:0}.kpi-grid{grid-template-columns:1fr !important}.nav-tab{padding:0 10px}.main{padding:12px}.exec-kpi-value{font-size:18px}}
 </style>
 
-<style id="v5-professional-refinements">
-/* ── Tipografía y jerarquía general ─────────────────────────────────── */
-:root {
-  --font-display: 'DM Sans', system-ui, sans-serif;
-}
-body { letter-spacing: -0.01em; }
-
-/* ── Topbar: nombre más elegante ────────────────────────────────────── */
-.brand-name { letter-spacing: -0.02em; }
-.brand-sub  { letter-spacing: 0.10em; font-size: 10px; }
-
-/* ── Nav: tab activo con indicador inferior más fino ───────────────── */
-.nav-tab.active {
-  box-shadow: inset 0 -3px 0 rgba(255,255,255,.5),
-              inset 0 0 0 1px rgba(255,255,255,.10);
-}
-.nav-tab { font-weight: 600; letter-spacing: 0.01em; }
-
-/* ── Period bar: más compacta y refinada ────────────────────────────── */
-.period-pill { letter-spacing: 0.02em; }
-.period-pill.active { font-weight: 700; letter-spacing: 0.02em; }
-
-/* ── Exec Rail: refinamiento tipográfico ────────────────────────────── */
-.exec-rail-title { font-size: 11px; letter-spacing: 0.10em; }
-.exec-kpi-label  { letter-spacing: 0.08em; }
-.exec-kpi-value  { letter-spacing: -0.03em; }
-.exec-badge-box .t { letter-spacing: 0.08em; }
-.exec-badge-box .v { letter-spacing: -0.02em; font-size: 14px; }
-
-/* ── KPI cards: sparkline + hover elevado ───────────────────────────── */
-.kpi-card {
-  transition: transform 0.12s ease, box-shadow 0.12s ease;
-  cursor: default;
-}
-.kpi-card:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 14px rgba(10,102,194,.12);
-}
-.kpi-label { letter-spacing: 0.08em; }
-.kpi-value { letter-spacing: -0.03em; }
-
-/* ── Cards: header con gradiente + título más definido ──────────────── */
-.card-title { letter-spacing: 0.08em; font-size: 10.5px; }
-.card-badge { letter-spacing: 0.04em; font-size: 10px; }
-
-/* ── Tabla: zebra stripes + cabecera sólida ─────────────────────────── */
-tbody tr:nth-child(even) td { background: #f8fafc; }
-tbody tr:nth-child(even):hover td { background: #f0f7fe; }
-th { letter-spacing: 0.07em; }
-td { letter-spacing: -0.005em; }
-
-/* ── Pills de estado: más redondeadas ───────────────────────────────── */
-.pill         { letter-spacing: 0.04em; padding: 3px 10px; }
-.count-chip   { letter-spacing: 0.04em; }
-
-/* ── Sub-tabs: grupo pill más definido ──────────────────────────────── */
-.sub-tab { letter-spacing: 0.04em; }
-.sub-tab.active { letter-spacing: 0.04em; }
-
-/* ── Progress bars: más altas y redondeadas ─────────────────────────── */
-.prog-track { height: 8px; border-radius: 6px; }
-.prog-fill  { border-radius: 6px; }
-.prog-label { font-weight: 500; letter-spacing: 0.01em; }
-.prog-pct   { letter-spacing: -0.02em; }
-
-/* ── Cmd obj bar: barra más alta ────────────────────────────────────── */
-.cmd-obj-track { height: 10px; border-radius: 6px; }
-.cmd-obj-fill  { border-radius: 6px; }
-.cmd-obj-pct   { letter-spacing: -0.02em; font-size: 14px; }
-
-/* ── Alertas: icono de área con más peso ────────────────────────────── */
-.alert-area { font-size: 10px; letter-spacing: 0.09em; }
-.alert-text { line-height: 1.45; letter-spacing: -0.005em; }
-
-/* ── Chip timestamp ─────────────────────────────────────────────────── */
-#chip-update { letter-spacing: 0.01em; }
-
-/* ── Scrollbar refinada (webkit) ────────────────────────────────────── */
-::-webkit-scrollbar { width: 5px; height: 5px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #cad4df; border-radius: 10px; }
-::-webkit-scrollbar-thumb:hover { background: #9aaec0; }
-
-/* ── Animación de entrada de sección más suave ──────────────────────── */
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(6px); }
-  to   { opacity: 1; transform: none; }
-}
-.section.active { animation: fadeIn 0.22s cubic-bezier(.4,0,.2,1); }
-
-/* ── Focus visible para accesibilidad ──────────────────────────────── */
-button:focus-visible,
-input:focus-visible,
-[tabindex]:focus-visible {
-  outline: 2px solid #0a66c2;
-  outline-offset: 2px;
-}
-
-/* ── Responsive: exec-rail en columna única ajustado ────────────────── */
-@media (max-width: 860px) {
-  .exec-kpi-value { font-size: 20px; }
-  .exec-rail-title { font-size: 10px; }
-}
-@media (max-width: 620px) {
-  .kpi-value { font-size: 22px; }
-}
-</style>
-
-<style id="v6-powerbi-theme">
-:root {
-  --pbi-bg:#f2f2f2; --pbi-panel:#ffffff; --pbi-hdr:#243a5e;
-  --pbi-hdr2:#1e5a9c; --pbi-accent:#117dbb; --pbi-orange:#e8802b;
-  --pbi-green:#6dae43; --pbi-bd:#cfd8e3;
-  --pbi-txt:#1b2d3e; --pbi-muted:#5a6e80;
-  --radius-sm:0px; --radius-md:2px; --radius-lg:2px;
-}
-body{background:#f2f2f2!important;font-family:'Segoe UI','DM Sans',system-ui,sans-serif}
-.topbar{background:#243a5e!important;box-shadow:0 2px 8px rgba(0,0,0,.28)!important;height:54px!important}
-.brand-logo{border-radius:2px!important;background:rgba(255,255,255,.15)!important;border:1px solid rgba(255,255,255,.25)!important}
-.brand-name{font-size:15px!important;font-weight:700!important;letter-spacing:.02em!important}
-.brand-sub{font-size:10px!important;letter-spacing:.14em!important;color:rgba(255,255,255,.75)!important;text-transform:uppercase}
-.nav-wrapper{background:#e8edf3!important;border-bottom:1px solid #c8d2de!important;top:54px!important}
-.nav-tab{font-size:11px!important;font-weight:700!important;color:#2e4158!important;letter-spacing:.04em!important;height:40px!important;border-bottom:3px solid transparent!important;padding:0 16px!important}
-.nav-tab:hover{background:#dde5ef!important;color:#243a5e!important}
-.nav-tab.active{color:#fff!important;background:#1e5a9c!important;border-bottom-color:#e8802b!important;box-shadow:none!important}
-.period-bar{background:#edf1f7!important;border-bottom:1px solid #c8d2de!important;top:calc(54px + 40px)!important}
-.period-pill{border-radius:2px!important;font-size:11px!important;font-weight:700!important;background:#fff!important;border-color:#b8c8d8!important;color:#2e4158!important}
-.period-pill.active{background:#1e5a9c!important;border-color:#1e5a9c!important;color:#fff!important}
-.period-badge{border-radius:2px!important;background:#dde8f4!important;color:#243a5e!important;border-color:#b8c8d8!important}
-.card{border-radius:2px!important;border:1px solid #cfd8e3!important;box-shadow:0 1px 4px rgba(0,0,0,.10)!important;background:#fff!important;padding:0!important;margin-bottom:10px!important}
-.card-header{margin:0!important;padding:7px 12px!important;background:#243a5e!important;border-bottom:2px solid #e8802b!important;border-radius:0!important}
-.card-title{font-size:11px!important;font-weight:700!important;color:#fff!important;letter-spacing:.06em!important;text-transform:uppercase!important}
-.card-badge{background:rgba(255,255,255,.18)!important;color:#fff!important;border-color:rgba(255,255,255,.25)!important;border-radius:2px!important;font-size:10px!important;font-weight:700!important}
-.card>.chart-box{padding:10px 12px}
-.card>.table-wrap{padding:0}
-.card>.prog-list{padding:10px 12px}
-.card>.legend{padding:4px 12px 10px}
-.kpi-grid{gap:8px!important}
-.kpi-card{border-radius:2px!important;border:1px solid #cfd8e3!important;box-shadow:0 1px 4px rgba(0,0,0,.10)!important;background:#fff!important;padding:0!important;overflow:hidden!important;transition:box-shadow .15s!important}
-.kpi-card:hover{box-shadow:0 3px 12px rgba(0,0,0,.16)!important;transform:none!important}
-.kpi-card::before{content:""!important;display:block!important;height:5px!important;position:static!important;width:100%!important;border-radius:0!important}
-.kpi-card.accent::before{background:#1e5a9c!important}
-.kpi-card.danger::before{background:#c0392b!important}
-.kpi-card.warn::before{background:#e8802b!important}
-.kpi-card.ok::before{background:#6dae43!important}
-.kpi-label{font-size:10px!important;font-weight:700!important;color:#243a5e!important;text-transform:uppercase!important;letter-spacing:.08em!important;padding:8px 12px 2px!important;margin:0!important;display:block!important}
-.kpi-value{font-size:28px!important;font-weight:300!important;color:#117dbb!important;letter-spacing:-.02em!important;padding:2px 12px 4px!important;margin:0!important;line-height:1.1!important}
-.kpi-card.danger .kpi-value{color:#c0392b!important}
-.kpi-card.warn .kpi-value{color:#e8802b!important}
-.kpi-card.ok .kpi-value{color:#6dae43!important}
-.kpi-delta{font-size:11px!important;padding:0 12px 10px!important;display:block!important;margin:0!important}
-.table-wrap{border:none!important;border-radius:0!important}
-table{font-size:12px!important;border-collapse:collapse!important}
-th{background:#243a5e!important;color:#fff!important;font-size:11px!important;font-weight:700!important;letter-spacing:.05em!important;text-transform:uppercase!important;padding:8px 10px!important;border-bottom:2px solid #e8802b!important;border-right:1px solid rgba(255,255,255,.12)!important;white-space:nowrap!important}
-th:last-child{border-right:none!important}
-td{padding:7px 10px!important;border-bottom:1px solid #e6ecf2!important;border-right:1px solid #eef2f7!important;vertical-align:middle!important}
-td:last-child{border-right:none!important}
-tbody tr:nth-child(even) td{background:#f4f7fb!important}
-tbody tr:nth-child(odd) td{background:#fff!important}
-tbody tr:hover td{background:#deeaf8!important}
-tr.row-danger td{background:#fff0f0!important}
-tr.row-warn td{background:#fff8ee!important}
-.num{font-weight:600!important}
-.sub-nav{display:flex!important;gap:0!important;border-bottom:2px solid #243a5e!important;margin-bottom:10px!important;background:transparent!important;padding:0!important;width:100%!important}
-.sub-tab{border-radius:0!important;border:1px solid #cfd8e3!important;border-bottom:none!important;padding:6px 14px!important;font-size:11px!important;font-weight:700!important;background:#e8edf3!important;color:#2e4158!important;margin-right:2px!important;letter-spacing:.04em!important;position:relative!important;top:2px!important}
-.sub-tab:hover{background:#d8e3ef!important}
-.sub-tab.active{background:#fff!important;color:#243a5e!important;border-top:2px solid #e8802b!important;border-bottom:none!important;box-shadow:none!important}
-.pill{border-radius:2px!important;font-weight:700!important}
-.pill-danger{background:#fde8e8!important;color:#a32020!important}
-.pill-warn{background:#fef3e2!important;color:#8a5200!important}
-.pill-ok{background:#e6f4de!important;color:#2d6b15!important}
-.count-chip{border-radius:2px!important;font-weight:700!important}
-.prog-track{height:8px!important;border-radius:0!important;background:#dde5ef!important}
-.prog-fill{border-radius:0!important}
-.prog-label{font-weight:600!important;color:#1b2d3e!important}
-.alert-item{border-radius:2px!important}
-.exec-rail-card{border-radius:2px!important;border-color:#cfd8e3!important}
-.exec-rail-header{background:#243a5e!important;border-bottom:2px solid #e8802b!important}
-.exec-kpi{border-top-color:#dde5ef!important}
-.exec-kpi-label{color:#5a6e80!important;letter-spacing:.08em!important}
-.exec-kpi-value{font-weight:300!important;font-size:22px!important;letter-spacing:-.02em!important}
-.exec-kpi.accent .exec-kpi-value{color:#117dbb!important}
-.exec-kpi.ok .exec-kpi-value{color:#6dae43!important}
-.exec-kpi.warn .exec-kpi-value{color:#e8802b!important}
-.exec-mini-status{background:#f2f6fb!important;border-top-color:#dde5ef!important}
-.exec-badge-box{border-radius:2px!important;border-color:#c8d4e0!important}
-.exec-badge-box .t{letter-spacing:.08em!important;color:#5a6e80!important}
-.exec-badge-box .v{font-weight:600!important;color:#243a5e!important}
-::-webkit-scrollbar{width:6px;height:6px}
-::-webkit-scrollbar-track{background:#e8edf3}
-::-webkit-scrollbar-thumb{background:#b0bfcf;border-radius:0}
-::-webkit-scrollbar-thumb:hover{background:#8a9db0}
-@media(max-width:860px){.exec-kpi-value{font-size:20px!important}.kpi-value{font-size:24px!important}}
-@media(max-width:620px){.kpi-value{font-size:22px!important}.sub-tab{padding:5px 10px!important}}
-</style>
-
 </head>
 <body>
 
@@ -1940,12 +1744,10 @@ function syncExecRail(o){
 function renderVentas(v) {
   if (!v || v.error) { html("kpi-ventas","<p style='color:var(--text-muted);font-size:13px;padding:12px'>Sin datos de ventas.</p>"); return; }
   var k = v.kpis;
-  var sparkNeto = (v.evolucion_mensual||[]).map(function(e){ return e.neto||0; });
-  var sparkNC   = (v.evolucion_mensual||[]).map(function(e){ return Math.abs(e.total - (e.neto||0)); });
   html("kpi-ventas",
-    kpiCard("Ventas del período",  fmtPeso(k.ventas_neto),    fmtNum(k.comprobantes_mes) + " FAC — " + fmtNum(k.nc_cantidad) + " NC", "up",   "accent", sparkNeto) +
-    kpiCard("Ticket promedio",     fmtPeso(k.ticket_promedio),"sin IVA",                                    "flat", "accent") +
-    kpiCard("Notas de crédito",    k.nc_cantidad,             fmtPeso(k.nc_importe) + " en NC",             k.nc_cantidad>10?"down":"flat","warn", sparkNC)
+    kpiCard("Ventas del período",    fmtPeso(k.ventas_neto),    fmtNum(k.comprobantes_mes) + " FAC — " + fmtNum(k.nc_cantidad) + " NC", "up",   "accent") +
+    kpiCard("Ticket promedio",       fmtPeso(k.ticket_promedio),"sin IVA",                                    "flat", "accent") +
+    kpiCard("Notas de crédito",    k.nc_cantidad,             fmtPeso(k.nc_importe) + " en NC",             k.nc_cantidad>10?"down":"flat","warn")
   );
 
   var meses = v.evolucion_mensual.map(function(e){ return e.mes; });
@@ -1978,25 +1780,15 @@ function renderVentas(v) {
     datasets:[{data:[45,21,26,8],backgroundColor:[C.blue,C.celeste,"#5DCAA5","#B5D4F4"],borderWidth:0}]},
     options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:"bottom",labels:{font:{size:11},boxWidth:10}}}}});
 
-  var topArt = (v.top_articulos||[]).slice(0,30);
-  var maxImp  = topArt.length ? Math.max.apply(null, topArt.map(function(a){ return Math.abs(a.importe||0); })) : 1;
   var rows = "";
-  topArt.forEach(function(a,i){
-    var pct = maxImp > 0 ? Math.round(Math.abs(a.importe||0) / maxImp * 100) : 0;
-    var rank_color = i === 0 ? "#0a66c2" : i < 3 ? "#3a7fc1" : "#8ab0d4";
-    rows += "<tr>" +
-      "<td style='color:var(--text-muted);font-size:11px;width:26px;font-weight:700'>" + (i+1) + "</td>" +
-      "<td style='font-family:var(--font-mono,monospace);font-size:10.5px;color:var(--text-muted);white-space:nowrap'>" + (a.cod||"—") + "</td>" +
-      "<td style='max-width:280px'>" +
-        "<div style='font-size:12px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis'>" + (a.desc||a.cod||"—") + "</div>" +
-        "<div style='height:2px;background:#e8edf3;border-radius:2px;margin-top:4px'>" +
-          "<div style='height:100%;width:" + pct + "%;background:" + rank_color + ";border-radius:2px;transition:width .6s ease'></div>" +
-        "</div>" +
-      "</td>" +
-      '<td class="num" style="font-size:12px;color:var(--text-muted)">' + fmtNum(a.unidades) + "</td>" +
-      '<td class="num" style="font-size:12px;font-weight:700;color:#102133">' + fmtPeso(a.importe) + "</td></tr>";
+  (v.top_articulos||[]).slice(0,30).forEach(function(a,i){
+    rows += "<tr><td>" + (i+1) + "</td>" +
+      "<td style='font-family:var(--font-mono,monospace);font-size:11px;color:var(--text-muted)'>" + (a.cod||"—") + "</td>" +
+      "<td>" + (a.desc||a.cod||"—") + "</td>" +
+      '<td class="num">' + fmtNum(a.unidades) + "</td>" +
+      '<td class="num">' + fmtPeso(a.importe) + "</td></tr>";
   });
-  html("tbody-top-art", rows || "<tr><td colspan='5' style='text-align:center;color:var(--text-muted);padding:20px'>Sin datos de artículos</td></tr>");
+  html("tbody-top-art", rows || "<tr><td colspan='5' style='text-align:center;color:var(--text-muted);padding:16px'>Sin datos de artículos</td></tr>");
   var br = document.getElementById("badge-ranking-periodo");
   if (br) br.textContent = PERIODO.label();
 }
@@ -2498,39 +2290,13 @@ function renderResumen(d, ventasData, moraData, segurosData) {
 // ═══════════════════════════════════════════════════════════════════════
 // HELPERS — KPI CARD
 // ═══════════════════════════════════════════════════════════════════════
-function kpiCard(label, value, sub, delta, type, sparkData) {
-  var deltaIcon  = delta==="up" ? "▲" : delta==="down" ? "▼" : "";
-  var deltaClass = delta==="up" ? "delta-up" : delta==="down" ? "delta-down" : "delta-flat";
+function kpiCard(label, value, sub, delta, type) {
+  var deltaClass = delta==="up"?"delta-up":delta==="down"?"delta-down":"delta-flat";
   var cardClass  = "kpi-card " + (type||"accent");
-
-  var sparkHtml = "";
-  if (sparkData && sparkData.length > 1) {
-    var max = Math.max.apply(null, sparkData.map(Math.abs));
-    if (max > 0) {
-      var pts = sparkData.map(function(v,i){
-        var x = Math.round(i / (sparkData.length-1) * 56);
-        var y = Math.round(22 - (Math.abs(v) / max) * 18);
-        return x+","+y;
-      }).join(" ");
-      var sparkColor = type==="danger" ? "#c0392b" : type==="ok" ? "#1d9e75" : type==="warn" ? "#ba7517" : "#0a66c2";
-      sparkHtml = '<svg width="58" height="24" style="flex-shrink:0;opacity:0.65;margin-bottom:2px">' +
-        '<polyline points="' + pts + '" fill="none" stroke="' + sparkColor + '" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/>' +
-        '<circle cx="' + sparkData.map(function(v,i){ return Math.round(i/(sparkData.length-1)*56); }).pop() + '" cy="' +
-          Math.round(22 - (Math.abs(sparkData[sparkData.length-1]) / max) * 18) + '" r="2.5" fill="' + sparkColor + '"/>' +
-        '</svg>';
-    }
-  }
-
   return '<div class="' + cardClass + '">' +
     '<div class="kpi-label">' + label + '</div>' +
-    '<div style="display:flex;align-items:flex-end;justify-content:space-between;gap:4px">' +
-      '<div class="kpi-value">' + value + '</div>' +
-      sparkHtml +
-    '</div>' +
-    '<div class="kpi-delta ' + deltaClass + '">' +
-      (deltaIcon ? '<span style="font-size:9px;margin-right:2px">' + deltaIcon + '</span>' : '') +
-      sub +
-    '</div>' +
+    '<div class="kpi-value">' + value + '</div>' +
+    '<div class="kpi-delta ' + deltaClass + '">' + sub + '</div>' +
     '</div>';
 }
 
