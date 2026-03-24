@@ -94,12 +94,15 @@ a { color: inherit; text-decoration: none; }
   position: sticky; top: var(--topbar-h); z-index: 90;
   background: #fff;
   border-bottom: 1px solid var(--border);
-  overflow-x: auto;
+  display: flex; align-items: stretch;
+}
+.nav-scroll {
+  overflow-x: auto; flex: 1;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
 }
-.nav-wrapper::-webkit-scrollbar { display: none; }
-.nav-tabs { display: flex; padding: 0 12px; min-width: max-content; }
+.nav-scroll::-webkit-scrollbar { display: none; }
+.nav-tabs { display: flex; padding: 0 12px; min-width: max-content; height: 100%; }
 .nav-tab {
   display: flex; align-items: center; gap: 5px;
   padding: 0 13px;
@@ -120,6 +123,69 @@ a { color: inherit; text-decoration: none; }
   font-size: 9px; font-weight: 600;
   width: 15px; height: 15px; border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
+}
+
+/* ─── PANEL DE COMANDO — integrado en la barra de nav ──────────────── */
+.nav-command-strip {
+  display: none; /* visible solo cuando hay datos */
+  align-items: center;
+  gap: 0;
+  border-left: 1px solid var(--border);
+  background: #fff;
+  flex-shrink: 0;
+  min-width: 0;
+}
+.nav-cmd-kpi {
+  display: flex; flex-direction: column; justify-content: center;
+  padding: 0 14px;
+  border-right: 1px solid var(--border);
+  height: var(--nav-h);
+  min-width: 110px;
+  cursor: default;
+}
+.nav-cmd-kpi:last-of-type { border-right: none; }
+.nav-cmd-label {
+  font-size: 9px; font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.06em; color: var(--text-muted);
+  line-height: 1; margin-bottom: 3px;
+}
+.nav-cmd-value {
+  font-size: 15px; font-weight: 600; color: var(--text);
+  line-height: 1; font-variant-numeric: tabular-nums;
+}
+.nav-cmd-value.highlight { color: var(--blue); }
+.nav-cmd-value.danger-hi { color: var(--red); }
+.nav-cmd-value.success-hi{ color: var(--teal); }
+.nav-cmd-sub {
+  font-size: 9.5px; color: var(--text-muted); margin-top: 2px; line-height: 1;
+}
+/* Barra de progreso objetivo — inline en el nav */
+.nav-cmd-bar {
+  display: flex; flex-direction: column; justify-content: center;
+  padding: 0 14px; border-right: 1px solid var(--border);
+  height: var(--nav-h); min-width: 140px;
+}
+.nav-cmd-bar-label {
+  font-size: 9px; font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.06em; color: var(--text-muted); margin-bottom: 4px;
+}
+.nav-cmd-bar-track {
+  height: 5px; background: var(--gray-200); border-radius: 3px; overflow: hidden;
+}
+.nav-cmd-bar-fill {
+  height: 100%; border-radius: 3px;
+  transition: width 1s cubic-bezier(.4,0,.2,1);
+}
+.nav-cmd-bar-meta {
+  display: flex; justify-content: space-between;
+  font-size: 9px; color: var(--text-muted); margin-top: 3px;
+}
+.nav-cmd-pct { font-weight: 700; color: var(--text); }
+
+/* En móvil — ocultar el strip del nav, mantener el panel clásico */
+@media (max-width: 768px) {
+  .nav-command-strip { display: none !important; }
+  .command-panel     { display: block !important; }
 }
 
 /* ─── MAIN CONTENT ──────────────────────────────────────────────────── */
@@ -206,44 +272,45 @@ a { color: inherit; text-decoration: none; }
 /* ─── KPI GRID ──────────────────────────────────────────────────────── */
 .kpi-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(145px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
   gap: 10px;
   margin-bottom: 14px;
 }
 .kpi-card {
   background: #fff;
-  border: 1px solid var(--border);
+  border: 0.5px solid var(--border);
   border-radius: var(--radius-md);
   padding: 14px 14px 12px;
   position: relative; overflow: hidden;
+  transition: box-shadow 0.15s, border-color 0.15s;
 }
-.kpi-card::before {
+.kpi-card:hover { border-color: var(--blue); box-shadow: 0 2px 8px rgba(37,150,190,0.12); }
+.kpi-card::after {
   content: "";
-  position: absolute; top: 0; left: 0; right: 0; height: 3px;
-  border-radius: var(--radius-md) var(--radius-md) 0 0;
+  position: absolute; top: 0; left: 0; bottom: 0; width: 3px;
+  border-radius: var(--radius-md) 0 0 var(--radius-md);
 }
-.kpi-card.accent::before { background: var(--blue); }
-.kpi-card.danger::before { background: var(--red); }
-.kpi-card.warn::before   { background: var(--amber); }
-.kpi-card.ok::before     { background: var(--teal); }
-/* Tarjeta de alerta crítica — borde izquierdo prominente */
+.kpi-card.accent::after  { background: var(--blue); }
+.kpi-card.danger::after  { background: var(--red); }
+.kpi-card.warn::after    { background: var(--amber); }
+.kpi-card.ok::after      { background: var(--teal); }
 .kpi-card.alert-critical {
   border-left: 4px solid var(--red);
   background: #fff9f9;
 }
-.kpi-card.alert-critical::before { display: none; }
+.kpi-card.alert-critical::after { display: none; }
 .kpi-label {
-  font-size: 10px; font-weight: 600; letter-spacing: 0.05em;
+  font-size: 10px; font-weight: 600; letter-spacing: 0.06em;
   color: var(--text-muted); text-transform: uppercase;
   margin-bottom: 6px;
 }
 .kpi-value {
-  font-size: 22px; font-weight: 600; color: var(--text);
+  font-size: 24px; font-weight: 600; color: var(--text);
   line-height: 1.1; margin-bottom: 4px;
   font-variant-numeric: tabular-nums;
 }
 .kpi-card.danger .kpi-value { color: var(--red); }
-.kpi-delta { font-size: 11px; line-height: 1.3; }
+.kpi-delta { font-size: 11px; line-height: 1.3; margin-top: 2px; }
 .delta-up   { color: var(--teal); }
 .delta-down { color: var(--red); }
 .delta-flat { color: var(--text-muted); }
@@ -356,15 +423,17 @@ tr.row-warn td { background: #fffbf0; }
 .timestamp { text-align: center; font-size: 11px; color: var(--text-muted); padding: 16px 0 4px; }
 
 /* ─── SUB-TABS ──────────────────────────────────────────────────────── */
-.sub-nav { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 14px; }
+.sub-nav { display: flex; gap: 2px; flex-wrap: wrap; margin-bottom: 14px;
+  background: var(--gray-100); border-radius: var(--radius-sm); padding: 3px; width: fit-content; }
 .sub-tab {
-  padding: 5px 13px; font-size: 12px; font-weight: 500;
-  border-radius: var(--radius-sm); cursor: pointer;
-  border: 1px solid var(--border-md); color: var(--text-muted);
-  background: #fff; transition: all 0.12s; user-select: none;
+  padding: 5px 14px; font-size: 12px; font-weight: 500;
+  border-radius: 6px; cursor: pointer;
+  border: none; color: var(--text-muted);
+  background: transparent; transition: all 0.12s; user-select: none;
 }
-.sub-tab:hover { border-color: var(--blue); color: var(--blue); }
-.sub-tab.active { background: var(--blue-pale); color: var(--blue-dark); border-color: var(--blue-light); font-weight: 600; }
+.sub-tab:hover { color: var(--text); background: rgba(255,255,255,0.6); }
+.sub-tab.active { background: #fff; color: var(--blue); font-weight: 600;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
 .sub-pane { display: none; }
 .sub-pane.active { display: block; animation: fadeIn 0.15s ease; }
 
@@ -418,56 +487,6 @@ tr.row-warn td { background: #fffbf0; }
   .command-kpis { grid-template-columns: 1fr 1fr; }
 }
 </style>
-
-<style id="v4-enterprise-overrides">
-:root{
-  --blue:#0a66c2;
-  --blue-dark:#004182;
-  --blue-light:#7fb4ea;
-  --blue-pale:#eef5fc;
-  --celeste:#58a6e7;
-  --gray-50:#f3f5f7;
-  --gray-100:#e8edf3;
-  --gray-200:#d6dde6;
-  --gray-400:#7b8794;
-  --gray-600:#425466;
-  --gray-900:#14202b;
-  --text:#1b2733;
-  --text-muted:#5a6b7b;
-  --border:rgba(20,32,43,.10);
-  --border-md:rgba(20,32,43,.16);
-  --radius-sm:4px;
-  --radius-md:6px;
-  --radius-lg:8px;
-  --shadow-sm:0 1px 2px rgba(15,23,42,.04),0 1px 1px rgba(15,23,42,.04);
-  --shadow-md:0 10px 24px rgba(15,23,42,.06);
-  --topbar-h:58px;
-  --nav-h:42px;
-}
-body{background:linear-gradient(180deg,#eff3f8 0%,#f7f9fb 180px,#f3f5f7 100%);}
-.topbar{background:linear-gradient(90deg,var(--blue-dark) 0%, var(--blue) 52%, #176fc9 100%);border-bottom:1px solid rgba(255,255,255,.12);box-shadow:0 2px 10px rgba(0,65,130,.18);height:var(--topbar-h);}
-.topbar-brand{gap:12px}.brand-logo{width:34px;height:34px;border-radius:6px;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.22);font-size:12px;letter-spacing:.04em}.brand-name{font-size:16px;font-weight:700}.brand-sub{font-size:11px;color:rgba(255,255,255,.82);text-transform:uppercase;letter-spacing:.08em}.topbar-meta{gap:8px}.meta-chip{border-radius:4px;padding:5px 10px;background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.16);font-weight:600}.meta-chip.green{background:rgba(50,168,82,.24)}.meta-chip.red{background:rgba(192,57,43,.32)}
-.nav-wrapper{top:var(--topbar-h);background:#edf2f7;border-bottom:1px solid #cad4df;box-shadow:inset 0 -1px 0 rgba(255,255,255,.5)}
-.nav-tabs{padding:0 10px}.nav-tab{height:var(--nav-h);font-size:12px;font-weight:700;color:#3e5166;border-bottom:3px solid transparent;padding:0 14px;gap:6px}.nav-tab:hover{background:#f8fbff}.nav-tab.active{color:#fff;border-bottom-color:transparent;background:linear-gradient(180deg,#1b74d1 0%, var(--blue) 100%);box-shadow:inset 0 0 0 1px rgba(255,255,255,.14)}.tab-icon{font-size:13px;filter:saturate(.8)}
-.period-bar{position:sticky;top:calc(var(--topbar-h) + var(--nav-h));z-index:75;background:#f7f9fb;border-bottom:1px solid #d5dde7;padding:10px 16px;gap:10px;box-shadow:0 1px 0 rgba(255,255,255,.8)}
-.period-label{font-size:11px;color:#4f6478}.period-pill{border-radius:4px;padding:5px 10px;font-size:11px;font-weight:700;background:#fff;border:1px solid #cbd5e1;color:#425466}.period-pill.active{background:linear-gradient(180deg,#1b74d1 0%, var(--blue) 100%);border-color:#0a66c2;color:#fff}.period-pill:hover{background:#f5f9ff}.period-custom input[type="date"]{border-radius:4px;padding:5px 8px;border-color:#cbd5e1}.period-apply{border-radius:4px;padding:5px 12px;font-weight:700;background:linear-gradient(180deg,#1b74d1 0%, var(--blue) 100%)}.period-badge{margin-left:auto;font-size:11px;padding:5px 10px;border-radius:4px;background:#e8eef6;color:#26415b;border:1px solid #ccd6e1;font-weight:700}
-.exec-shell{position:relative;max-width:1360px;margin:0 auto;padding-right:290px;}
-.main{max-width:1060px;padding:16px 16px 22px 16px;margin:0;}
-.exec-rail{position:fixed;top:calc(var(--topbar-h) + var(--nav-h) + 58px);right:14px;width:260px;z-index:70;display:flex;flex-direction:column;gap:10px;}
-.exec-rail-card{background:#fff;border:1px solid #cfd8e3;border-radius:6px;box-shadow:var(--shadow-sm);overflow:hidden}.exec-rail-header{background:linear-gradient(180deg,#1b74d1 0%,var(--blue) 100%);color:#fff;padding:9px 12px;border-bottom:1px solid rgba(255,255,255,.14)}.exec-rail-title{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}.exec-rail-sub{font-size:11px;color:rgba(255,255,255,.82);margin-top:3px}.exec-kpi-list{display:grid;grid-template-columns:1fr;}.exec-kpi{padding:10px 12px;border-top:1px solid #e8edf3}.exec-kpi:first-child{border-top:none}.exec-kpi-label{font-size:10px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:#5a6b7b;margin-bottom:5px}.exec-kpi-value{font-size:20px;font-weight:800;color:#102133;line-height:1.05;font-variant-numeric:tabular-nums}.exec-kpi-sub{font-size:11px;color:#627487;margin-top:4px;line-height:1.3}.exec-kpi.accent .exec-kpi-value{color:var(--blue)}.exec-kpi.ok .exec-kpi-value{color:#1c8c6c}.exec-kpi.warn .exec-kpi-value{color:#a76714}.exec-kpi.danger .exec-kpi-value{color:#c0392b}.exec-mini-status{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:10px 12px;border-top:1px solid #e8edf3;background:#f8fafc}.exec-badge-box{background:#fff;border:1px solid #d8e0ea;border-radius:4px;padding:8px}.exec-badge-box-wide{grid-column:1 / -1}.exec-badge-box .t{font-size:10px;font-weight:800;color:#5a6b7b;text-transform:uppercase;letter-spacing:.06em}.exec-badge-box .v{font-size:15px;font-weight:800;color:#17324d;margin-top:3px}
-.command-panel{display:none !important;border-radius:6px;border:1px solid #cad4df;box-shadow:var(--shadow-sm);margin-bottom:16px}.command-header{background:linear-gradient(180deg,#1b74d1 0%,var(--blue) 100%);padding:11px 14px 10px;border-bottom:1px solid rgba(255,255,255,.14)}.command-title{font-size:11px;color:rgba(255,255,255,.9);font-weight:800;letter-spacing:.08em}.command-periodo{font-size:11px;border-radius:4px;padding:4px 8px;background:rgba(255,255,255,.14);color:#fff;border:1px solid rgba(255,255,255,.14)}.command-kpis{grid-template-columns:repeat(3,minmax(0,1fr));background:linear-gradient(180deg,#fff 0%,#fbfcfd 100%)}.cmd-kpi{padding:12px 14px;border-right:1px solid #e2e8f0}.cmd-kpi-label{font-size:10px;font-weight:800;color:#607080}.cmd-kpi-value{font-size:22px;font-weight:800}.cmd-kpi-sub{font-size:11px}.cmd-obj-bar{padding:11px 14px;background:#f7fafc}
-.kpi-grid{gap:10px}.kpi-card{border-radius:6px;border:1px solid #ccd6e2;box-shadow:var(--shadow-sm);padding:12px 13px 12px;background:linear-gradient(180deg,#fff 0%,#fcfdff 100%)}.kpi-card::before{height:4px}.kpi-label{font-size:10px;font-weight:800;color:#607080}.kpi-value{font-size:26px;font-weight:800;color:#112235}.kpi-delta{font-size:11px}.kpi-card.alert-critical{background:#fffafb;border-left-width:5px}
-.sub-nav{gap:6px;margin-bottom:12px}.sub-tab{border-radius:4px;padding:6px 12px;font-size:11px;font-weight:800;background:#fff;border:1px solid #cad4df;color:#44586d}.sub-tab.active{background:linear-gradient(180deg,#f0f7ff 0%,#e3f0fd 100%);border-color:#91b8e6;color:#0a66c2}.sub-tab:hover{background:#f7fbff}
-.card{border-radius:6px;border:1px solid #ccd6e2;box-shadow:var(--shadow-sm);padding:14px;background:#fff}.card-header{margin:-14px -14px 12px -14px;padding:9px 12px;background:linear-gradient(180deg,#1b74d1 0%,var(--blue) 100%);border-bottom:1px solid rgba(255,255,255,.12);align-items:center}.card-title{font-size:11px;font-weight:800;letter-spacing:.07em;color:#fff}.card-badge{font-size:10px;font-weight:800;padding:4px 8px;border-radius:4px;background:rgba(255,255,255,.16);color:#fff;border:1px solid rgba(255,255,255,.14)}
-.table-wrap{border:1px solid #d8e0ea;border-radius:4px;overflow:auto;background:#fff}table{font-size:12px}th{font-size:10px;font-weight:800;background:linear-gradient(180deg,#f1f6fb 0%,#e8eef6 100%);color:#30485f;border-bottom:1px solid #cfd8e3;padding:8px 8px}td{padding:8px 8px;border-bottom:1px solid #e8edf3}tr:hover td{background:#f5f9fe}.num{font-weight:500}
-.section-heading-text{font-weight:800;color:#526678}.count-chip{border-radius:4px;font-weight:800}
-.alert-list{display:grid;gap:8px}.alert-item{border-radius:4px;border:1px solid #d8e0ea;background:#fff;padding:10px 12px;box-shadow:none}.alert-item.alta{border-left:4px solid #c0392b;background:#fff9f8}.alert-item.media{border-left:4px solid #ba7517;background:#fffbf4}.alert-item.ok{border-left:4px solid #1d9e75;background:#f6fffb}
-.chart-box canvas{max-height:340px}
-@media (max-width: 1180px){.exec-shell{padding-right:0}.exec-rail{position:static;width:auto;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;padding:12px 16px 0 16px}.exec-rail-card{grid-column:1/-1}.exec-mini-status{grid-template-columns:repeat(2,1fr)}.main{max-width:100%;margin:0 auto;padding-top:12px}}
-@media (max-width: 860px){.exec-rail{grid-template-columns:1fr}.command-kpis{grid-template-columns:1fr}.row-2{grid-template-columns:1fr}.kpi-grid{grid-template-columns:1fr 1fr !important}.topbar{padding:0 12px}.brand-name{font-size:14px}.brand-sub{letter-spacing:.05em}}
-@media (max-width: 620px){.topbar-meta{display:none}.period-badge{margin-left:0}.kpi-grid{grid-template-columns:1fr !important}.nav-tab{padding:0 10px}.main{padding:12px}.exec-kpi-value{font-size:18px}}
-</style>
-
 </head>
 <body>
 
@@ -488,24 +507,49 @@ body{background:linear-gradient(180deg,#eff3f8 0%,#f7f9fb 180px,#f3f5f7 100%);}
 
 <!-- ═══════════════════ NAV ══════════════════════════════════════════ -->
 <nav class="nav-wrapper">
-  <div class="nav-tabs">
-    <div class="nav-tab active" data-tab="ventas">
-      <span class="tab-icon">📈</span> Ventas
+  <div class="nav-scroll">
+    <div class="nav-tabs">
+      <div class="nav-tab active" data-tab="ventas">
+        <span class="tab-icon">📈</span> Ventas
+      </div>
+      <div class="nav-tab" data-tab="stock">
+        <span class="tab-icon">📦</span> Stock
+      </div>
+      <div class="nav-tab" data-tab="morosidad">
+        <span class="tab-icon">⚠️</span> Morosidad
+      </div>
+      <div class="nav-tab" data-tab="objetivos">
+        <span class="tab-icon">🎯</span> Objetivos
+      </div>
+      <div class="nav-tab" data-tab="seguros">
+        <span class="tab-icon">🛡️</span> Seguros
+      </div>
+      <div class="nav-tab" data-tab="resumen">
+        <span class="tab-icon">📋</span> Resumen
+      </div>
     </div>
-    <div class="nav-tab" data-tab="stock">
-      <span class="tab-icon">📦</span> Stock
+  </div>
+  <!-- ── Panel de comando integrado en nav (desktop) ── -->
+  <div class="nav-command-strip" id="nav-command-strip">
+    <div class="nav-cmd-kpi">
+      <div class="nav-cmd-label">Ventas netas</div>
+      <div class="nav-cmd-value highlight" id="ncs-ventas">—</div>
+      <div class="nav-cmd-sub" id="ncs-ventas-sub">—</div>
     </div>
-    <div class="nav-tab" data-tab="morosidad">
-      <span class="tab-icon">⚠️</span> Morosidad
+    <div class="nav-cmd-bar" id="ncs-obj-wrap">
+      <div class="nav-cmd-bar-label" id="ncs-obj-label">Objetivo</div>
+      <div class="nav-cmd-bar-track">
+        <div class="nav-cmd-bar-fill" id="ncs-obj-fill" style="width:0%;background:var(--blue)"></div>
+      </div>
+      <div class="nav-cmd-bar-meta">
+        <span id="ncs-obj-real">—</span>
+        <span class="nav-cmd-pct" id="ncs-obj-pct">—</span>
+      </div>
     </div>
-    <div class="nav-tab" data-tab="objetivos">
-      <span class="tab-icon">🎯</span> Objetivos
-    </div>
-    <div class="nav-tab" data-tab="seguros">
-      <span class="tab-icon">🛡️</span> Seguros
-    </div>
-    <div class="nav-tab" data-tab="resumen">
-      <span class="tab-icon">📋</span> Resumen
+    <div class="nav-cmd-kpi" id="ncs-stock-kpi">
+      <div class="nav-cmd-label">Stock crítico</div>
+      <div class="nav-cmd-value" id="ncs-stock">—</div>
+      <div class="nav-cmd-sub" id="ncs-stock-sub">—</div>
     </div>
   </div>
 </nav>
@@ -530,57 +574,6 @@ body{background:linear-gradient(180deg,#eff3f8 0%,#f7f9fb 180px,#f3f5f7 100%);}
   </div>
   <span class="period-badge" id="period-badge">—</span>
 </div>
-
-<div class="exec-shell">
-  <aside class="exec-rail" id="exec-rail">
-    <div class="exec-rail-card">
-      <div class="exec-rail-header">
-        <div class="exec-rail-title">Resumen ejecutivo fijo</div>
-        <div class="exec-rail-sub"><span id="exec-sucursal">Sucursal</span> · <span id="exec-period">Período</span></div>
-      </div>
-      <div class="exec-kpi-list">
-        <div class="exec-kpi accent">
-          <div class="exec-kpi-label">Ventas netas</div>
-          <div class="exec-kpi-value" id="exec-ventas">—</div>
-          <div class="exec-kpi-sub" id="exec-ventas-sub">—</div>
-        </div>
-        <div class="exec-kpi" id="exec-obj-wrap">
-          <div class="exec-kpi-label">Objetivo</div>
-          <div class="exec-kpi-value" id="exec-obj">—</div>
-          <div class="exec-kpi-sub" id="exec-obj-sub">—</div>
-        </div>
-        <div class="exec-kpi danger" id="exec-stock-wrap">
-          <div class="exec-kpi-label">Stock crítico</div>
-          <div class="exec-kpi-value" id="exec-stock">—</div>
-          <div class="exec-kpi-sub" id="exec-stock-sub">—</div>
-        </div>
-        <div class="exec-kpi danger" id="exec-mora-wrap">
-          <div class="exec-kpi-label">Mora vencida</div>
-          <div class="exec-kpi-value" id="exec-mora">—</div>
-          <div class="exec-kpi-sub" id="exec-mora-sub">—</div>
-        </div>
-        <div class="exec-kpi ok" id="exec-seg-wrap">
-          <div class="exec-kpi-label">Seguros y garantías</div>
-          <div class="exec-kpi-value" id="exec-seg">—</div>
-          <div class="exec-kpi-sub" id="exec-seg-sub">—</div>
-        </div>
-      </div>
-      <div class="exec-mini-status">
-        <div class="exec-badge-box">
-          <div class="t">Actualización</div>
-          <div class="v" id="exec-update">—</div>
-        </div>
-        <div class="exec-badge-box exec-badge-box-wide">
-          <div class="t">Cierre de mes</div>
-          <div class="v" id="exec-cierre">—</div>
-        </div>
-        <div class="exec-badge-box">
-          <div class="t">Vista</div>
-          <div class="v">Gerencial</div>
-        </div>
-      </div>
-    </div>
-  </aside>
 
 <!-- ═══════════════════ MAIN ══════════════════════════════════════════ -->
 <main class="main">
@@ -638,21 +631,22 @@ body{background:linear-gradient(180deg,#eff3f8 0%,#f7f9fb 180px,#f3f5f7 100%);}
       <span class="sub-tab" data-section="ventas" data-pane="vendedor">Por vendedor</span>
     </div>
     <div id="vpane-evolucion" class="sub-pane active">
-      <div class="card">
-        <div class="card-header">
-          <span class="card-title">Evolución — 6 meses</span>
-          <span class="card-badge" id="badge-ventas-mes">—</span>
+      <div style="display:grid;grid-template-columns:1fr 340px;gap:12px">
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Evolución mensual</span>
+            <span class="card-badge" id="badge-ventas-mes">—</span>
+          </div>
+          <div class="chart-box" style="height:220px"><canvas id="chart-ventas-ev"></canvas></div>
+          <div class="legend" id="legend-ventas-ev" style="margin-top:8px"></div>
         </div>
-        <div class="chart-box" style="height:220px"><canvas id="chart-ventas-ev"></canvas></div>
-        <div class="legend" id="legend-ventas-ev"></div>
+        <div class="card">
+          <div class="card-header"><span class="card-title">Por depósito</span></div>
+          <div class="chart-box" style="height:220px"><canvas id="chart-ventas-fam"></canvas></div>
+        </div>
       </div>
     </div>
-    <div id="vpane-familias" class="sub-pane">
-      <div class="card">
-        <div class="card-header"><span class="card-title">Ventas por depósito</span></div>
-        <div class="chart-box" style="height:280px"><canvas id="chart-ventas-fam"></canvas></div>
-      </div>
-    </div>
+    <div id="vpane-familias" class="sub-pane" style="display:none!important"></div>
     <div id="vpane-ranking" class="sub-pane">
       <div class="card">
         <div class="card-header">
@@ -870,7 +864,6 @@ body{background:linear-gradient(180deg,#eff3f8 0%,#f7f9fb 180px,#f3f5f7 100%);}
   </div>
 
 </main>
-</div>
 
 <script>
 // ═══════════════════════════════════════════════════════════════════════
@@ -1527,6 +1520,7 @@ function onDataReady() {
     ? calcularKpisVentas(PERIODO.filtrar(d._raw_ventas, "Fecha"))
     : d.ventas;
   renderCommandPanel(d, initVentas);
+  renderNavCommandStrip(d, initVentas);
   showSection(STATE.activeTab);
 
   var now = new Date().toLocaleString("es-AR");
@@ -1582,6 +1576,7 @@ function renderSection(tab) {
 
   // Actualizar panel de comando con los datos del período actual
   renderCommandPanel(d, ventasData);
+  renderNavCommandStrip(d, ventasData);
 
   switch(tab) {
     case "ventas":
@@ -1600,12 +1595,72 @@ function renderSection(tab) {
 }
 
 // ═══════════════════════════════════════════════════════════════════════
+// NAV COMMAND STRIP — panel de comando integrado en la barra de navegación
+// Visible en desktop (> 768px). En móvil se usa el command-panel clásico.
+// ═══════════════════════════════════════════════════════════════════════
+function renderNavCommandStrip(d, ventasData) {
+  var strip = document.getElementById("nav-command-strip");
+  if (!strip) return;
+
+  var isMobile = window.innerWidth <= 768;
+
+  var v  = ventasData || d.ventas    || {};
+  var s  = d.stock    || {};
+  var o  = d.objetivos|| {};
+  var vk = v.kpis || {};
+  var sk = s.kpis || {};
+  var ok = o.kpis || {};
+
+  // Ventas netas
+  var el = document.getElementById("ncs-ventas");
+  var es = document.getElementById("ncs-ventas-sub");
+  if (el) el.textContent = fmtPeso(vk.ventas_neto || 0);
+  if (es) es.textContent = fmtNum(vk.comprobantes_mes||0) + " FAC";
+
+  // Objetivo — barra de progreso
+  var objV  = ok.obj_ventas || 0;
+  var realV = vk.ventas_neto || 0;
+  var pct   = objV > 0 ? Math.min(Math.round(realV / objV * 100), 100) : 0;
+  var fill  = document.getElementById("ncs-obj-fill");
+  var lbl   = document.getElementById("ncs-obj-label");
+  var real  = document.getElementById("ncs-obj-real");
+  var ppct  = document.getElementById("ncs-obj-pct");
+  if (fill) {
+    var color = pct >= 100 ? "var(--teal)" : pct >= 70 ? "var(--blue)" : pct >= 50 ? "var(--amber)" : "var(--red)";
+    fill.style.width    = pct + "%";
+    fill.style.background = color;
+  }
+  if (lbl)  lbl.textContent  = (o.mes_nombre || "Objetivo") + " " + (o.anio || "");
+  if (real) real.textContent = fmtPeso(realV);
+  if (ppct) { ppct.textContent = pct + "%"; ppct.style.color = pct >= 100 ? "var(--teal)" : pct < 50 ? "var(--red)" : "var(--blue)"; }
+
+  // Stock crítico
+  var neg   = sk.negativos   || 0;
+  var sinSt = sk.sin_stock   || 0;
+  var total = neg + sinSt;
+  var sv    = document.getElementById("ncs-stock");
+  var ss    = document.getElementById("ncs-stock-sub");
+  var skpi  = document.getElementById("ncs-stock-kpi");
+  if (sv)   sv.textContent   = total;
+  if (ss)   ss.textContent   = neg + " neg. · " + sinSt + " sin st.";
+  if (skpi) skpi.querySelector(".nav-cmd-value").className =
+    "nav-cmd-value " + (neg > 0 ? "danger-hi" : total > 0 ? "danger-hi" : "highlight");
+
+  // Mostrar strip en desktop, ocultar panel clásico
+  if (!isMobile) {
+    strip.style.display = "flex";
+    var panel = document.getElementById("command-panel");
+    if (panel) panel.style.display = "none";
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════
 // PANEL DE COMANDO — resumen ejecutivo visible en todo momento
 // ═══════════════════════════════════════════════════════════════════════
 function renderCommandPanel(d, ventasData) {
   var panel = document.getElementById("command-panel");
   if (!panel) return;
-  panel.style.display = "none";
+  panel.style.display = "block";
 
   var v  = ventasData  || d.ventas    || {};
   var s  = d.stock     || {};
@@ -1670,36 +1725,6 @@ function renderCommandPanel(d, ventasData) {
   if (cssSub) cssSub.textContent = neg + " neg. · " + sinSt + " sin st. · " + bajo + " bajo";
   if (cskpi) cskpi.className = "cmd-kpi " + (neg > 0 ? "danger-hi" : total > 0 ? "danger-hi" : "highlight");
 
-  syncExecRail({
-    sucursal: (document.getElementById("chip-sucursal")||{}).textContent || (document.querySelector(".brand-name")||{}).textContent || "Sucursal",
-    periodo: PERIODO.label(),
-    update: (document.getElementById("chip-update")||{}).textContent || "—",
-    cierre: (function(){
-      if (objV > 0) {
-        var hoy2 = new Date();
-        var diasMes2 = new Date(hoy2.getFullYear(), hoy2.getMonth()+1, 0).getDate();
-        var diasRest2 = Math.max(diasMes2 - hoy2.getDate(), 0);
-        var ritmo2 = diasRest2 > 0 ? Math.max(Math.round((objV - realV) / diasRest2), 0) : 0;
-        return pctObj >= 100 ? "Objetivo cumplido" : (diasRest2 + "d restantes · " + fmtPeso(ritmo2) + "/día");
-      }
-      return "Sin objetivo cargado";
-    })(),
-    ventas: fmtPeso(vk.ventas_neto || 0),
-    ventasSub: fmtNum(vk.comprobantes_mes || 0) + " FAC · " + fmtNum(vk.nc_cantidad || 0) + " NC",
-    objetivo: objV > 0 ? (pctObj + "%") : "Sin obj.",
-    objetivoSub: objV > 0 ? (fmtPeso(realV) + " / " + fmtPeso(objV)) : "cargar planilla",
-    objetivoState: objV > 0 ? (pctObj >= 100 ? "ok" : pctObj >= 70 ? "accent" : pctObj >= 50 ? "warn" : "danger") : "warn",
-    stock: String(total),
-    stockSub: neg + " neg. · " + sinSt + " sin st. · " + bajo + " bajo",
-    stockState: neg > 0 || total > 0 ? "danger" : "ok",
-    mora: fmtPeso(((d.morosidad||{}).kpis||{}).vencido_total || ((d.morosidad||{}).kpis||{}).saldo_total || 0),
-    moraSub: fmtNum(((d.morosidad||{}).kpis||{}).clientes_morosos || 0) + " clientes morosos",
-    moraState: ((((d.morosidad||{}).kpis||{}).vencido_total || ((d.morosidad||{}).kpis||{}).saldo_total || 0) > 0) ? "danger" : "ok",
-    seg: fmtNum((((d.seguros||{}).kpis||{}).total_polizas || 0)) + " / " + fmtNum((((d.seguros||{}).kpis||{}).total_garantias || 0)),
-    segSub: fmtPeso((((d.seguros||{}).kpis||{}).importe_polizas || 0) + (((d.seguros||{}).kpis||{}).importe_garantias || 0)),
-    segState: ((((d.seguros||{}).kpis||{}).total_polizas || 0) + (((d.seguros||{}).kpis||{}).total_garantias || 0)) > 0 ? "ok" : "accent"
-  });
-
   // Badge en tab Stock si hay negativos
   var tabBadge = document.querySelector('[data-tab="stock"] .tab-badge');
   if (neg > 0) {
@@ -1710,44 +1735,18 @@ function renderCommandPanel(d, ventasData) {
   }
 }
 
-
-function syncExecRail(o){
-  function set(id, value){ var el = document.getElementById(id); if (el) el.textContent = value == null ? "—" : value; }
-  function setState(id, base, state){
-    var el = document.getElementById(id);
-    if (!el) return;
-    el.className = (base || 'exec-kpi') + (state ? (' ' + state) : '');
-  }
-  set('exec-sucursal', o.sucursal);
-  set('exec-period', o.periodo);
-  set('exec-update', o.update);
-  set('exec-cierre', o.cierre);
-  set('exec-ventas', o.ventas);
-  set('exec-ventas-sub', o.ventasSub);
-  set('exec-obj', o.objetivo);
-  set('exec-obj-sub', o.objetivoSub);
-  set('exec-stock', o.stock);
-  set('exec-stock-sub', o.stockSub);
-  set('exec-mora', o.mora);
-  set('exec-mora-sub', o.moraSub);
-  set('exec-seg', o.seg);
-  set('exec-seg-sub', o.segSub);
-  setState('exec-obj-wrap','exec-kpi', o.objetivoState);
-  setState('exec-stock-wrap','exec-kpi', o.stockState);
-  setState('exec-mora-wrap','exec-kpi', o.moraState);
-  setState('exec-seg-wrap','exec-kpi', o.segState);
-}
-
 // ═══════════════════════════════════════════════════════════════════════
 // VENTAS
 // ═══════════════════════════════════════════════════════════════════════
 function renderVentas(v) {
   if (!v || v.error) { html("kpi-ventas","<p style='color:var(--text-muted);font-size:13px;padding:12px'>Sin datos de ventas.</p>"); return; }
   var k = v.kpis;
+  var sparkNeto = (v.evolucion_mensual||[]).map(function(e){ return e.neto||0; });
+  var sparkNC   = (v.evolucion_mensual||[]).map(function(e){ return Math.abs(e.neto - (e.total||0)); });
   html("kpi-ventas",
-    kpiCard("Ventas del período",    fmtPeso(k.ventas_neto),    fmtNum(k.comprobantes_mes) + " FAC — " + fmtNum(k.nc_cantidad) + " NC", "up",   "accent") +
-    kpiCard("Ticket promedio",       fmtPeso(k.ticket_promedio),"sin IVA",                                    "flat", "accent") +
-    kpiCard("Notas de crédito",    k.nc_cantidad,             fmtPeso(k.nc_importe) + " en NC",             k.nc_cantidad>10?"down":"flat","warn")
+    kpiCard("Ventas del período",  fmtPeso(k.ventas_neto),    fmtNum(k.comprobantes_mes) + " FAC — " + fmtNum(k.nc_cantidad) + " NC", "up",   "accent", sparkNeto) +
+    kpiCard("Ticket promedio",     fmtPeso(k.ticket_promedio),"sin IVA",                                    "flat", "accent") +
+    kpiCard("Notas de crédito",    k.nc_cantidad,             fmtPeso(k.nc_importe) + " en NC",             k.nc_cantidad>10?"down":"flat","warn", sparkNC)
   );
 
   var meses = v.evolucion_mensual.map(function(e){ return e.mes; });
@@ -1780,15 +1779,24 @@ function renderVentas(v) {
     datasets:[{data:[45,21,26,8],backgroundColor:[C.blue,C.celeste,"#5DCAA5","#B5D4F4"],borderWidth:0}]},
     options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:"bottom",labels:{font:{size:11},boxWidth:10}}}}});
 
+  var topArt = (v.top_articulos||[]).slice(0,30);
+  var maxImp  = topArt.length ? Math.max.apply(null, topArt.map(function(a){ return Math.abs(a.importe||0); })) : 1;
   var rows = "";
-  (v.top_articulos||[]).slice(0,30).forEach(function(a,i){
-    rows += "<tr><td>" + (i+1) + "</td>" +
-      "<td style='font-family:var(--font-mono,monospace);font-size:11px;color:var(--text-muted)'>" + (a.cod||"—") + "</td>" +
-      "<td>" + (a.desc||a.cod||"—") + "</td>" +
-      '<td class="num">' + fmtNum(a.unidades) + "</td>" +
-      '<td class="num">' + fmtPeso(a.importe) + "</td></tr>";
+  topArt.forEach(function(a,i){
+    var pct = maxImp > 0 ? Math.round(Math.abs(a.importe||0) / maxImp * 100) : 0;
+    rows += "<tr>" +
+      "<td style='color:var(--text-muted);font-size:11px;width:28px'>" + (i+1) + "</td>" +
+      "<td style='font-family:var(--font-mono,monospace);font-size:11px;color:var(--text-muted);white-space:nowrap'>" + (a.cod||"—") + "</td>" +
+      "<td style='max-width:260px'>" +
+        "<div style='font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis'>" + (a.desc||a.cod||"—") + "</div>" +
+        "<div style='height:3px;background:var(--gray-200);border-radius:2px;margin-top:3px'>" +
+          "<div style='height:100%;width:" + pct + "%;background:var(--blue);border-radius:2px'></div>" +
+        "</div>" +
+      "</td>" +
+      '<td class="num" style="font-size:12px">' + fmtNum(a.unidades) + "</td>" +
+      '<td class="num" style="font-size:12px;font-weight:500">' + fmtPeso(a.importe) + "</td></tr>";
   });
-  html("tbody-top-art", rows || "<tr><td colspan='5' style='text-align:center;color:var(--text-muted);padding:16px'>Sin datos de artículos</td></tr>");
+  html("tbody-top-art", rows || "<tr><td colspan='5' style='text-align:center;color:var(--text-muted);padding:20px'>Sin datos de artículos</td></tr>");
   var br = document.getElementById("badge-ranking-periodo");
   if (br) br.textContent = PERIODO.label();
 }
@@ -2290,13 +2298,37 @@ function renderResumen(d, ventasData, moraData, segurosData) {
 // ═══════════════════════════════════════════════════════════════════════
 // HELPERS — KPI CARD
 // ═══════════════════════════════════════════════════════════════════════
-function kpiCard(label, value, sub, delta, type) {
-  var deltaClass = delta==="up"?"delta-up":delta==="down"?"delta-down":"delta-flat";
+function kpiCard(label, value, sub, delta, type, sparkData) {
+  var deltaIcon  = delta==="up" ? "▲" : delta==="down" ? "▼" : "";
+  var deltaClass = delta==="up" ? "delta-up" : delta==="down" ? "delta-down" : "delta-flat";
   var cardClass  = "kpi-card " + (type||"accent");
+
+  var sparkHtml = "";
+  if (sparkData && sparkData.length > 1) {
+    var max = Math.max.apply(null, sparkData.map(Math.abs));
+    if (max > 0) {
+      var pts = sparkData.map(function(v,i){
+        var x = Math.round(i / (sparkData.length-1) * 54);
+        var y = Math.round(22 - (Math.abs(v) / max) * 18);
+        return x+","+y;
+      }).join(" ");
+      var sparkColor = type==="danger" ? "var(--red)" : type==="ok" ? "var(--teal)" : type==="warn" ? "var(--amber)" : "var(--blue)";
+      sparkHtml = '<svg width="56" height="24" style="flex-shrink:0;opacity:0.7">' +
+        '<polyline points="' + pts + '" fill="none" stroke="' + sparkColor + '" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>' +
+        '</svg>';
+    }
+  }
+
   return '<div class="' + cardClass + '">' +
     '<div class="kpi-label">' + label + '</div>' +
-    '<div class="kpi-value">' + value + '</div>' +
-    '<div class="kpi-delta ' + deltaClass + '">' + sub + '</div>' +
+    '<div style="display:flex;align-items:flex-end;justify-content:space-between;gap:6px">' +
+      '<div class="kpi-value">' + value + '</div>' +
+      sparkHtml +
+    '</div>' +
+    '<div class="kpi-delta ' + deltaClass + '">' +
+      (deltaIcon ? '<span style="font-size:9px;margin-right:2px">' + deltaIcon + '</span>' : '') +
+      sub +
+    '</div>' +
     '</div>';
 }
 
@@ -2316,3 +2348,4 @@ fetchData();
 </script>
 </body>
 </html>
+
