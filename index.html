@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CHEMES · Consulta de Sucursales</title>
+<style>
+  :root{
+    --bg:#0f172a;--card:#111827;--muted:#94a3b8;--text:#e5e7eb;--line:#1f2937;
+    --blue:#22c1dc;--green:#22c55e;--amber:#f59e0b;--red:#ef4444;
+  }
+  *{box-sizing:border-box} body{margin:0;font-family:Arial,sans-serif;background:var(--bg);color:var(--text)}
+  .wrap{max-width:760px;margin:0 auto;padding:14px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:12px}
+  .title{font-weight:700;font-size:20px;margin-bottom:4px}
+  .sub{color:var(--muted);font-size:12px}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .grid-inner{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  input,select,button{width:100%;padding:12px;border-radius:12px;border:1px solid var(--line);background:#0b1220;color:var(--text)}
+  button{border:none;font-weight:700;cursor:pointer}
+  .btn-primary{background:linear-gradient(135deg,#0891b2,#2563eb)}
+  .btn-secondary{background:#1e293b;border:1px solid #334155}
+  .actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+  .kpis{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .kpi{background:#0b1220;border:1px solid var(--line);border-radius:12px;padding:10px}
+  .kpi b{display:block;font-size:22px;margin-top:6px}
+  .item{border-top:1px solid var(--line);padding:12px 0}
+  .row{display:flex;justify-content:space-between;gap:10px}
+  .name{font-weight:700}
+  .muted{color:var(--muted)}
+  .sucs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+  .suc{background:#0b1220;border:1px solid var(--line);border-radius:10px;padding:8px}
+  .msg{padding:10px 12px;border-radius:12px;background:#0b1220;border:1px solid var(--line);margin-top:10px}
+  @media (max-width:560px){.grid,.kpis,.sucs,.grid-inner,.actions{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="card">
+    <div class="title">Consulta de Artículos</div>
+    <div class="sub">Base: ranking con precios y saldo de sucursales</div>
+  </div>
+
+  <div class="card">
+    <div class="grid">
+      <input id="q" placeholder="Buscar por código, nombre, SKU o código de barras">
+      <input id="rubro" placeholder="Rubro">
+      <input id="subrubro" placeholder="Subrubro">
+      <div class="grid-inner">
+        <input id="desde" placeholder="Código desde">
+        <input id="hasta" placeholder="Código hasta">
+      </div>
+    </div>
+    <div class="actions">
+      <button class="btn-primary" onclick="buscar()">Buscar</button>
+      <button class="btn-secondary" onclick="limpiar()">Limpiar</button>
+    </div>
+    <div id="mensaje" class="msg" style="display:none"></div>
+  </div>
+
+  <div class="card" id="resumen" style="display:none"></div>
+  <div class="card" id="resultados" style="display:none"></div>
+</div>
+
+<script>
+const API = 'https://script.google.com/macros/s/AKfycbwp-3sbDqcLCW5OG3xsQBBc16yb7ei3ynTETo7oppFdeZ4Jx4tj00mEb457G8h91LOB/exec';
+
+function fmt(n){
+  const x = String(n ?? '0').replace(/\./g,'').replace(',', '.');
+  const v = Number(x);
+  return isNaN(v) ? (n ?? '-') : v.toLocaleString('es-AR');
+}
+
+function toNum(n){
+  const x = String(n ?? '0').replace(/\./g,'').replace(',', '.');
+  const v = Number(x);
+  return isNaN(v) ? 0 : v;
+}
+
+function showMsg(text){
+  const m = document.getElementById('mensaje');
+  m.textContent = text;
+  m.style.display = 'block';
+}
+
+function hideMsg(){
+  const m = document.getElementById('mensaje');
+  m.style.display = 'none';
+  m.textContent = '';
+}
+
+function limpiar(){
+  ['q','rubro','subrubro','desde','hasta'].forEach(id => document.getElementById(id).value = '');
+  hideMsg();
+  document.getElementById('resumen').style.display = 'none';
+  document.getElementById('resumen').innerHTML = '';
+  document.getElementById('resultados').style.display = 'none';
+  document.getElementById('resultados').innerHTML = '';
+  document.getElementById('q').focus();
+}
+
+function detectarSucursales(row){
+  if(!row) return [];
+  const omit = new Set(['STOCK','STOCK_CD','STOCK_CA','STOCK_CN','A_RECEPCIONAR','COMPROMETIDA']);
+  return Object.keys(row).filter(k => {
+    const u = k.toUpperCase();
+    if (omit.has(u)) return false;
+    return u.startsWith('STOCK ');
+  });
+}
+
+function totalizar(items){
+  const t = { stockTotal:0, ventasMes:0, ventas3M:0, ventasAnio:0, sucursales:{} };
+  const sucCols = detectarSucursales(items[0]);
+
+  items.forEach(r => {
+    t.stockTotal += toNum(r.STOCK);
+    t.ventasMes += toNum(r.VentasUltimoMes);
+    t.ventas3M += toNum(r.VentasUltimos3Meses);
+    t.ventasAnio += toNum(r.VentasUltimoAnio);
+    sucCols.forEach(c => {
+      t.sucursales[c] = (t.sucursales[c] || 0) + toNum(r[c]);
+    });
+  });
+  return t;
+}
+
+async function buscar(){
+  hideMsg();
+  const params = new URLSearchParams({
+    action:'search',
+    q:document.getElementById('q').value.trim(),
+    rubro:document.getElementById('rubro').value.trim(),
+    subrubro:document.getElementById('subrubro').value.trim(),
+    desde:document.getElementById('desde').value.trim(),
+    hasta:document.getElementById('hasta').value.trim()
+  });
+
+  showMsg('Buscando...');
+  const res = await fetch(`${API}?${params.toString()}`);
+  const data = await res.json();
+  if(!data.ok){ showMsg(data.error || 'Error en la consulta'); return; }
+
+  const items = data.data || [];
+  const totals = totalizar(items);
+  renderResumen({
+    sourceFile: data.archivo || '-',
+    totalRows: data.total,
+    totals,
+    limitado: data.limitado
+  });
+  renderItems(items);
+  showMsg(items.length ? `Consulta finalizada. Resultados: ${items.length}${data.limitado ? ' (limitado por API)' : ''}` : 'Sin resultados para la búsqueda.');
+}
+
+function renderResumen(data){
+  const t = data.totals || {};
+  const sucursales = Object.entries(t.sucursales || {});
+  const html = `
+    <div class="sub">Archivo: ${data.sourceFile || '-'} · Filas encontradas: ${fmt(data.totalRows || 0)}${data.limitado ? ' · respuesta limitada' : ''}</div>
+    <div class="kpis" style="margin-top:10px">
+      <div class="kpi"><span class="muted">Stock total</span><b>${fmt(t.stockTotal)}</b></div>
+      <div class="kpi"><span class="muted">Ventas mes</span><b>${fmt(t.ventasMes)}</b></div>
+      <div class="kpi"><span class="muted">Ventas 3M</span><b>${fmt(t.ventas3M)}</b></div>
+      <div class="kpi"><span class="muted">Ventas año</span><b>${fmt(t.ventasAnio)}</b></div>
+    </div>
+    <div style="margin-top:12px;font-weight:700">Totales por sucursal / depósito detectados</div>
+    <div class="sucs">
+      ${sucursales.length ? sucursales.map(([k,v]) => `<div class="suc"><div class="muted">${k}</div><div><b>${fmt(v)}</b></div></div>`).join('') : '<div class="muted">No se detectaron columnas de sucursal adicionales.</div>'}
+    </div>`;
+  const box = document.getElementById('resumen');
+  box.innerHTML = html;
+  box.style.display = 'block';
+}
+
+function renderItems(items){
+  const box = document.getElementById('resultados');
+  box.innerHTML = items.map(r => {
+    const sucCols = detectarSucursales(r);
+    return `
+    <div class="item">
+      <div class="row"><div class="name">${r.ARTICULO || '-'}</div><div>${r.COD_ARTICULO || '-'}</div></div>
+      <div class="muted">${r.RUBRO || '-'} · ${r.SUBRUBRO || '-'} · ${r.NOM_PROVEE || '-'}</div>
+      <div class="row" style="margin-top:8px"><div>Stock: <b>${fmt(r.STOCK)}</b></div><div>Vta Mes: <b>${fmt(r.VentasUltimoMes)}</b></div></div>
+      <div class="row" style="margin-top:6px"><div>Stock CD: <b>${fmt(r.STOCK_CD)}</b></div><div>Stock CA: <b>${fmt(r.STOCK_CA)}</b></div></div>
+      ${sucCols.length ? `<div class="sucs">${sucCols.map(c => `<div class="suc"><div class="muted">${c}</div><div><b>${fmt(r[c])}</b></div></div>`).join('')}</div>` : ''}
+    </div>`;
+  }).join('') || '<div class="muted">Sin resultados.</div>';
+  box.style.display = 'block';
+}
+</script>
+</body>
+</html>
