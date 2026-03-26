@@ -672,8 +672,11 @@ tr.row-warn td { background: #fffbf0; }
             <thead><tr>
               <th>#</th><th>Vendedor</th>
               <th class="num">Venta neta</th>
-              <th class="num">Intangibles</th>
+              <th class="num">Intangibles $</th>
+              <th class="num">% Part.</th>
+              <th class="num">% Alcance</th>
               <th class="num">Pólizas $</th>
+              <th class="num">% Part.</th>
               <th class="num">Pólizas u.</th>
               <th class="num">FAC</th>
             </tr></thead>
@@ -1899,30 +1902,122 @@ function renderVendedor(vd) {
   var badge = document.getElementById("badge-vendedor-mes");
   if (badge) badge.textContent = vd.mes || "—";
 
-  // Calcular total para % de participación
-  var totalNeto = vd.vendedores.reduce(function(s,v){ return s + v.venta_neto; }, 0);
+  var vends = vd.vendedores;
+
+  // Totales para calcular % de participación
+  var totalNeto       = vends.reduce(function(s,v){ return s + (v.venta_neto  || 0); }, 0);
+  var totalIntangibles= vends.reduce(function(s,v){ return s + (v.intangibles || 0); }, 0);
+  var totalPolizas    = vends.reduce(function(s,v){ return s + (v.polizas     || 0); }, 0);
+
+  // Fila de totales al pie
+  var ratioIntTotal = totalNeto > 0 ? (totalIntangibles / totalNeto * 100).toFixed(1) : "—";
 
   var rows = "";
-  vd.vendedores.forEach(function(v, i) {
-    var pct = totalNeto > 0 ? Math.round(v.venta_neto / totalNeto * 100) : 0;
-    var barW = Math.max(pct, 2);
+  vends.forEach(function(v, i) {
+    // % participación en ventas
+    var pctVenta = totalNeto > 0 ? Math.round(v.venta_neto / totalNeto * 100) : 0;
+    var barW     = Math.max(pctVenta, 2);
+
+    // % participación en intangibles — cuánto del total de intangibles es este vendedor
+    var pctPartInt = totalIntangibles > 0 && v.intangibles > 0
+      ? (v.intangibles / totalIntangibles * 100).toFixed(1)
+      : null;
+
+    // % alcance (ratio) — intangibles / venta_neta de ese vendedor
+    var pctAlcance = v.venta_neto > 0 && v.intangibles > 0
+      ? (v.intangibles / v.venta_neto * 100).toFixed(1)
+      : null;
+
+    // % participación en pólizas
+    var pctPartPol = totalPolizas > 0 && v.polizas > 0
+      ? (v.polizas / totalPolizas * 100).toFixed(1)
+      : null;
+
+    // Color alcance — verde si supera el ratio general, ámbar si está cerca, rojo si está lejos
+    var ratioGeneral = parseFloat(ratioIntTotal) || 0;
+    var alcanceVal   = parseFloat(pctAlcance)    || 0;
+    var alcanceColor = alcanceVal === 0   ? "var(--text-muted)"
+                     : alcanceVal >= ratioGeneral * 1.1 ? "var(--teal)"
+                     : alcanceVal >= ratioGeneral * 0.7 ? "var(--blue)"
+                     : "var(--amber)";
+
     rows += "<tr>" +
       "<td><b>" + (i+1) + "</b></td>" +
+      // Vendedor + barra participación en ventas
       "<td>" +
         "<div style='font-size:13px;font-weight:500'>" + v.nombre + "</div>" +
-        "<div style='height:4px;background:var(--gray-100);border-radius:2px;margin-top:4px;width:100%'>" +
+        "<div style='height:3px;background:var(--gray-100);border-radius:2px;margin-top:4px;width:100%'>" +
           "<div style='height:100%;width:" + barW + "%;background:var(--blue);border-radius:2px'></div>" +
         "</div>" +
-        "<div style='font-size:10px;color:var(--text-muted);margin-top:2px'>" + pct + "% del total · " + v.cant_fac + " FAC</div>" +
+        "<div style='font-size:10px;color:var(--text-muted);margin-top:2px'>" +
+          pctVenta + "% del total &middot; " + v.cant_fac + " FAC" +
+        "</div>" +
       "</td>" +
+      // Venta neta
       '<td class="num" style="font-weight:600">' + fmtPeso(v.venta_neto) + "</td>" +
-      '<td class="num" style="color:var(--blue)">' + (v.intangibles > 0 ? fmtPeso(v.intangibles) : "—") + "</td>" +
-      '<td class="num" style="color:var(--teal)">' + (v.polizas > 0 ? fmtPeso(v.polizas) : "—") + "</td>" +
-      '<td class="num">' + (v.cant_polizas > 0 ? v.cant_polizas : "—") + "</td>" +
+      // Intangibles $
+      '<td class="num" style="color:var(--blue)">' +
+        (v.intangibles > 0 ? fmtPeso(v.intangibles) : "<span style='color:var(--text-muted)'>—</span>") +
+      "</td>" +
+      // % Participación intangibles — barra proporcional
+      '<td class="num">' +
+        (pctPartInt !== null
+          ? "<div style='display:flex;align-items:center;gap:5px;justify-content:flex-end'>" +
+              "<div style='width:40px;height:5px;background:var(--gray-100);border-radius:3px;flex-shrink:0'>" +
+                "<div style='height:100%;width:" + Math.min(parseFloat(pctPartInt),100) + "%;background:var(--blue);border-radius:3px'></div>" +
+              "</div>" +
+              "<span style='font-size:11px;font-weight:600;color:var(--blue);min-width:34px;text-align:right'>" + pctPartInt + "%</span>" +
+            "</div>"
+          : "<span style='color:var(--text-muted)'>—</span>") +
+      "</td>" +
+      // % Alcance — ratio intangibles/venta propia
+      '<td class="num">' +
+        (pctAlcance !== null
+          ? "<span style='font-size:12px;font-weight:700;color:" + alcanceColor + "'>" + pctAlcance + "%</span>"
+          : "<span style='color:var(--text-muted)'>—</span>") +
+      "</td>" +
+      // Pólizas $
+      '<td class="num" style="color:var(--teal)">' +
+        (v.polizas > 0 ? fmtPeso(v.polizas) : "<span style='color:var(--text-muted)'>—</span>") +
+      "</td>" +
+      // % Participación pólizas — barra proporcional
+      '<td class="num">' +
+        (pctPartPol !== null
+          ? "<div style='display:flex;align-items:center;gap:5px;justify-content:flex-end'>" +
+              "<div style='width:40px;height:5px;background:var(--gray-100);border-radius:3px;flex-shrink:0'>" +
+                "<div style='height:100%;width:" + Math.min(parseFloat(pctPartPol),100) + "%;background:var(--teal);border-radius:3px'></div>" +
+              "</div>" +
+              "<span style='font-size:11px;font-weight:600;color:var(--teal);min-width:34px;text-align:right'>" + pctPartPol + "%</span>" +
+            "</div>"
+          : "<span style='color:var(--text-muted)'>—</span>") +
+      "</td>" +
+      // Pólizas unidades
+      '<td class="num">' + (v.cant_polizas > 0 ? v.cant_polizas : "<span style='color:var(--text-muted)'>—</span>") + "</td>" +
+      // FAC
       '<td class="num">' + v.cant_fac + "</td>" +
       "</tr>";
   });
-  html("tbody-vendedor", rows || "<tr><td colspan='7' style='text-align:center;color:var(--text-muted);padding:20px'>Sin datos de vendedores</td></tr>");
+
+  // Fila de totales
+  rows += "<tr style='background:var(--gray-50);border-top:2px solid var(--gray-200)'>" +
+    "<td colspan='2' style='font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.04em;padding:8px'>TOTAL</td>" +
+    "<td class='num' style='font-weight:700'>" + fmtPeso(totalNeto) + "</td>" +
+    "<td class='num' style='font-weight:700;color:var(--blue)'>" + fmtPeso(totalIntangibles) + "</td>" +
+    "<td class='num' style='font-size:11px;color:var(--text-muted)'>100%</td>" +
+    "<td class='num'><span style='font-size:11px;font-weight:700;color:var(--text-muted)'>" +
+      (ratioIntTotal !== "—" ? ratioIntTotal + "%" : "—") +
+    "</span><br><span style='font-size:9px;color:var(--text-muted)'>ratio gral.</span></td>" +
+    "<td class='num' style='font-weight:700;color:var(--teal)'>" + fmtPeso(totalPolizas) + "</td>" +
+    "<td class='num' style='font-size:11px;color:var(--text-muted)'>100%</td>" +
+    "<td class='num' style='font-weight:700'>" +
+      vends.reduce(function(s,v){ return s + (v.cant_polizas||0); }, 0) +
+    "</td>" +
+    "<td class='num' style='font-weight:700'>" +
+      vends.reduce(function(s,v){ return s + (v.cant_fac||0); }, 0) +
+    "</td>" +
+    "</tr>";
+
+  html("tbody-vendedor", rows || "<tr><td colspan='10' style='text-align:center;color:var(--text-muted);padding:20px'>Sin datos de vendedores</td></tr>");
 }
 
 // ═══════════════════════════════════════════════════════════════════════
