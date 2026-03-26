@@ -94,12 +94,15 @@ a { color: inherit; text-decoration: none; }
   position: sticky; top: var(--topbar-h); z-index: 90;
   background: #fff;
   border-bottom: 1px solid var(--border);
-  overflow-x: auto;
+  display: flex; align-items: stretch;
+}
+.nav-scroll {
+  overflow-x: auto; flex: 1;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
 }
-.nav-wrapper::-webkit-scrollbar { display: none; }
-.nav-tabs { display: flex; padding: 0 12px; min-width: max-content; }
+.nav-scroll::-webkit-scrollbar { display: none; }
+.nav-tabs { display: flex; padding: 0 12px; min-width: max-content; height: 100%; }
 .nav-tab {
   display: flex; align-items: center; gap: 5px;
   padding: 0 13px;
@@ -120,6 +123,69 @@ a { color: inherit; text-decoration: none; }
   font-size: 9px; font-weight: 600;
   width: 15px; height: 15px; border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
+}
+
+/* ─── PANEL DE COMANDO — integrado en la barra de nav ──────────────── */
+.nav-command-strip {
+  display: none; /* visible solo cuando hay datos */
+  align-items: center;
+  gap: 0;
+  border-left: 1px solid var(--border);
+  background: #fff;
+  flex-shrink: 0;
+  min-width: 0;
+}
+.nav-cmd-kpi {
+  display: flex; flex-direction: column; justify-content: center;
+  padding: 0 14px;
+  border-right: 1px solid var(--border);
+  height: var(--nav-h);
+  min-width: 110px;
+  cursor: default;
+}
+.nav-cmd-kpi:last-of-type { border-right: none; }
+.nav-cmd-label {
+  font-size: 9px; font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.06em; color: var(--text-muted);
+  line-height: 1; margin-bottom: 3px;
+}
+.nav-cmd-value {
+  font-size: 15px; font-weight: 600; color: var(--text);
+  line-height: 1; font-variant-numeric: tabular-nums;
+}
+.nav-cmd-value.highlight { color: var(--blue); }
+.nav-cmd-value.danger-hi { color: var(--red); }
+.nav-cmd-value.success-hi{ color: var(--teal); }
+.nav-cmd-sub {
+  font-size: 9.5px; color: var(--text-muted); margin-top: 2px; line-height: 1;
+}
+/* Barra de progreso objetivo — inline en el nav */
+.nav-cmd-bar {
+  display: flex; flex-direction: column; justify-content: center;
+  padding: 0 14px; border-right: 1px solid var(--border);
+  height: var(--nav-h); min-width: 140px;
+}
+.nav-cmd-bar-label {
+  font-size: 9px; font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.06em; color: var(--text-muted); margin-bottom: 4px;
+}
+.nav-cmd-bar-track {
+  height: 5px; background: var(--gray-200); border-radius: 3px; overflow: hidden;
+}
+.nav-cmd-bar-fill {
+  height: 100%; border-radius: 3px;
+  transition: width 1s cubic-bezier(.4,0,.2,1);
+}
+.nav-cmd-bar-meta {
+  display: flex; justify-content: space-between;
+  font-size: 9px; color: var(--text-muted); margin-top: 3px;
+}
+.nav-cmd-pct { font-weight: 700; color: var(--text); }
+
+/* En móvil — ocultar el strip del nav, mantener el panel clásico */
+@media (max-width: 768px) {
+  .nav-command-strip { display: none !important; }
+  .command-panel     { display: block !important; }
 }
 
 /* ─── MAIN CONTENT ──────────────────────────────────────────────────── */
@@ -206,44 +272,45 @@ a { color: inherit; text-decoration: none; }
 /* ─── KPI GRID ──────────────────────────────────────────────────────── */
 .kpi-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(145px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
   gap: 10px;
   margin-bottom: 14px;
 }
 .kpi-card {
   background: #fff;
-  border: 1px solid var(--border);
+  border: 0.5px solid var(--border);
   border-radius: var(--radius-md);
   padding: 14px 14px 12px;
   position: relative; overflow: hidden;
+  transition: box-shadow 0.15s, border-color 0.15s;
 }
-.kpi-card::before {
+.kpi-card:hover { border-color: var(--blue); box-shadow: 0 2px 8px rgba(37,150,190,0.12); }
+.kpi-card::after {
   content: "";
-  position: absolute; top: 0; left: 0; right: 0; height: 3px;
-  border-radius: var(--radius-md) var(--radius-md) 0 0;
+  position: absolute; top: 0; left: 0; bottom: 0; width: 3px;
+  border-radius: var(--radius-md) 0 0 var(--radius-md);
 }
-.kpi-card.accent::before { background: var(--blue); }
-.kpi-card.danger::before { background: var(--red); }
-.kpi-card.warn::before   { background: var(--amber); }
-.kpi-card.ok::before     { background: var(--teal); }
-/* Tarjeta de alerta crítica — borde izquierdo prominente */
+.kpi-card.accent::after  { background: var(--blue); }
+.kpi-card.danger::after  { background: var(--red); }
+.kpi-card.warn::after    { background: var(--amber); }
+.kpi-card.ok::after      { background: var(--teal); }
 .kpi-card.alert-critical {
   border-left: 4px solid var(--red);
   background: #fff9f9;
 }
-.kpi-card.alert-critical::before { display: none; }
+.kpi-card.alert-critical::after { display: none; }
 .kpi-label {
-  font-size: 10px; font-weight: 600; letter-spacing: 0.05em;
+  font-size: 10px; font-weight: 600; letter-spacing: 0.06em;
   color: var(--text-muted); text-transform: uppercase;
   margin-bottom: 6px;
 }
 .kpi-value {
-  font-size: 22px; font-weight: 600; color: var(--text);
+  font-size: 24px; font-weight: 600; color: var(--text);
   line-height: 1.1; margin-bottom: 4px;
   font-variant-numeric: tabular-nums;
 }
 .kpi-card.danger .kpi-value { color: var(--red); }
-.kpi-delta { font-size: 11px; line-height: 1.3; }
+.kpi-delta { font-size: 11px; line-height: 1.3; margin-top: 2px; }
 .delta-up   { color: var(--teal); }
 .delta-down { color: var(--red); }
 .delta-flat { color: var(--text-muted); }
@@ -356,15 +423,17 @@ tr.row-warn td { background: #fffbf0; }
 .timestamp { text-align: center; font-size: 11px; color: var(--text-muted); padding: 16px 0 4px; }
 
 /* ─── SUB-TABS ──────────────────────────────────────────────────────── */
-.sub-nav { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 14px; }
+.sub-nav { display: flex; gap: 2px; flex-wrap: wrap; margin-bottom: 14px;
+  background: var(--gray-100); border-radius: var(--radius-sm); padding: 3px; width: fit-content; }
 .sub-tab {
-  padding: 5px 13px; font-size: 12px; font-weight: 500;
-  border-radius: var(--radius-sm); cursor: pointer;
-  border: 1px solid var(--border-md); color: var(--text-muted);
-  background: #fff; transition: all 0.12s; user-select: none;
+  padding: 5px 14px; font-size: 12px; font-weight: 500;
+  border-radius: 6px; cursor: pointer;
+  border: none; color: var(--text-muted);
+  background: transparent; transition: all 0.12s; user-select: none;
 }
-.sub-tab:hover { border-color: var(--blue); color: var(--blue); }
-.sub-tab.active { background: var(--blue-pale); color: var(--blue-dark); border-color: var(--blue-light); font-weight: 600; }
+.sub-tab:hover { color: var(--text); background: rgba(255,255,255,0.6); }
+.sub-tab.active { background: #fff; color: var(--blue); font-weight: 600;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
 .sub-pane { display: none; }
 .sub-pane.active { display: block; animation: fadeIn 0.15s ease; }
 
@@ -438,24 +507,49 @@ tr.row-warn td { background: #fffbf0; }
 
 <!-- ═══════════════════ NAV ══════════════════════════════════════════ -->
 <nav class="nav-wrapper">
-  <div class="nav-tabs">
-    <div class="nav-tab active" data-tab="ventas">
-      <span class="tab-icon">📈</span> Ventas
+  <div class="nav-scroll">
+    <div class="nav-tabs">
+      <div class="nav-tab active" data-tab="ventas">
+        <span class="tab-icon">📈</span> Ventas
+      </div>
+      <div class="nav-tab" data-tab="stock">
+        <span class="tab-icon">📦</span> Stock
+      </div>
+      <div class="nav-tab" data-tab="morosidad">
+        <span class="tab-icon">⚠️</span> Morosidad
+      </div>
+      <div class="nav-tab" data-tab="objetivos">
+        <span class="tab-icon">🎯</span> Objetivos
+      </div>
+      <div class="nav-tab" data-tab="seguros">
+        <span class="tab-icon">🛡️</span> Seguros
+      </div>
+      <div class="nav-tab" data-tab="resumen">
+        <span class="tab-icon">📋</span> Resumen
+      </div>
     </div>
-    <div class="nav-tab" data-tab="stock">
-      <span class="tab-icon">📦</span> Stock
+  </div>
+  <!-- ── Panel de comando integrado en nav (desktop) ── -->
+  <div class="nav-command-strip" id="nav-command-strip">
+    <div class="nav-cmd-kpi">
+      <div class="nav-cmd-label">Ventas netas</div>
+      <div class="nav-cmd-value highlight" id="ncs-ventas">—</div>
+      <div class="nav-cmd-sub" id="ncs-ventas-sub">—</div>
     </div>
-    <div class="nav-tab" data-tab="morosidad">
-      <span class="tab-icon">⚠️</span> Morosidad
+    <div class="nav-cmd-bar" id="ncs-obj-wrap">
+      <div class="nav-cmd-bar-label" id="ncs-obj-label">Objetivo</div>
+      <div class="nav-cmd-bar-track">
+        <div class="nav-cmd-bar-fill" id="ncs-obj-fill" style="width:0%;background:var(--blue)"></div>
+      </div>
+      <div class="nav-cmd-bar-meta">
+        <span id="ncs-obj-real">—</span>
+        <span class="nav-cmd-pct" id="ncs-obj-pct">—</span>
+      </div>
     </div>
-    <div class="nav-tab" data-tab="objetivos">
-      <span class="tab-icon">🎯</span> Objetivos
-    </div>
-    <div class="nav-tab" data-tab="seguros">
-      <span class="tab-icon">🛡️</span> Seguros
-    </div>
-    <div class="nav-tab" data-tab="resumen">
-      <span class="tab-icon">📋</span> Resumen
+    <div class="nav-cmd-kpi" id="ncs-stock-kpi">
+      <div class="nav-cmd-label">Stock crítico</div>
+      <div class="nav-cmd-value" id="ncs-stock">—</div>
+      <div class="nav-cmd-sub" id="ncs-stock-sub">—</div>
     </div>
   </div>
 </nav>
@@ -537,21 +631,22 @@ tr.row-warn td { background: #fffbf0; }
       <span class="sub-tab" data-section="ventas" data-pane="vendedor">Por vendedor</span>
     </div>
     <div id="vpane-evolucion" class="sub-pane active">
-      <div class="card">
-        <div class="card-header">
-          <span class="card-title">Evolución — 6 meses</span>
-          <span class="card-badge" id="badge-ventas-mes">—</span>
+      <div style="display:grid;grid-template-columns:1fr 340px;gap:12px">
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Evolución mensual</span>
+            <span class="card-badge" id="badge-ventas-mes">—</span>
+          </div>
+          <div class="chart-box" style="height:220px"><canvas id="chart-ventas-ev"></canvas></div>
+          <div class="legend" id="legend-ventas-ev" style="margin-top:8px"></div>
         </div>
-        <div class="chart-box" style="height:220px"><canvas id="chart-ventas-ev"></canvas></div>
-        <div class="legend" id="legend-ventas-ev"></div>
+        <div class="card">
+          <div class="card-header"><span class="card-title">Por depósito</span></div>
+          <div class="chart-box" style="height:220px"><canvas id="chart-ventas-fam"></canvas></div>
+        </div>
       </div>
     </div>
-    <div id="vpane-familias" class="sub-pane">
-      <div class="card">
-        <div class="card-header"><span class="card-title">Ventas por depósito</span></div>
-        <div class="chart-box" style="height:280px"><canvas id="chart-ventas-fam"></canvas></div>
-      </div>
-    </div>
+    <div id="vpane-familias" class="sub-pane" style="display:none!important"></div>
     <div id="vpane-ranking" class="sub-pane">
       <div class="card">
         <div class="card-header">
@@ -1425,6 +1520,7 @@ function onDataReady() {
     ? calcularKpisVentas(PERIODO.filtrar(d._raw_ventas, "Fecha"))
     : d.ventas;
   renderCommandPanel(d, initVentas);
+  renderNavCommandStrip(d, initVentas);
   showSection(STATE.activeTab);
 
   var now = new Date().toLocaleString("es-AR");
@@ -1480,6 +1576,7 @@ function renderSection(tab) {
 
   // Actualizar panel de comando con los datos del período actual
   renderCommandPanel(d, ventasData);
+  renderNavCommandStrip(d, ventasData);
 
   switch(tab) {
     case "ventas":
@@ -1494,6 +1591,66 @@ function renderSection(tab) {
     case "objetivos": renderObjetivos(d.objetivos, ventasData, segurosData); break;
     case "seguros":   renderSeguros(segurosData);                            break;
     case "resumen":   renderResumen(d, ventasData, moraData, segurosData);   break;
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// NAV COMMAND STRIP — panel de comando integrado en la barra de navegación
+// Visible en desktop (> 768px). En móvil se usa el command-panel clásico.
+// ═══════════════════════════════════════════════════════════════════════
+function renderNavCommandStrip(d, ventasData) {
+  var strip = document.getElementById("nav-command-strip");
+  if (!strip) return;
+
+  var isMobile = window.innerWidth <= 768;
+
+  var v  = ventasData || d.ventas    || {};
+  var s  = d.stock    || {};
+  var o  = d.objetivos|| {};
+  var vk = v.kpis || {};
+  var sk = s.kpis || {};
+  var ok = o.kpis || {};
+
+  // Ventas netas
+  var el = document.getElementById("ncs-ventas");
+  var es = document.getElementById("ncs-ventas-sub");
+  if (el) el.textContent = fmtPeso(vk.ventas_neto || 0);
+  if (es) es.textContent = fmtNum(vk.comprobantes_mes||0) + " FAC";
+
+  // Objetivo — barra de progreso
+  var objV  = ok.obj_ventas || 0;
+  var realV = vk.ventas_neto || 0;
+  var pct   = objV > 0 ? Math.min(Math.round(realV / objV * 100), 100) : 0;
+  var fill  = document.getElementById("ncs-obj-fill");
+  var lbl   = document.getElementById("ncs-obj-label");
+  var real  = document.getElementById("ncs-obj-real");
+  var ppct  = document.getElementById("ncs-obj-pct");
+  if (fill) {
+    var color = pct >= 100 ? "var(--teal)" : pct >= 70 ? "var(--blue)" : pct >= 50 ? "var(--amber)" : "var(--red)";
+    fill.style.width    = pct + "%";
+    fill.style.background = color;
+  }
+  if (lbl)  lbl.textContent  = (o.mes_nombre || "Objetivo") + " " + (o.anio || "");
+  if (real) real.textContent = fmtPeso(realV);
+  if (ppct) { ppct.textContent = pct + "%"; ppct.style.color = pct >= 100 ? "var(--teal)" : pct < 50 ? "var(--red)" : "var(--blue)"; }
+
+  // Stock crítico
+  var neg   = sk.negativos   || 0;
+  var sinSt = sk.sin_stock   || 0;
+  var total = neg + sinSt;
+  var sv    = document.getElementById("ncs-stock");
+  var ss    = document.getElementById("ncs-stock-sub");
+  var skpi  = document.getElementById("ncs-stock-kpi");
+  if (sv)   sv.textContent   = total;
+  if (ss)   ss.textContent   = neg + " neg. · " + sinSt + " sin st.";
+  if (skpi) skpi.querySelector(".nav-cmd-value").className =
+    "nav-cmd-value " + (neg > 0 ? "danger-hi" : total > 0 ? "danger-hi" : "highlight");
+
+  // Mostrar strip en desktop, ocultar panel clásico
+  if (!isMobile) {
+    strip.style.display = "flex";
+    var panel = document.getElementById("command-panel");
+    if (panel) panel.style.display = "none";
   }
 }
 
@@ -1584,10 +1741,12 @@ function renderCommandPanel(d, ventasData) {
 function renderVentas(v) {
   if (!v || v.error) { html("kpi-ventas","<p style='color:var(--text-muted);font-size:13px;padding:12px'>Sin datos de ventas.</p>"); return; }
   var k = v.kpis;
+  var sparkNeto = (v.evolucion_mensual||[]).map(function(e){ return e.neto||0; });
+  var sparkNC   = (v.evolucion_mensual||[]).map(function(e){ return Math.abs(e.neto - (e.total||0)); });
   html("kpi-ventas",
-    kpiCard("Ventas del período",    fmtPeso(k.ventas_neto),    fmtNum(k.comprobantes_mes) + " FAC — " + fmtNum(k.nc_cantidad) + " NC", "up",   "accent") +
-    kpiCard("Ticket promedio",       fmtPeso(k.ticket_promedio),"sin IVA",                                    "flat", "accent") +
-    kpiCard("Notas de crédito",    k.nc_cantidad,             fmtPeso(k.nc_importe) + " en NC",             k.nc_cantidad>10?"down":"flat","warn")
+    kpiCard("Ventas del período",  fmtPeso(k.ventas_neto),    fmtNum(k.comprobantes_mes) + " FAC — " + fmtNum(k.nc_cantidad) + " NC", "up",   "accent", sparkNeto) +
+    kpiCard("Ticket promedio",     fmtPeso(k.ticket_promedio),"sin IVA",                                    "flat", "accent") +
+    kpiCard("Notas de crédito",    k.nc_cantidad,             fmtPeso(k.nc_importe) + " en NC",             k.nc_cantidad>10?"down":"flat","warn", sparkNC)
   );
 
   var meses = v.evolucion_mensual.map(function(e){ return e.mes; });
@@ -1620,15 +1779,24 @@ function renderVentas(v) {
     datasets:[{data:[45,21,26,8],backgroundColor:[C.blue,C.celeste,"#5DCAA5","#B5D4F4"],borderWidth:0}]},
     options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:"bottom",labels:{font:{size:11},boxWidth:10}}}}});
 
+  var topArt = (v.top_articulos||[]).slice(0,30);
+  var maxImp  = topArt.length ? Math.max.apply(null, topArt.map(function(a){ return Math.abs(a.importe||0); })) : 1;
   var rows = "";
-  (v.top_articulos||[]).slice(0,30).forEach(function(a,i){
-    rows += "<tr><td>" + (i+1) + "</td>" +
-      "<td style='font-family:var(--font-mono,monospace);font-size:11px;color:var(--text-muted)'>" + (a.cod||"—") + "</td>" +
-      "<td>" + (a.desc||a.cod||"—") + "</td>" +
-      '<td class="num">' + fmtNum(a.unidades) + "</td>" +
-      '<td class="num">' + fmtPeso(a.importe) + "</td></tr>";
+  topArt.forEach(function(a,i){
+    var pct = maxImp > 0 ? Math.round(Math.abs(a.importe||0) / maxImp * 100) : 0;
+    rows += "<tr>" +
+      "<td style='color:var(--text-muted);font-size:11px;width:28px'>" + (i+1) + "</td>" +
+      "<td style='font-family:var(--font-mono,monospace);font-size:11px;color:var(--text-muted);white-space:nowrap'>" + (a.cod||"—") + "</td>" +
+      "<td style='max-width:260px'>" +
+        "<div style='font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis'>" + (a.desc||a.cod||"—") + "</div>" +
+        "<div style='height:3px;background:var(--gray-200);border-radius:2px;margin-top:3px'>" +
+          "<div style='height:100%;width:" + pct + "%;background:var(--blue);border-radius:2px'></div>" +
+        "</div>" +
+      "</td>" +
+      '<td class="num" style="font-size:12px">' + fmtNum(a.unidades) + "</td>" +
+      '<td class="num" style="font-size:12px;font-weight:500">' + fmtPeso(a.importe) + "</td></tr>";
   });
-  html("tbody-top-art", rows || "<tr><td colspan='5' style='text-align:center;color:var(--text-muted);padding:16px'>Sin datos de artículos</td></tr>");
+  html("tbody-top-art", rows || "<tr><td colspan='5' style='text-align:center;color:var(--text-muted);padding:20px'>Sin datos de artículos</td></tr>");
   var br = document.getElementById("badge-ranking-periodo");
   if (br) br.textContent = PERIODO.label();
 }
@@ -2130,13 +2298,37 @@ function renderResumen(d, ventasData, moraData, segurosData) {
 // ═══════════════════════════════════════════════════════════════════════
 // HELPERS — KPI CARD
 // ═══════════════════════════════════════════════════════════════════════
-function kpiCard(label, value, sub, delta, type) {
-  var deltaClass = delta==="up"?"delta-up":delta==="down"?"delta-down":"delta-flat";
+function kpiCard(label, value, sub, delta, type, sparkData) {
+  var deltaIcon  = delta==="up" ? "▲" : delta==="down" ? "▼" : "";
+  var deltaClass = delta==="up" ? "delta-up" : delta==="down" ? "delta-down" : "delta-flat";
   var cardClass  = "kpi-card " + (type||"accent");
+
+  var sparkHtml = "";
+  if (sparkData && sparkData.length > 1) {
+    var max = Math.max.apply(null, sparkData.map(Math.abs));
+    if (max > 0) {
+      var pts = sparkData.map(function(v,i){
+        var x = Math.round(i / (sparkData.length-1) * 54);
+        var y = Math.round(22 - (Math.abs(v) / max) * 18);
+        return x+","+y;
+      }).join(" ");
+      var sparkColor = type==="danger" ? "var(--red)" : type==="ok" ? "var(--teal)" : type==="warn" ? "var(--amber)" : "var(--blue)";
+      sparkHtml = '<svg width="56" height="24" style="flex-shrink:0;opacity:0.7">' +
+        '<polyline points="' + pts + '" fill="none" stroke="' + sparkColor + '" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>' +
+        '</svg>';
+    }
+  }
+
   return '<div class="' + cardClass + '">' +
     '<div class="kpi-label">' + label + '</div>' +
-    '<div class="kpi-value">' + value + '</div>' +
-    '<div class="kpi-delta ' + deltaClass + '">' + sub + '</div>' +
+    '<div style="display:flex;align-items:flex-end;justify-content:space-between;gap:6px">' +
+      '<div class="kpi-value">' + value + '</div>' +
+      sparkHtml +
+    '</div>' +
+    '<div class="kpi-delta ' + deltaClass + '">' +
+      (deltaIcon ? '<span style="font-size:9px;margin-right:2px">' + deltaIcon + '</span>' : '') +
+      sub +
+    '</div>' +
     '</div>';
 }
 
