@@ -1909,8 +1909,11 @@ function renderVendedor(vd) {
   var totalIntangibles= vends.reduce(function(s,v){ return s + (v.intangibles || 0); }, 0);
   var totalPolizas    = vends.reduce(function(s,v){ return s + (v.polizas     || 0); }, 0);
 
-  // Fila de totales al pie
-  var ratioIntTotal = totalNeto > 0 ? (totalIntangibles / totalNeto * 100).toFixed(1) : "—";
+  // Ratio general del equipo — misma fórmula: intangibles / (venta_neta - intangibles)
+  var baseAlcanceTotal = totalNeto - totalIntangibles;
+  var ratioIntTotal = baseAlcanceTotal > 0
+    ? (totalIntangibles / baseAlcanceTotal * 100).toFixed(1)
+    : "—";
 
   var rows = "";
   vends.forEach(function(v, i) {
@@ -1923,9 +1926,11 @@ function renderVendedor(vd) {
       ? (v.intangibles / totalIntangibles * 100).toFixed(1)
       : null;
 
-    // % alcance (ratio) — intangibles / venta_neta de ese vendedor
-    var pctAlcance = v.venta_neto > 0 && v.intangibles > 0
-      ? (v.intangibles / v.venta_neto * 100).toFixed(1)
+    // % alcance (ratio) — intangibles / (venta_neta - intangibles)
+    // Fórmula comercial: penetración de intangibles sobre ventas tangibles
+    var baseAlcance = v.venta_neto - (v.intangibles || 0);
+    var pctAlcance = baseAlcance > 0 && v.intangibles > 0
+      ? (v.intangibles / baseAlcance * 100).toFixed(1)
       : null;
 
     // % participación en pólizas
