@@ -1333,29 +1333,47 @@ function calcularKpisMorosidad(filas) {
 
   filas.forEach(function(r) {
     var imp   = parseFloat(r.ImporteCuota || 0);
-    var tramo = r.TramoMora || "";
-    var cod   = r.CodCliente || "";
-    var nom   = r.NombreCliente || cod;
-    var tel   = r.Telefono || "";
+    var tramo = (r.TramoMora || "").trim();
+    var cod   = (r.CodCliente || "").trim();
+    var nom   = (r.NombreCliente || cod || "SIN NOMBRE").trim();
+    var tel   = (r.Telefono || "").trim();
     var dias  = parseInt(r.DiasVencido || 0, 10);
 
+    if (isNaN(imp))  imp = 0;
+    if (isNaN(dias)) dias = 0;
+
     saldoTotal += imp;
+
     if (tramo === "MORA_1_30")   mora130   += imp;
     if (tramo === "MORA_31_90")  mora3190  += imp;
     if (tramo === "MORA_MAS_90") moraMas90 += imp;
 
     if (tramo !== "VIGENTE") {
-      if (!clientes[cod]) clientes[cod] = { cod: cod, nom: nom, tel: tel, vencido: 0, diasMax: 0 };
+      if (!clientes[cod]) {
+        clientes[cod] = {
+          cod: cod,
+          nom: nom,
+          tel: tel,
+          vencido: 0,
+          diasMax: 0
+        };
+      }
       clientes[cod].vencido += imp;
       if (dias > clientes[cod].diasMax) clientes[cod].diasMax = dias;
     }
   });
 
   var vencidoTotal = mora130 + mora3190 + moraMas90;
-  var pctMora = saldoTotal > 0 ? parseFloat((vencidoTotal / saldoTotal * 100).toFixed(1)) : 0;
+  var pctMora = saldoTotal > 0
+    ? parseFloat((vencidoTotal / saldoTotal * 100).toFixed(1))
+    : 0;
 
-  var clientesArr = Object.values(clientes)
-    .sort(function(a, b) { return b.vencido - a.vencido; })
+  var clientesBase = Object.values(clientes)
+    .sort(function(a, b) { return b.vencido - a.vencido; });
+
+  var totalClientesMorosos = clientesBase.length;
+
+  var clientesArr = clientesBase
     .slice(0, 20)
     .map(function(c) {
       return {
@@ -1363,7 +1381,9 @@ function calcularKpisMorosidad(filas) {
         telefono:  c.tel,
         vencido:   Math.round(c.vencido),
         dias_mora: c.diasMax,
-        estado:    c.diasMax > 90 ? "ALTO RIESGO" : c.diasMax > 30 ? "SEGUIMIENTO" : "GESTION"
+        estado:    c.diasMax > 90 ? "ALTO RIESGO"
+                  : c.diasMax > 30 ? "SEGUIMIENTO"
+                  : "GESTION"
       };
     });
 
@@ -1375,7 +1395,7 @@ function calcularKpisMorosidad(filas) {
       mora_1_30:        Math.round(mora130),
       mora_31_90:       Math.round(mora3190),
       mora_mas_90:      Math.round(moraMas90),
-      clientes_morosos: clientesArr.length
+      clientes_morosos: totalClientesMorosos
     },
     distribucion: [
       { tramo: "1–30 días",  importe: Math.round(mora130)   },
@@ -2069,40 +2089,76 @@ function renderCuotas(cuotas) {
 }
 
 function renderMorosidad(m, cuotas) {
-  if (!m || m.error) return;
-  var k = m.kpis;
-  html("kpi-morosidad",
-    kpiCard("Mora total vencida",  fmtPeso(k.saldo_total),  k.clientes_morosos + " clientes", "down","danger") +
-    kpiCard("Mora 1–30 días",      fmtPeso(k.mora_1_30),    "gestión inmediata",              "down","warn")   +
-    kpiCard("Mora 31–90 días",     fmtPeso(k.mora_31_90),   "seguimiento activo",             "down","warn")   +
-    kpiCard("Mora +90 días",       fmtPeso(k.mora_mas_90),  "alto riesgo",                    "down","danger")
-  );
+  m = m || {};
+  var k = m.kpis || {};
 
-  if (m.distribucion) {
-    mkChart("chart-mora-dist",{type:"bar",data:{
-      labels:m.distribucion.map(function(d){return d.tramo;}),
-      datasets:[{data:m.distribucion.map(function(d){return d.importe;}),
-        backgroundColor:[C.amber,"#EF9F27",C.red],borderRadius:5}]},
-      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
-        scales:{y:{ticks:{callback:function(v){return fmtPeso(v);}}}}}});
-
-    mkChart("chart-mora-comp",{type:"doughnut",data:{
-      labels:m.distribucion.map(function(d){return d.tramo;}),
-      datasets:[{data:m.distribucion.map(function(d){return d.importe;}),
-        backgroundColor:[C.amber,"#EF9F27",C.red],borderWidth:0}]},
-      options:{responsive:true,maintainAspectRatio:false,
-        plugins:{legend:{position:"bottom",labels:{font:{size:11},boxWidth:10}}}}});
+  var kpiMorosidad = document.getElementById("kpi-morosidad");
+  if (kpiMorosidad) {
+    kpiMorosidad.innerHTML = [
+      {
+        cls: "danger",
+        label: "Mora total vencida",
+        value: fmtPeso(k.vencido_total || 0),
+        delta: "▼ " + fmtNum(k.clientes_morosos || 0) + " clientes con deuda vencida"
+      },
+      {
+        cls: "warn",
+        label: "Mora 1–30 días",
+        value: fmtPeso(k.mora_1_30 || 0),
+        delta: "▼ gestión inmediata"
+      },
+      {
+        cls: "warn",
+        label: "Mora 31–90 días",
+        value: fmtPeso(k.mora_31_90 || 0),
+        delta: "▼ seguimiento activo"
+      },
+      {
+        cls: "danger",
+        label: "Mora +90 días",
+        value: fmtPeso(k.mora_mas_90 || 0),
+        delta: "▼ alto riesgo"
+      }
+    ].map(function(x) {
+      return `
+        <div class="kpi-card ${x.cls}">
+          <div class="kpi-label">${x.label}</div>
+          <div class="kpi-value">${x.value}</div>
+          <div class="kpi-delta delta-down">${x.delta}</div>
+        </div>
+      `;
+    }).join("");
   }
 
-  var rows = "";
-  (m.clientes||[]).forEach(function(c){
-    var cls = c.estado==="ALTO RIESGO"?"danger":c.estado==="SEGUIMIENTO"?"warn":"info";
-    rows += "<tr><td>" + c.nombre + "</td>" +
-      "<td>" + (c.telefono||"—") + "</td>" +
-      '<td class="num">' + fmtPeso(c.vencido) + "</td>" +
-      '<td class="num">' + c.dias_mora + "d</td><td>" + pill(c.estado, cls) + "</td></tr>";
-  });
-  html("tbody-mora-clientes", rows || "<tr><td colspan='5' style='text-align:center;color:var(--text-muted);padding:16px'>Sin clientes morosos</td></tr>");
+  var tbody = document.getElementById("tbody-mora-clientes");
+  if (tbody) {
+    var rows = (m.clientes || []).map(function(c) {
+      var pillCls = c.estado === "ALTO RIESGO"
+        ? "pill-danger"
+        : c.estado === "SEGUIMIENTO"
+        ? "pill-warn"
+        : "pill-info";
+
+      return `
+        <tr>
+          <td>${escapeHtml(c.nombre || "—")}</td>
+          <td>${escapeHtml(c.telefono || "—")}</td>
+          <td class="num">${fmtPeso(c.vencido || 0)}</td>
+          <td class="num">${fmtNum(c.dias_mora || 0)}d</td>
+          <td><span class="pill ${pillCls}">${escapeHtml(c.estado || "—")}</span></td>
+        </tr>
+      `;
+    }).join("");
+
+    tbody.innerHTML = rows || `
+      <tr>
+        <td colspan="5" style="text-align:center;color:var(--text-muted)">Sin datos de morosidad</td>
+      </tr>
+    `;
+  }
+
+  renderChartMoraDistribucion(m);
+  renderChartMoraComposicion(m);
 }
 
 // ═══════════════════════════════════════════════════════════════════════
