@@ -2142,10 +2142,10 @@ function renderMorosidad(m, cuotas) {
   if (tbody) {
     var rows = (m.clientes || []).map(function(c) {
       var pillCls = c.estado === "ALTO RIESGO"
-        ? "danger"
+        ? "pill-danger"
         : c.estado === "SEGUIMIENTO"
-        ? "warn"
-        : "info";
+        ? "pill-warn"
+        : "pill-info";
 
       return `
         <tr>
@@ -2153,7 +2153,7 @@ function renderMorosidad(m, cuotas) {
           <td>${escapeHtml(c.telefono || "—")}</td>
           <td class="num">${fmtPeso(c.vencido || 0)}</td>
           <td class="num">${fmtNum(c.dias_mora || 0)}d</td>
-          <td>${pill(escapeHtml(c.estado || "—"), pillCls)}</td>
+          <td><span class="pill ${pillCls}">${escapeHtml(c.estado || "—")}</span></td>
         </tr>
       `;
     }).join("");
@@ -2161,14 +2161,59 @@ function renderMorosidad(m, cuotas) {
     tbody.innerHTML = rows || `
       <tr>
         <td colspan="5" style="text-align:center;color:var(--text-muted);padding:16px">
-          Sin clientes morosos
+          Sin datos de morosidad
         </td>
       </tr>
     `;
   }
 
-  renderChartMoraDistribucion(m);
-  renderChartMoraComposicion(m);
+  if (m.distribucion && m.distribucion.length) {
+    mkChart("chart-mora-dist", {
+      type: "bar",
+      data: {
+        labels: m.distribucion.map(function(d){ return d.tramo; }),
+        datasets: [{
+          data: m.distribucion.map(function(d){ return d.importe; }),
+          backgroundColor: [C.amber, "#EF9F27", C.red],
+          borderRadius: 5
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          y: {
+            ticks: {
+              callback: function(v){ return fmtPeso(v); }
+            }
+          }
+        }
+      }
+    });
+
+    mkChart("chart-mora-comp", {
+      type: "doughnut",
+      data: {
+        labels: m.distribucion.map(function(d){ return d.tramo; }),
+        datasets: [{
+          data: m.distribucion.map(function(d){ return d.importe; }),
+          backgroundColor: [C.amber, "#EF9F27", C.red],
+          borderWidth: 0
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            position: "bottom",
+            labels: { font: { size: 11 }, boxWidth: 10 }
+          }
+        }
+      }
+    });
+  }
 }
 
 // ═══════════════════════════════════════════════════════════════════════
