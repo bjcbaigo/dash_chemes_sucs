@@ -997,6 +997,14 @@ function fmtNum(n) {
   if (n === undefined || n === null) return "—";
   return Math.round(n).toLocaleString("es-AR");
 }
+function escapeHtml(v) {
+  return String(v == null ? "" : v)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
 function fmtPct(n) { return Math.round(n) + "%"; }
 function pill(txt, cls) { return '<span class="pill pill-' + cls + '">' + txt + '</span>'; }
 function progColor(pct) {
@@ -2134,10 +2142,10 @@ function renderMorosidad(m, cuotas) {
   if (tbody) {
     var rows = (m.clientes || []).map(function(c) {
       var pillCls = c.estado === "ALTO RIESGO"
-        ? "pill-danger"
+        ? "danger"
         : c.estado === "SEGUIMIENTO"
-        ? "pill-warn"
-        : "pill-info";
+        ? "warn"
+        : "info";
 
       return `
         <tr>
@@ -2145,14 +2153,16 @@ function renderMorosidad(m, cuotas) {
           <td>${escapeHtml(c.telefono || "—")}</td>
           <td class="num">${fmtPeso(c.vencido || 0)}</td>
           <td class="num">${fmtNum(c.dias_mora || 0)}d</td>
-          <td><span class="pill ${pillCls}">${escapeHtml(c.estado || "—")}</span></td>
+          <td>${pill(escapeHtml(c.estado || "—"), pillCls)}</td>
         </tr>
       `;
     }).join("");
 
     tbody.innerHTML = rows || `
       <tr>
-        <td colspan="5" style="text-align:center;color:var(--text-muted)">Sin datos de morosidad</td>
+        <td colspan="5" style="text-align:center;color:var(--text-muted);padding:16px">
+          Sin clientes morosos
+        </td>
       </tr>
     `;
   }
@@ -2504,3 +2514,4 @@ fetchData();
 </script>
 </body>
 </html>
+
