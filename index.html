@@ -8,268 +8,419 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <title>Chemes — Panel Gerencial</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 
 <style>
-/* ─── RESET & BASE ──────────────────────────────────────────────────── */
+/* ─── RESET & TOKENS ──────────────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
-  --blue:       #2596be;
-  --blue-light: #7ecfe0;
-  --blue-pale:  #e8f6fb;
-  --blue-dark:  #185FA5;
-  --celeste:    #7ecfe0;
-  --teal:       #1D9E75;
-  --teal-light: #E1F5EE;
-  --amber:      #BA7517;
-  --amber-light:#FAEEDA;
-  --red:        #C0392B;
-  --red-light:  #FDEDEC;
-  --red-mid:    #E74C3C;
-  --gray-50:    #f7f8fa;
-  --gray-100:   #f0f2f5;
-  --gray-200:   #e4e8ed;
-  --gray-400:   #8896a7;
-  --gray-600:   #4a5568;
-  --gray-900:   #1a202c;
-  --text:       #1a202c;
-  --text-muted: #718096;
-  --border:     rgba(0,0,0,0.07);
-  --border-md:  rgba(0,0,0,0.11);
-  --radius-sm:  8px;
-  --radius-md:  12px;
-  --radius-lg:  16px;
-  --shadow-sm:  0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
-  --shadow-md:  0 4px 16px rgba(0,0,0,0.09);
-  --font:       'DM Sans', system-ui, sans-serif;
-  --font-mono:  'DM Mono', monospace;
-  --topbar-h:   56px;
-  --nav-h:      46px;
+  /* Paleta CHEMES */
+  --blue:        #2596be;
+  --blue-dk:     #1d7fa3;
+  --blue-lt:     #e8f4f8;
+  --blue-pale:   #f0f8fb;
+  --celeste:     #7ecfe0;
+  --teal:        #1D9E75;
+  --teal-light:  #E1F5EE;
+  --amber:       #BA7517;
+  --amber-light: #FAEEDA;
+  --red:         #C0392B;
+  --red-light:   #FDEDEC;
+  --red-mid:     #E74C3C;
+  --pur:         #6366f1;
+  --pur-lt:      #eef2ff;
+  /* Grises */
+  --bg:          #f0f2f5;
+  --surf:        #ffffff;
+  --surf2:       #f8f9fb;
+  --line:        #e4e8ee;
+  --line2:       #d0d5de;
+  --ink:         #1a1f2e;
+  --ink2:        #3a4155;
+  --ink3:        #6b7280;
+  --ink4:        #9ca3af;
+  /* Layout */
+  --sidebar-w:   216px;
+  --topbar-h:    50px;
+  --radius:      8px;
+  --radius-lg:   11px;
+  --font:        'Inter', system-ui, sans-serif;
+  --font-mono:   'JetBrains Mono', monospace;
 }
-html { font-size: 15px; -webkit-text-size-adjust: 100%; }
+
+html { font-size: 14px; -webkit-text-size-adjust: 100%; }
 body {
   font-family: var(--font);
-  background: var(--gray-50);
-  color: var(--text);
+  background: var(--bg);
+  color: var(--ink);
   min-height: 100vh;
-  padding-bottom: 80px;
 }
 a { color: inherit; text-decoration: none; }
 
-/* ─── TOPBAR ────────────────────────────────────────────────────────── */
-.topbar {
-  position: sticky; top: 0; z-index: 100;
-  background: var(--blue);
-  height: var(--topbar-h);
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 0 16px;
-  box-shadow: var(--shadow-md);
+/* ─── SHELL (sidebar + main) ──────────────────────────────────────────── */
+.shell { display: flex; min-height: 100vh; }
+
+/* ─── SIDEBAR ─────────────────────────────────────────────────────────── */
+.sidebar {
+  width: var(--sidebar-w);
+  background: var(--surf);
+  border-right: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  flex-shrink: 0;
+  z-index: 200;
+  overflow-y: auto;
 }
-.topbar-brand { display: flex; align-items: center; gap: 10px; }
-.brand-logo {
-  width: 36px; height: 36px;
-  background: rgba(255,255,255,0.2);
-  border-radius: 10px;
-  display: flex; align-items: center; justify-content: center;
-  font-weight: 600; font-size: 13px; color: #fff;
+
+/* Logo */
+.sidebar-logo {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 58px;
   flex-shrink: 0;
 }
-.brand-info { line-height: 1.25; }
-.brand-name { font-size: 14px; font-weight: 600; color: #fff; }
-.brand-sub  { font-size: 11px; color: rgba(255,255,255,0.72); }
-.topbar-meta { display: flex; gap: 6px; align-items: center; flex-shrink: 0; }
-.meta-chip {
-  background: rgba(255,255,255,0.18);
-  color: rgba(255,255,255,0.9);
-  font-size: 11px; padding: 4px 9px;
-  border-radius: 20px;
+.sidebar-logo img {
+  max-height: 30px;
+  max-width: 160px;
+  object-fit: contain;
 }
-.meta-chip.green { background: rgba(29,158,117,0.35); }
-.meta-chip.red   { background: rgba(192,57,43,0.5); animation: pulse-chip 2s infinite; }
-@keyframes pulse-chip { 0%,100%{opacity:1} 50%{opacity:0.7} }
-
-/* ─── NAV TABS ──────────────────────────────────────────────────────── */
-.nav-wrapper {
-  position: sticky; top: var(--topbar-h); z-index: 90;
-  background: #fff;
-  border-bottom: 1px solid var(--border);
-  display: flex; align-items: stretch;
+.sidebar-logo-fallback {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
-.nav-scroll {
-  overflow-x: auto; flex: 1;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
-}
-.nav-scroll::-webkit-scrollbar { display: none; }
-.nav-tabs { display: flex; padding: 0 12px; min-width: max-content; height: 100%; }
-.nav-tab {
-  display: flex; align-items: center; gap: 5px;
-  padding: 0 13px;
-  height: var(--nav-h);
-  font-size: 13px; font-weight: 500;
-  color: var(--text-muted);
-  cursor: pointer;
-  border-bottom: 2.5px solid transparent;
-  transition: color 0.15s, border-color 0.15s;
-  white-space: nowrap; user-select: none; position: relative;
-}
-.nav-tab:hover { color: var(--blue); }
-.nav-tab.active { color: var(--blue); border-bottom-color: var(--blue); }
-.tab-icon { font-size: 14px; }
-.tab-badge {
-  position: absolute; top: 8px; right: 4px;
-  background: var(--red); color: #fff;
-  font-size: 9px; font-weight: 600;
-  width: 15px; height: 15px; border-radius: 50%;
+.sidebar-logo-mark {
+  width: 30px; height: 30px;
+  border-radius: 7px;
+  background: var(--blue);
   display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 800; color: #fff;
+  flex-shrink: 0;
+  letter-spacing: -.5px;
+}
+.sidebar-logo-text {
+  font-size: 15px; font-weight: 800;
+  color: var(--ink); letter-spacing: -.4px;
 }
 
-/* ─── PANEL DE COMANDO — integrado en la barra de nav ──────────────── */
+/* Sección del nav */
+.sidebar-sect {
+  padding: 14px 12px 4px;
+  font-size: 10px; font-weight: 700;
+  color: var(--ink4);
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  flex-shrink: 0;
+}
+
+/* Nav item */
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 8px 10px;
+  border-radius: var(--radius);
+  margin: 1px 8px;
+  cursor: pointer;
+  color: var(--ink3);
+  font-size: 13px;
+  font-weight: 400;
+  transition: background .12s, color .12s;
+  position: relative;
+  user-select: none;
+}
+.nav-item:hover { background: var(--surf2); color: var(--ink2); }
+.nav-item.active {
+  background: var(--blue-lt);
+  color: var(--blue-dk);
+  font-weight: 600;
+}
+.nav-item svg { flex-shrink: 0; width: 15px; height: 15px; }
+.nav-badge {
+  position: absolute; right: 10px;
+  background: var(--red); color: #fff;
+  font-size: 9px; font-weight: 700;
+  min-width: 16px; height: 16px;
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  padding: 0 3px;
+}
+
+/* Selector sucursal (bottom) */
+.sidebar-bottom {
+  margin-top: auto;
+  padding: 12px;
+  border-top: 1px solid var(--line);
+  flex-shrink: 0;
+}
+.branch-pill {
+  background: var(--surf2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 8px 11px;
+  display: flex; align-items: center; gap: 7px;
+  cursor: pointer;
+  transition: border-color .12s;
+}
+.branch-pill:hover { border-color: var(--blue); }
+.branch-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--teal); flex-shrink: 0; }
+.branch-name { font-size: 12px; color: var(--ink2); font-weight: 600; flex: 1; }
+.branch-name-sub { font-size: 10px; color: var(--ink3); font-weight: 400; }
+.branch-chev { color: var(--ink4); font-size: 11px; }
+
+/* ─── MAIN ─────────────────────────────────────────────────────────────  */
+.main-wrap { flex: 1; display: flex; flex-direction: column; min-width: 0; overflow: hidden; }
+
+/* ─── TOPBAR ──────────────────────────────────────────────────────────── */
+.topbar {
+  background: var(--surf);
+  border-bottom: 1px solid var(--line);
+  height: var(--topbar-h);
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  gap: 10px;
+  flex-shrink: 0;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.topbar-title {
+  font-size: 15px; font-weight: 800;
+  color: var(--ink); letter-spacing: -.3px;
+  flex: 1;
+}
+.topbar-update {
+  font-size: 11px; color: var(--ink4);
+}
+.topbar-status {
+  display: flex; align-items: center; gap: 5px;
+  font-size: 11px; padding: 3px 9px;
+  border-radius: 20px;
+  background: var(--teal-light);
+  color: #0F6E56;
+  font-weight: 500;
+}
+.topbar-status.error {
+  background: var(--red-light); color: var(--red);
+  animation: blink 2s infinite;
+}
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:.6} }
+
+/* Period pills in topbar */
+.period-wrap {
+  display: flex; gap: 1px;
+  background: var(--surf2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 2px;
+}
+.period-pill {
+  padding: 4px 11px;
+  border-radius: 6px;
+  font-size: 11.5px;
+  color: var(--ink3);
+  cursor: pointer;
+  white-space: nowrap;
+  user-select: none;
+  transition: all .12s;
+}
+.period-pill:hover { background: rgba(255,255,255,.8); color: var(--ink2); }
+.period-pill.active {
+  background: var(--surf);
+  color: var(--ink);
+  font-weight: 600;
+  border: 1px solid var(--line);
+}
+.period-custom {
+  display: none; align-items: center; gap: 6px; flex-wrap: wrap;
+  padding: 0 8px;
+}
+.period-custom.visible { display: flex; }
+.period-custom input[type="date"] {
+  padding: 4px 8px; border-radius: 6px;
+  border: 1px solid var(--line);
+  font-size: 12px; color: var(--ink);
+  background: var(--surf); font-family: var(--font);
+}
+.period-custom input[type="date"]:focus { outline: none; border-color: var(--blue); }
+.period-apply {
+  padding: 4px 12px; border-radius: 20px;
+  font-size: 12px; font-weight: 600;
+  background: var(--blue); color: #fff;
+  border: none; cursor: pointer;
+}
+.period-badge {
+  font-size: 11px; color: var(--blue-dk);
+  background: var(--blue-lt);
+  padding: 3px 8px; border-radius: 20px;
+  font-weight: 500; white-space: nowrap;
+}
+
+/* ─── CONTENT ─────────────────────────────────────────────────────────── */
+.content {
+  padding: 16px 20px;
+  flex: 1;
+  overflow-y: auto;
+}
+
+/* ─── LOADING / ERROR ─────────────────────────────────────────────────── */
+.loading-wrap {
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 60px 20px; gap: 12px;
+}
+.spinner {
+  width: 30px; height: 30px;
+  border: 3px solid var(--line);
+  border-top-color: var(--blue);
+  border-radius: 50%;
+  animation: spin .7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.loading-text { font-size: 13px; color: var(--ink3); }
+.error-banner {
+  background: var(--red-light); color: var(--red);
+  border: 1px solid rgba(192,57,43,.2);
+  border-radius: var(--radius-lg);
+  padding: 14px 16px; font-size: 13px;
+  margin-bottom: 14px;
+}
+
+/* ─── COMMAND PANEL (mini KPIs siempre visibles) ──────────────────────── */
+.command-panel {
+  background: var(--surf);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  margin-bottom: 14px;
+}
+.command-header {
+  background: var(--blue);
+  padding: 10px 16px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.command-title {
+  font-size: 11px; font-weight: 700;
+  color: rgba(255,255,255,.8);
+  text-transform: uppercase; letter-spacing: .06em;
+}
+.command-periodo {
+  font-size: 11px; color: rgba(255,255,255,.75);
+  background: rgba(255,255,255,.18);
+  padding: 2px 9px; border-radius: 20px;
+}
+.command-kpis {
+  display: grid;
+  grid-template-columns: repeat(3,1fr);
+}
+.cmd-kpi {
+  padding: 12px 16px;
+  border-right: 1px solid var(--line);
+}
+.cmd-kpi:last-child { border-right: none; }
+.cmd-kpi-label {
+  font-size: 9.5px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .06em; color: var(--ink3);
+  margin-bottom: 4px;
+}
+.cmd-kpi-value {
+  font-size: 20px; font-weight: 800; color: var(--ink);
+  line-height: 1; font-variant-numeric: tabular-nums;
+  letter-spacing: -.5px;
+}
+.cmd-kpi-sub { font-size: 11px; color: var(--ink3); margin-top: 3px; }
+.cmd-kpi.highlight .cmd-kpi-value { color: var(--blue-dk); }
+.cmd-kpi.danger-hi .cmd-kpi-value { color: var(--red); }
+.cmd-kpi.success-hi .cmd-kpi-value { color: var(--teal); }
+.cmd-obj-bar {
+  padding: 10px 16px 12px;
+  border-top: 1px solid var(--line);
+  background: var(--surf2);
+}
+.cmd-obj-track {
+  height: 6px; background: var(--line);
+  border-radius: 3px; overflow: hidden; margin: 5px 0 4px;
+}
+.cmd-obj-fill {
+  height: 100%; border-radius: 3px;
+  transition: width 1s cubic-bezier(.4,0,.2,1);
+}
+.cmd-obj-meta {
+  display: flex; justify-content: space-between;
+  font-size: 11px; color: var(--ink3);
+}
+.cmd-obj-pct { font-weight: 700; color: var(--ink); }
+
+/* ─── NAV COMMAND STRIP (en topbar desktop) ───────────────────────────── */
 .nav-command-strip {
-  display: none; /* visible solo cuando hay datos */
+  display: none;
   align-items: center;
   gap: 0;
-  border-left: 1px solid var(--border);
-  background: #fff;
+  border-left: 1px solid var(--line);
   flex-shrink: 0;
-  min-width: 0;
 }
 .nav-cmd-kpi {
   display: flex; flex-direction: column; justify-content: center;
   padding: 0 14px;
-  border-right: 1px solid var(--border);
-  height: var(--nav-h);
+  border-right: 1px solid var(--line);
+  height: var(--topbar-h);
   min-width: 110px;
-  cursor: default;
 }
 .nav-cmd-kpi:last-of-type { border-right: none; }
 .nav-cmd-label {
-  font-size: 9px; font-weight: 600; text-transform: uppercase;
-  letter-spacing: 0.06em; color: var(--text-muted);
+  font-size: 9px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .06em; color: var(--ink3);
   line-height: 1; margin-bottom: 3px;
 }
 .nav-cmd-value {
-  font-size: 15px; font-weight: 600; color: var(--text);
+  font-size: 14px; font-weight: 700; color: var(--ink);
   line-height: 1; font-variant-numeric: tabular-nums;
 }
-.nav-cmd-value.highlight { color: var(--blue); }
-.nav-cmd-value.danger-hi { color: var(--red); }
-.nav-cmd-value.success-hi{ color: var(--teal); }
-.nav-cmd-sub {
-  font-size: 9.5px; color: var(--text-muted); margin-top: 2px; line-height: 1;
-}
-/* Barra de progreso objetivo — inline en el nav */
+.nav-cmd-value.highlight  { color: var(--blue-dk); }
+.nav-cmd-value.danger-hi  { color: var(--red); }
+.nav-cmd-value.success-hi { color: var(--teal); }
+.nav-cmd-sub { font-size: 9.5px; color: var(--ink3); margin-top: 2px; }
 .nav-cmd-bar {
   display: flex; flex-direction: column; justify-content: center;
-  padding: 0 14px; border-right: 1px solid var(--border);
-  height: var(--nav-h); min-width: 140px;
+  padding: 0 14px; border-right: 1px solid var(--line);
+  height: var(--topbar-h); min-width: 140px;
 }
 .nav-cmd-bar-label {
-  font-size: 9px; font-weight: 600; text-transform: uppercase;
-  letter-spacing: 0.06em; color: var(--text-muted); margin-bottom: 4px;
+  font-size: 9px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .06em; color: var(--ink3); margin-bottom: 4px;
 }
 .nav-cmd-bar-track {
-  height: 5px; background: var(--gray-200); border-radius: 3px; overflow: hidden;
+  height: 4px; background: var(--line);
+  border-radius: 2px; overflow: hidden;
 }
 .nav-cmd-bar-fill {
-  height: 100%; border-radius: 3px;
+  height: 100%; border-radius: 2px;
   transition: width 1s cubic-bezier(.4,0,.2,1);
 }
 .nav-cmd-bar-meta {
   display: flex; justify-content: space-between;
-  font-size: 9px; color: var(--text-muted); margin-top: 3px;
+  font-size: 9px; color: var(--ink3); margin-top: 3px;
 }
-.nav-cmd-pct { font-weight: 700; color: var(--text); }
-
-/* En móvil — ocultar el strip del nav, mantener el panel clásico */
+.nav-cmd-pct { font-weight: 700; color: var(--ink); }
 @media (max-width: 768px) {
   .nav-command-strip { display: none !important; }
   .command-panel     { display: block !important; }
 }
 
-/* ─── MAIN CONTENT ──────────────────────────────────────────────────── */
-.main { padding: 14px; max-width: 980px; margin: 0 auto; }
+/* ─── SECCIONES ────────────────────────────────────────────────────────── */
 .section { display: none; }
-.section.active { display: block; animation: fadeIn 0.18s ease; }
-@keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: none; } }
+.section.active { display: block; animation: fadeIn .16s ease; }
+@keyframes fadeIn { from { opacity:0; transform:translateY(4px); } to { opacity:1; transform:none; } }
 
-/* ─── LOADING / ERROR ───────────────────────────────────────────────── */
-.loading-wrap {
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  padding: 60px 20px; gap: 12px;
-}
-.spinner {
-  width: 32px; height: 32px;
-  border: 3px solid var(--border);
-  border-top-color: var(--blue);
-  border-radius: 50%;
-  animation: spin 0.7s linear infinite;
-}
-@keyframes spin { to { transform: rotate(360deg); } }
-.loading-text { font-size: 13px; color: var(--text-muted); }
-.error-banner {
-  background: var(--red-light); color: var(--red);
-  border: 1px solid rgba(192,57,43,0.2);
-  border-radius: var(--radius-md);
-  padding: 14px 16px; font-size: 13px;
-  margin-bottom: 16px;
-}
-
-/* ─── PANEL DE COMANDO — hero visible en todas las secciones ────────── */
-.command-panel {
-  background: #fff;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  margin-bottom: 14px;
-  overflow: hidden;
-}
-.command-header {
-  background: linear-gradient(135deg, #1a6e8a 0%, #2596be 100%);
-  padding: 14px 16px 12px;
-  display: flex; align-items: center; justify-content: space-between;
-  gap: 10px;
-}
-.command-title { font-size: 12px; font-weight: 600; color: rgba(255,255,255,0.75); text-transform: uppercase; letter-spacing: 0.06em; }
-.command-periodo { font-size: 11px; color: rgba(255,255,255,0.65); background: rgba(255,255,255,0.15); padding: 3px 9px; border-radius: 20px; }
-.command-kpis {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 0;
-}
-.cmd-kpi {
-  padding: 12px 14px;
-  border-right: 1px solid var(--border);
-}
-.cmd-kpi:last-child { border-right: none; }
-.cmd-kpi-label { font-size: 10px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
-.cmd-kpi-value { font-size: 20px; font-weight: 600; color: var(--text); line-height: 1; font-variant-numeric: tabular-nums; }
-.cmd-kpi-sub   { font-size: 11px; color: var(--text-muted); margin-top: 3px; }
-.cmd-kpi.highlight .cmd-kpi-value { color: var(--blue); }
-.cmd-kpi.danger-hi .cmd-kpi-value { color: var(--red); }
-.cmd-kpi.success-hi .cmd-kpi-value { color: var(--teal); }
-
-/* Barra de progreso objetivo dentro del command panel */
-.cmd-obj-bar {
-  padding: 10px 14px 12px;
-  border-top: 1px solid var(--border);
-  background: var(--gray-50);
-}
-.cmd-obj-track {
-  height: 8px; background: var(--gray-200); border-radius: 4px; overflow: hidden;
-  margin: 6px 0 4px;
-}
-.cmd-obj-fill {
-  height: 100%; border-radius: 4px;
-  transition: width 1s cubic-bezier(.4,0,.2,1);
-}
-.cmd-obj-meta {
-  display: flex; justify-content: space-between;
-  font-size: 11px; color: var(--text-muted);
-}
-.cmd-obj-pct { font-weight: 600; color: var(--text); }
-
-/* ─── KPI GRID ──────────────────────────────────────────────────────── */
+/* ─── KPI GRID ─────────────────────────────────────────────────────────── */
 .kpi-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
@@ -277,49 +428,49 @@ a { color: inherit; text-decoration: none; }
   margin-bottom: 14px;
 }
 .kpi-card {
-  background: #fff;
-  border: 0.5px solid var(--border);
-  border-radius: var(--radius-md);
-  padding: 14px 14px 12px;
-  position: relative; overflow: hidden;
-  transition: box-shadow 0.15s, border-color 0.15s;
+  background: var(--surf);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  padding: 0;
+  overflow: hidden;
+  cursor: pointer;
+  transition: border-color .15s;
 }
-.kpi-card:hover { border-color: var(--blue); box-shadow: 0 2px 8px rgba(37,150,190,0.12); }
-.kpi-card::after {
-  content: "";
-  position: absolute; top: 0; left: 0; bottom: 0; width: 3px;
-  border-radius: var(--radius-md) 0 0 var(--radius-md);
-}
-.kpi-card.accent::after  { background: var(--blue); }
-.kpi-card.danger::after  { background: var(--red); }
-.kpi-card.warn::after    { background: var(--amber); }
-.kpi-card.ok::after      { background: var(--teal); }
-.kpi-card.alert-critical {
-  border-left: 4px solid var(--red);
-  background: #fff9f9;
-}
-.kpi-card.alert-critical::after { display: none; }
+.kpi-card:hover { border-color: var(--blue); }
+.kpi-top-bar { height: 4px; width: 100%; }
+.kpi-card.accent  .kpi-top-bar { background: var(--blue); }
+.kpi-card.danger  .kpi-top-bar { background: var(--red); }
+.kpi-card.warn    .kpi-top-bar { background: var(--amber); }
+.kpi-card.ok      .kpi-top-bar { background: var(--teal); }
+.kpi-inner { padding: 13px 14px 13px; }
 .kpi-label {
-  font-size: 10px; font-weight: 600; letter-spacing: 0.06em;
-  color: var(--text-muted); text-transform: uppercase;
-  margin-bottom: 6px;
+  font-size: 10px; font-weight: 700; letter-spacing: .07em;
+  color: var(--ink3); text-transform: uppercase;
+  margin-bottom: 7px;
 }
 .kpi-value {
-  font-size: 24px; font-weight: 600; color: var(--text);
-  line-height: 1.1; margin-bottom: 4px;
+  font-size: 23px; font-weight: 800; color: var(--ink);
+  line-height: 1.05; margin-bottom: 5px;
   font-variant-numeric: tabular-nums;
+  letter-spacing: -.5px;
 }
 .kpi-card.danger .kpi-value { color: var(--red); }
-.kpi-delta { font-size: 11px; line-height: 1.3; margin-top: 2px; }
+.kpi-card.accent .kpi-value { color: var(--blue-dk); }
+.kpi-delta { font-size: 11px; line-height: 1.35; margin-top: 1px; }
 .delta-up   { color: var(--teal); }
 .delta-down { color: var(--red); }
-.delta-flat { color: var(--text-muted); }
+.delta-flat { color: var(--ink3); }
+.kpi-card.alert-critical {
+  border-top: 4px solid var(--red);
+  background: #fff9f9;
+}
+.kpi-card.alert-critical .kpi-top-bar { display: none; }
 
-/* ─── CARDS ─────────────────────────────────────────────────────────── */
+/* ─── CARDS ────────────────────────────────────────────────────────────── */
 .card {
-  background: #fff;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
+  background: var(--surf);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
   padding: 16px;
   margin-bottom: 12px;
 }
@@ -328,547 +479,659 @@ a { color: inherit; text-decoration: none; }
   margin-bottom: 14px;
 }
 .card-title {
-  font-size: 11px; font-weight: 600; letter-spacing: 0.05em;
-  text-transform: uppercase; color: var(--text-muted);
+  font-size: 11px; font-weight: 700; letter-spacing: .06em;
+  text-transform: uppercase; color: var(--ink2);
 }
 .card-badge {
-  font-size: 11px; padding: 2px 8px;
+  font-size: 11px; padding: 2px 9px;
   border-radius: 20px;
-  background: var(--blue-pale); color: var(--blue-dark);
-  font-weight: 500;
+  background: var(--blue-lt); color: var(--blue-dk);
+  font-weight: 600;
 }
 .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 @media (max-width: 540px) { .row-2 { grid-template-columns: 1fr; } }
 
-/* ─── SECCIÓN TÍTULO con contador ───────────────────────────────────── */
+/* ─── SECTION HEADING ──────────────────────────────────────────────────── */
 .section-heading {
   display: flex; align-items: center; gap: 8px;
   margin-bottom: 10px;
 }
-.section-heading-text { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); }
+.section-heading-text {
+  font-size: 11px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: .06em;
+  color: var(--ink3);
+}
 .count-chip {
-  font-size: 11px; padding: 2px 8px; border-radius: 20px; font-weight: 600;
+  font-size: 11px; padding: 2px 8px;
+  border-radius: 20px; font-weight: 700;
 }
 .count-chip.danger { background: var(--red-light); color: var(--red); }
 .count-chip.warn   { background: var(--amber-light); color: var(--amber); }
 .count-chip.ok     { background: var(--teal-light); color: var(--teal); }
-.count-chip.info   { background: var(--blue-pale); color: var(--blue-dark); }
+.count-chip.info   { background: var(--blue-lt); color: var(--blue-dk); }
 
-/* ─── PROGRESS BARS ─────────────────────────────────────────────────── */
+/* ─── PROGRESS BARS ─────────────────────────────────────────────────────  */
 .prog-list { display: flex; flex-direction: column; gap: 10px; }
 .prog-item { display: flex; align-items: center; gap: 10px; }
-.prog-label { font-size: 12px; color: var(--text); min-width: 120px; max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex-shrink: 0; }
-.prog-track { flex: 1; height: 7px; background: var(--gray-100); border-radius: 4px; overflow: hidden; }
-.prog-fill  { height: 100%; border-radius: 4px; transition: width 0.8s cubic-bezier(.4,0,.2,1); }
-.prog-pct   { font-size: 12px; font-weight: 600; color: var(--text); min-width: 36px; text-align: right; font-variant-numeric: tabular-nums; flex-shrink: 0; }
+.prog-label {
+  font-size: 12.5px; color: var(--ink);
+  min-width: 120px; max-width: 140px;
+  overflow: hidden; text-overflow: ellipsis;
+  white-space: nowrap; flex-shrink: 0;
+}
+.prog-track {
+  flex: 1; height: 6px;
+  background: var(--surf2);
+  border: 1px solid var(--line);
+  border-radius: 3px; overflow: hidden;
+}
+.prog-fill {
+  height: 100%; border-radius: 3px;
+  transition: width .8s cubic-bezier(.4,0,.2,1);
+}
+.prog-pct {
+  font-size: 12px; font-weight: 700; color: var(--ink);
+  min-width: 36px; text-align: right;
+  font-variant-numeric: tabular-nums; flex-shrink: 0;
+}
 
-/* ─── TABLE ─────────────────────────────────────────────────────────── */
+/* ─── TABLES ────────────────────────────────────────────────────────────  */
 .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
 table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
 th {
-  font-size: 10.5px; font-weight: 600; letter-spacing: 0.04em;
-  text-transform: uppercase; color: var(--text-muted);
-  text-align: left; padding: 7px 8px;
-  border-bottom: 1.5px solid var(--gray-200);
-  white-space: nowrap; background: var(--gray-50);
+  font-size: 10px; font-weight: 700; letter-spacing: .05em;
+  text-transform: uppercase; color: var(--ink4);
+  text-align: left; padding: 8px 10px;
+  border-bottom: 1px solid var(--line);
+  white-space: nowrap; background: var(--surf2);
 }
 td {
-  padding: 9px 8px;
-  border-bottom: 1px solid var(--gray-100);
-  color: var(--text);
+  padding: 9px 10px;
+  border-bottom: 1px solid var(--line);
+  color: var(--ink2);
   vertical-align: middle;
 }
 tr:last-child td { border-bottom: none; }
 tr:hover td { background: var(--blue-pale); }
 .num { font-family: var(--font-mono); text-align: right; }
-/* Fila de alerta en tabla */
 tr.row-danger td { background: #fff5f5; }
 tr.row-danger:hover td { background: #fee; }
 tr.row-warn td { background: #fffbf0; }
 
-/* ─── PILLS ─────────────────────────────────────────────────────────── */
+/* ─── PILLS ─────────────────────────────────────────────────────────────  */
 .pill {
-  display: inline-block; padding: 3px 9px; border-radius: 20px;
-  font-size: 11px; font-weight: 600; white-space: nowrap;
+  display: inline-block; padding: 3px 9px;
+  border-radius: 20px; font-size: 11px; font-weight: 600;
+  white-space: nowrap;
 }
 .pill-ok     { background: var(--teal-light);  color: #0F6E56; }
 .pill-warn   { background: var(--amber-light); color: #854F0B; }
 .pill-danger { background: var(--red-light);   color: var(--red); }
-.pill-info   { background: var(--blue-pale);   color: var(--blue-dark); }
-.pill-gray   { background: var(--gray-100);    color: var(--gray-600); }
+.pill-info   { background: var(--blue-lt);     color: var(--blue-dk); }
+.pill-gray   { background: var(--surf2);       color: var(--ink3); }
 
-/* ─── LEGEND ────────────────────────────────────────────────────────── */
+/* ─── LEGEND ────────────────────────────────────────────────────────────  */
 .legend { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 10px; }
-.legend-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--text-muted); }
+.legend-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--ink3); }
 .legend-dot  { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
 
-/* ─── RESUMEN ALERTS ────────────────────────────────────────────────── */
+/* ─── ALERTS ─────────────────────────────────────────────────────────────  */
 .alert-list { display: flex; flex-direction: column; gap: 8px; }
 .alert-item {
   display: flex; align-items: flex-start; gap: 10px;
   padding: 10px 12px;
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius);
   border-left: 3px solid;
 }
 .alert-item.alta   { background: #fff5f5; border-color: var(--red);   }
 .alert-item.media  { background: #fffbf0; border-color: var(--amber); }
 .alert-item.ok     { background: #f0fdf8; border-color: var(--teal);  }
-.alert-area  { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; min-width: 72px; margin-top: 1px; flex-shrink: 0; }
-.alert-item.alta  .alert-area  { color: var(--red);   }
-.alert-item.media .alert-area  { color: var(--amber); }
-.alert-item.ok    .alert-area  { color: var(--teal);  }
-.alert-text  { font-size: 12.5px; color: var(--text); line-height: 1.4; }
+.alert-area {
+  font-size: 10px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: .06em;
+  min-width: 72px; margin-top: 1px; flex-shrink: 0;
+}
+.alert-item.alta  .alert-area { color: var(--red);   }
+.alert-item.media .alert-area { color: var(--amber); }
+.alert-item.ok    .alert-area { color: var(--teal);  }
+.alert-text { font-size: 12.5px; color: var(--ink); line-height: 1.4; }
 
-/* ─── TIMESTAMP ─────────────────────────────────────────────────────── */
-.timestamp { text-align: center; font-size: 11px; color: var(--text-muted); padding: 16px 0 4px; }
-
-/* ─── SUB-TABS ──────────────────────────────────────────────────────── */
-.sub-nav { display: flex; gap: 2px; flex-wrap: wrap; margin-bottom: 14px;
-  background: var(--gray-100); border-radius: var(--radius-sm); padding: 3px; width: fit-content; }
+/* ─── SUB-TABS ──────────────────────────────────────────────────────────  */
+.sub-nav {
+  display: flex; gap: 2px; flex-wrap: wrap;
+  margin-bottom: 14px;
+  background: var(--surf2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 3px;
+  width: fit-content;
+}
 .sub-tab {
   padding: 5px 14px; font-size: 12px; font-weight: 500;
   border-radius: 6px; cursor: pointer;
-  border: none; color: var(--text-muted);
-  background: transparent; transition: all 0.12s; user-select: none;
+  color: var(--ink3); background: transparent;
+  transition: all .12s; user-select: none; border: none;
 }
-.sub-tab:hover { color: var(--text); background: rgba(255,255,255,0.6); }
-.sub-tab.active { background: #fff; color: var(--blue); font-weight: 600;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+.sub-tab:hover { color: var(--ink); background: rgba(255,255,255,.7); }
+.sub-tab.active {
+  background: var(--surf); color: var(--blue-dk); font-weight: 700;
+  border: 1px solid var(--line);
+}
 .sub-pane { display: none; }
-.sub-pane.active { display: block; animation: fadeIn 0.15s ease; }
+.sub-pane.active { display: block; animation: fadeIn .15s ease; }
 
-/* ─── CHART CONTAINER ───────────────────────────────────────────────── */
+/* ─── CHART CONTAINER ────────────────────────────────────────────────────  */
 .chart-box { position: relative; width: 100%; }
 
-/* ─── PERIOD SELECTOR BAR ───────────────────────────────────────────── */
-.period-bar {
-  background: #fff;
-  border-bottom: 1px solid var(--border);
-  padding: 8px 16px;
-  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
-}
-.period-label { font-size: 10px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; flex-shrink: 0; }
-.period-pills { display: flex; gap: 5px; flex-wrap: wrap; flex: 1; }
-.period-pill {
-  padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 500;
-  cursor: pointer; border: 1px solid var(--border);
-  color: var(--text-muted); background: var(--gray-50);
-  transition: all 0.12s; white-space: nowrap; user-select: none;
-}
-.period-pill:hover { border-color: var(--blue); color: var(--blue); background: var(--blue-pale); }
-.period-pill.active { background: var(--blue); color: #fff; border-color: var(--blue); }
-.period-custom { display: none; align-items: center; gap: 6px; flex-wrap: wrap; }
-.period-custom.visible { display: flex; }
-.period-custom input[type="date"] {
-  padding: 4px 8px; border-radius: 6px; border: 1px solid var(--border);
-  font-size: 12px; color: var(--text); background: #fff; font-family: var(--font);
-}
-.period-custom input[type="date"]:focus { outline: none; border-color: var(--blue); }
-.period-custom-sep { font-size: 11px; color: var(--text-muted); }
-.period-apply {
-  padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 500;
-  background: var(--blue); color: #fff; border: none; cursor: pointer;
-}
-.period-badge {
-  font-size: 11px; color: var(--blue-dark); background: var(--blue-pale);
-  padding: 3px 8px; border-radius: 20px; font-weight: 500; white-space: nowrap;
+/* ─── TIMESTAMP ──────────────────────────────────────────────────────────  */
+.timestamp {
+  text-align: center;
+  font-size: 11px; color: var(--ink4);
+  padding: 16px 0 4px;
 }
 
-/* ─── RESPONSIVE ────────────────────────────────────────────────────── */
-@media (max-width: 640px) {
-  .main { padding: 10px; }
+/* ─── RESPONSIVE (móvil) ─────────────────────────────────────────────────  */
+@media (max-width: 768px) {
+  .sidebar {
+    position: fixed; left: -100%; top: 0; bottom: 0;
+    transition: left .2s;
+    z-index: 300;
+    box-shadow: 2px 0 16px rgba(0,0,0,.12);
+  }
+  .sidebar.open { left: 0; }
+  .main-wrap { width: 100%; }
+  .topbar { padding: 0 12px; gap: 6px; }
+  .content { padding: 12px; }
   .kpi-grid { grid-template-columns: repeat(2, 1fr); }
   .kpi-value { font-size: 19px; }
-  .period-bar { padding: 7px 10px; }
-  .command-kpis { grid-template-columns: repeat(3, 1fr); }
-  .cmd-kpi-value { font-size: 17px; }
+  .hamburger { display: flex; }
 }
-@media (max-width: 400px) {
-  .command-kpis { grid-template-columns: 1fr 1fr; }
+@media (min-width: 769px) {
+  .hamburger { display: none; }
 }
+
+/* Hamburger */
+.hamburger {
+  width: 32px; height: 32px;
+  align-items: center; justify-content: center;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  cursor: pointer; flex-shrink: 0;
+  background: var(--surf2);
+}
+.hamburger svg { width: 16px; height: 16px; }
 </style>
 </head>
 <body>
 
-<!-- ═══════════════════ TOPBAR ════════════════════════════════════════ -->
-<header class="topbar">
-  <div class="topbar-brand">
-    <div class="brand-logo">CH</div>
-    <div class="brand-info">
-      <div class="brand-name">Casa Luis Chemes S.A.</div>
-      <div class="brand-sub">Panel Gerencial</div>
-    </div>
-  </div>
-  <div class="topbar-meta">
-    <span class="meta-chip" id="chip-sucursal">Cargando...</span>
-    <span class="meta-chip green" id="chip-update" title="Última actualización">—</span>
-  </div>
-</header>
+<div class="shell">
 
-<!-- ═══════════════════ NAV ══════════════════════════════════════════ -->
-<nav class="nav-wrapper">
-  <div class="nav-scroll">
-    <div class="nav-tabs">
-      <div class="nav-tab active" data-tab="ventas">
-        <span class="tab-icon">📈</span> Ventas
-      </div>
-      <div class="nav-tab" data-tab="stock">
-        <span class="tab-icon">📦</span> Stock
-      </div>
-      <div class="nav-tab" data-tab="morosidad">
-        <span class="tab-icon">⚠️</span> Morosidad
-      </div>
-      <div class="nav-tab" data-tab="objetivos">
-        <span class="tab-icon">🎯</span> Objetivos
-      </div>
-      <div class="nav-tab" data-tab="seguros">
-        <span class="tab-icon">🛡️</span> Seguros
-      </div>
-      <div class="nav-tab" data-tab="resumen">
-        <span class="tab-icon">📋</span> Resumen
-      </div>
-    </div>
-  </div>
-  <!-- ── Panel de comando integrado en nav (desktop) ── -->
-  <div class="nav-command-strip" id="nav-command-strip">
-    <div class="nav-cmd-kpi">
-      <div class="nav-cmd-label">Ventas netas</div>
-      <div class="nav-cmd-value highlight" id="ncs-ventas">—</div>
-      <div class="nav-cmd-sub" id="ncs-ventas-sub">—</div>
-    </div>
-    <div class="nav-cmd-bar" id="ncs-obj-wrap">
-      <div class="nav-cmd-bar-label" id="ncs-obj-label">Objetivo</div>
-      <div class="nav-cmd-bar-track">
-        <div class="nav-cmd-bar-fill" id="ncs-obj-fill" style="width:0%;background:var(--blue)"></div>
-      </div>
-      <div class="nav-cmd-bar-meta">
-        <span id="ncs-obj-real">—</span>
-        <span class="nav-cmd-pct" id="ncs-obj-pct">—</span>
-      </div>
-    </div>
-    <div class="nav-cmd-kpi" id="ncs-stock-kpi">
-      <div class="nav-cmd-label">Stock crítico</div>
-      <div class="nav-cmd-value" id="ncs-stock">—</div>
-      <div class="nav-cmd-sub" id="ncs-stock-sub">—</div>
-    </div>
-  </div>
-</nav>
+<!-- ═══════════════════════ SIDEBAR ══════════════════════════════════════ -->
+<aside class="sidebar" id="sidebar">
 
-<!-- ═══════════════════ PERIOD SELECTOR ══════════════════════════════ -->
-<div class="period-bar" id="period-bar">
-  <span class="period-label">Período</span>
-  <div class="period-pills">
-    <span class="period-pill active" data-period="mes_actual">Mes actual</span>
-    <span class="period-pill" data-period="mes_anterior">Mes anterior</span>
-    <span class="period-pill" data-period="trimestre">Trimestre</span>
-    <span class="period-pill" data-period="semestre">6 meses</span>
-    <span class="period-pill" data-period="anio">Año actual</span>
-    <span class="period-pill" data-period="custom">Personalizado</span>
+  <!-- Logo -->
+  <div class="sidebar-logo">
+    <img src="logo.png" alt="Chemes"
+      onerror="this.style.display='none';document.getElementById('logo-fallback').style.display='flex'">
+    <div class="sidebar-logo-fallback" id="logo-fallback" style="display:none">
+      <div class="sidebar-logo-mark">CH</div>
+      <span class="sidebar-logo-text">CHEMES</span>
+    </div>
   </div>
-  <div class="period-custom" id="period-custom">
-    <span class="period-custom-sep">Desde</span>
-    <input type="date" id="fecha-desde">
-    <span class="period-custom-sep">hasta</span>
-    <input type="date" id="fecha-hasta">
-    <button class="period-apply" onclick="aplicarPeriodoCustom()">Aplicar</button>
-  </div>
-  <span class="period-badge" id="period-badge">—</span>
-</div>
 
-<!-- ═══════════════════ MAIN ══════════════════════════════════════════ -->
-<main class="main">
+  <!-- Nav principal -->
+  <div class="sidebar-sect">Analytics</div>
 
-  <!-- ── PANEL DE COMANDO — visible en todas las secciones ─────────── -->
-  <div class="command-panel" id="command-panel" style="display:none">
-    <div class="command-header">
-      <span class="command-title">Panel de comando</span>
-      <span class="command-periodo" id="cmd-periodo">—</span>
-    </div>
-    <div class="command-kpis">
-      <div class="cmd-kpi highlight">
-        <div class="cmd-kpi-label">Ventas netas</div>
-        <div class="cmd-kpi-value" id="cmd-ventas">—</div>
-        <div class="cmd-kpi-sub" id="cmd-ventas-sub">—</div>
+  <div class="nav-item active" data-tab="ventas" onclick="showSection('ventas')">
+    <svg viewBox="0 0 15 15" fill="none" stroke="currentColor" stroke-width="1.6">
+      <rect x="1" y="8" width="3" height="5.5" rx=".5"/>
+      <rect x="5.5" y="5" width="3" height="8.5" rx=".5"/>
+      <rect x="10" y="2" width="3.5" height="11.5" rx=".5"/>
+    </svg>
+    Ventas
+  </div>
+
+  <div class="nav-item" data-tab="stock" onclick="showSection('stock')">
+    <svg viewBox="0 0 15 15" fill="none" stroke="currentColor" stroke-width="1.6">
+      <path d="M1 11V5l6-3.5L13 5v6l-6 3.5L1 11z"/>
+      <path d="M1 5l6 3.5M13 5l-6 3.5M7.5 8.5v5"/>
+    </svg>
+    Stock
+  </div>
+
+  <div class="nav-item" data-tab="morosidad" onclick="showSection('morosidad')">
+    <svg viewBox="0 0 15 15" fill="none" stroke="currentColor" stroke-width="1.6">
+      <circle cx="7.5" cy="7.5" r="5.5"/>
+      <path d="M7.5 5v3l1.8 1.8"/>
+    </svg>
+    Morosidad
+  </div>
+
+  <div class="nav-item" data-tab="objetivos" onclick="showSection('objetivos')">
+    <svg viewBox="0 0 15 15" fill="none" stroke="currentColor" stroke-width="1.6">
+      <path d="M7.5 1.5l1.7 3.5 3.8.55-2.75 2.7.65 3.8L7.5 10.2 4.1 12l.65-3.8L2 5.55l3.8-.55z"/>
+    </svg>
+    Objetivos
+  </div>
+
+  <div class="sidebar-sect">Operaciones</div>
+
+  <div class="nav-item" data-tab="seguros" onclick="showSection('seguros')">
+    <svg viewBox="0 0 15 15" fill="none" stroke="currentColor" stroke-width="1.6">
+      <path d="M7.5 1.5L13 4v4c0 3-2.5 5.2-5.5 5.5C4.5 13.2 2 11 2 8V4l5.5-2.5z"/>
+    </svg>
+    Seguros
+  </div>
+
+  <div class="nav-item" data-tab="resumen" onclick="showSection('resumen')">
+    <svg viewBox="0 0 15 15" fill="none" stroke="currentColor" stroke-width="1.6">
+      <rect x="1.5" y="2" width="12" height="11" rx="1.5"/>
+      <path d="M5 6h5M5 9h3.5"/>
+    </svg>
+    Resumen
+  </div>
+
+  <!-- Selector de sucursal -->
+  <div class="sidebar-bottom">
+    <div class="branch-pill">
+      <div class="branch-dot" id="branch-dot"></div>
+      <div>
+        <div class="branch-name" id="chip-sucursal">Cargando…</div>
+        <div class="branch-name-sub" id="chip-update">—</div>
       </div>
-      <div class="cmd-kpi" id="cmd-obj-kpi">
-        <div class="cmd-kpi-label">Objetivo</div>
-        <div class="cmd-kpi-value" id="cmd-obj-pct">—</div>
-        <div class="cmd-kpi-sub" id="cmd-obj-sub">—</div>
-      </div>
-      <div class="cmd-kpi" id="cmd-stock-kpi">
-        <div class="cmd-kpi-label">Stock crítico</div>
-        <div class="cmd-kpi-value" id="cmd-stock-val">—</div>
-        <div class="cmd-kpi-sub" id="cmd-stock-sub">—</div>
-      </div>
-    </div>
-    <div class="cmd-obj-bar" id="cmd-obj-bar" style="display:none">
-      <div class="cmd-obj-meta">
-        <span id="cmd-obj-label" style="font-size:11px;color:var(--text-muted)">Objetivo del mes</span>
-        <span class="cmd-obj-pct" id="cmd-obj-pct2">0%</span>
-      </div>
-      <div class="cmd-obj-track">
-        <div class="cmd-obj-fill" id="cmd-obj-fill" style="width:0%;background:var(--blue)"></div>
-      </div>
-      <div class="cmd-obj-meta">
-        <span id="cmd-obj-real" style="font-size:11px;color:var(--text-muted)"></span>
-        <span id="cmd-obj-meta-right" style="font-size:11px;color:var(--text-muted)"></span>
-      </div>
+      <div class="branch-chev">⌄</div>
     </div>
   </div>
-  <div id="global-loading" class="loading-wrap">
-    <div class="spinner"></div>
-    <div class="loading-text">Conectando con el servidor de datos…</div>
-  </div>
-  <div id="global-error" class="error-banner" style="display:none;"></div>
 
-  <!-- ── VENTAS ────────────────────────────────────────────────────── -->
-  <div id="sec-ventas" class="section">
-    <div class="kpi-grid" id="kpi-ventas"></div>
-    <div class="sub-nav" id="subnav-ventas">
-      <span class="sub-tab active" data-section="ventas" data-pane="evolucion">Evolución</span>
-      <span class="sub-tab" data-section="ventas" data-pane="familias">Por depósito</span>
-      <span class="sub-tab" data-section="ventas" data-pane="ranking">Ranking artículos</span>
-      <span class="sub-tab" data-section="ventas" data-pane="vendedor">Por vendedor</span>
+</aside>
+
+<!-- ═══════════════════════ MAIN WRAP ════════════════════════════════════ -->
+<div class="main-wrap">
+
+  <!-- ═══ TOPBAR ═══ -->
+  <header class="topbar">
+    <!-- Hamburger (móvil) -->
+    <div class="hamburger" onclick="document.getElementById('sidebar').classList.toggle('open')">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+        <path d="M2 4h12M2 8h12M2 12h12"/>
+      </svg>
     </div>
-    <div id="vpane-evolucion" class="sub-pane active">
-      <div style="display:grid;grid-template-columns:1fr 340px;gap:12px">
+
+    <div class="topbar-title" id="topbar-section-title">Panel Gerencial</div>
+
+    <!-- Period pills -->
+    <div class="period-wrap" id="period-bar">
+      <span class="period-pill active" data-period="mes_actual">Mes actual</span>
+      <span class="period-pill" data-period="mes_anterior">Mes ant.</span>
+      <span class="period-pill" data-period="trimestre">Trimestre</span>
+      <span class="period-pill" data-period="semestre">6 meses</span>
+      <span class="period-pill" data-period="anio">Año</span>
+      <span class="period-pill" data-period="custom">Custom</span>
+    </div>
+    <div class="period-custom" id="period-custom">
+      <input type="date" id="fecha-desde">
+      <span style="font-size:11px;color:var(--ink3)">→</span>
+      <input type="date" id="fecha-hasta">
+      <button class="period-apply" onclick="aplicarPeriodoCustom()">Aplicar</button>
+    </div>
+    <span class="period-badge" id="period-badge">—</span>
+
+    <!-- Nav command strip (desktop) -->
+    <div class="nav-command-strip" id="nav-command-strip">
+      <div class="nav-cmd-kpi">
+        <div class="nav-cmd-label">Ventas netas</div>
+        <div class="nav-cmd-value highlight" id="ncs-ventas">—</div>
+        <div class="nav-cmd-sub" id="ncs-ventas-sub">—</div>
+      </div>
+      <div class="nav-cmd-bar" id="ncs-obj-wrap">
+        <div class="nav-cmd-bar-label" id="ncs-obj-label">Objetivo</div>
+        <div class="nav-cmd-bar-track">
+          <div class="nav-cmd-bar-fill" id="ncs-obj-fill" style="width:0%;background:var(--blue)"></div>
+        </div>
+        <div class="nav-cmd-bar-meta">
+          <span id="ncs-obj-real">—</span>
+          <span class="nav-cmd-pct" id="ncs-obj-pct">—</span>
+        </div>
+      </div>
+      <div class="nav-cmd-kpi" id="ncs-stock-kpi">
+        <div class="nav-cmd-label">Stock crítico</div>
+        <div class="nav-cmd-value" id="ncs-stock">—</div>
+        <div class="nav-cmd-sub" id="ncs-stock-sub">—</div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ═══ CONTENT ═══ -->
+  <main class="content">
+
+    <div id="global-loading" class="loading-wrap">
+      <div class="spinner"></div>
+      <div class="loading-text">Conectando con el servidor de datos…</div>
+    </div>
+    <div id="global-error" class="error-banner" style="display:none;"></div>
+
+    <!-- Panel de comando (móvil / fallback) -->
+    <div class="command-panel" id="command-panel" style="display:none">
+      <div class="command-header">
+        <span class="command-title">Panel de comando</span>
+        <span class="command-periodo" id="cmd-periodo">—</span>
+      </div>
+      <div class="command-kpis">
+        <div class="cmd-kpi highlight">
+          <div class="cmd-kpi-label">Ventas netas</div>
+          <div class="cmd-kpi-value" id="cmd-ventas">—</div>
+          <div class="cmd-kpi-sub" id="cmd-ventas-sub">—</div>
+        </div>
+        <div class="cmd-kpi" id="cmd-obj-kpi">
+          <div class="cmd-kpi-label">Objetivo</div>
+          <div class="cmd-kpi-value" id="cmd-obj-pct">—</div>
+          <div class="cmd-kpi-sub" id="cmd-obj-sub">—</div>
+        </div>
+        <div class="cmd-kpi" id="cmd-stock-kpi">
+          <div class="cmd-kpi-label">Stock crítico</div>
+          <div class="cmd-kpi-value" id="cmd-stock-val">—</div>
+          <div class="cmd-kpi-sub" id="cmd-stock-sub">—</div>
+        </div>
+      </div>
+      <div class="cmd-obj-bar" id="cmd-obj-bar" style="display:none">
+        <div class="cmd-obj-meta">
+          <span id="cmd-obj-label" style="font-size:11px;color:var(--ink3)">Objetivo del mes</span>
+          <span class="cmd-obj-pct" id="cmd-obj-pct2">0%</span>
+        </div>
+        <div class="cmd-obj-track">
+          <div class="cmd-obj-fill" id="cmd-obj-fill" style="width:0%;background:var(--blue)"></div>
+        </div>
+        <div class="cmd-obj-meta">
+          <span id="cmd-obj-real" style="font-size:11px;color:var(--ink3)"></span>
+          <span id="cmd-obj-meta-right" style="font-size:11px;color:var(--ink3)"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── VENTAS ──────────────────────────────────────────────────────── -->
+    <div id="sec-ventas" class="section">
+      <div class="kpi-grid" id="kpi-ventas"></div>
+      <div class="sub-nav" id="subnav-ventas">
+        <span class="sub-tab active" data-section="ventas" data-pane="evolucion">Evolución</span>
+        <span class="sub-tab" data-section="ventas" data-pane="familias">Por depósito</span>
+        <span class="sub-tab" data-section="ventas" data-pane="ranking">Ranking artículos</span>
+        <span class="sub-tab" data-section="ventas" data-pane="vendedor">Por vendedor</span>
+      </div>
+      <div id="vpane-evolucion" class="sub-pane active">
+        <div style="display:grid;grid-template-columns:1fr 340px;gap:12px">
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">Evolución mensual</span>
+              <span class="card-badge" id="badge-ventas-mes">—</span>
+            </div>
+            <div class="chart-box" style="height:220px"><canvas id="chart-ventas-ev"></canvas></div>
+            <div class="legend" id="legend-ventas-ev" style="margin-top:8px"></div>
+          </div>
+          <div class="card">
+            <div class="card-header"><span class="card-title">Por depósito</span></div>
+            <div class="chart-box" style="height:220px"><canvas id="chart-ventas-fam"></canvas></div>
+          </div>
+        </div>
+      </div>
+      <div id="vpane-familias" class="sub-pane" style="display:none!important"></div>
+      <div id="vpane-ranking" class="sub-pane">
         <div class="card">
           <div class="card-header">
-            <span class="card-title">Evolución mensual</span>
-            <span class="card-badge" id="badge-ventas-mes">—</span>
+            <span class="card-title">Top 30 artículos</span>
+            <span class="card-badge" id="badge-ranking-periodo">—</span>
           </div>
-          <div class="chart-box" style="height:220px"><canvas id="chart-ventas-ev"></canvas></div>
-          <div class="legend" id="legend-ventas-ev" style="margin-top:8px"></div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>#</th><th>SKU</th><th>Artículo</th><th class="num">Unidades</th><th class="num">Neto s/imp.</th></tr></thead>
+              <tbody id="tbody-top-art"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <div id="vpane-vendedor" class="sub-pane">
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Ranking por vendedor — mes actual</span>
+            <span class="card-badge" id="badge-vendedor-mes">—</span>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr>
+                <th>#</th><th>Vendedor</th>
+                <th class="num">Venta neta</th>
+                <th class="num">Intangibles $</th>
+                <th class="num">% Part.</th>
+                <th class="num">% Alcance</th>
+                <th class="num">Pólizas $</th>
+                <th class="num">% Part.</th>
+                <th class="num">Pólizas u.</th>
+                <th class="num">FAC</th>
+              </tr></thead>
+              <tbody id="tbody-vendedor"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── STOCK ──────────────────────────────────────────────────────── -->
+    <div id="sec-stock" class="section">
+      <div class="kpi-grid" id="kpi-stock"></div>
+      <div class="sub-nav">
+        <span class="sub-tab active" data-section="stock" data-pane="criticos">Críticos</span>
+        <span class="sub-tab" data-section="stock" data-pane="distribucion">Distribución</span>
+        <span class="sub-tab" data-section="stock" data-pane="inmovilizado">Inmovilizado</span>
+      </div>
+      <div id="spane-criticos" class="sub-pane active">
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Artículos críticos</span>
+            <span class="card-badge" id="badge-stock-criticos">—</span>
+          </div>
+          <div id="stock-criticos-chips" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px"></div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>SKU</th><th>Artículo</th><th>Depósito</th><th class="num">Stock</th><th class="num">P.Pedido</th><th>Estado</th></tr></thead>
+              <tbody id="tbody-criticos"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <div id="spane-distribucion" class="sub-pane">
+        <div class="row-2">
+          <div class="card">
+            <div class="card-header"><span class="card-title">Stock por familia/depósito</span></div>
+            <div class="chart-box" style="height:260px"><canvas id="chart-stock-fam"></canvas></div>
+          </div>
+          <div class="card">
+            <div class="card-header"><span class="card-title">Antigüedad del stock</span></div>
+            <div class="chart-box" style="height:260px"><canvas id="chart-stock-antig"></canvas></div>
+          </div>
+        </div>
+      </div>
+      <div id="spane-inmovilizado" class="sub-pane">
+        <div class="card">
+          <div class="card-header"><span class="card-title">Stock inmovilizado — +90 días sin movimiento</span></div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>SKU</th><th>Artículo</th><th class="num">Stock</th><th class="num">Días sin mov.</th></tr></thead>
+              <tbody id="tbody-inmovilizado"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── MOROSIDAD ──────────────────────────────────────────────────── -->
+    <div id="sec-morosidad" class="section">
+      <div class="kpi-grid" id="kpi-morosidad"></div>
+      <div class="sub-nav">
+        <span class="sub-tab active" data-section="mora" data-pane="clientes">Clientes</span>
+        <span class="sub-tab" data-section="mora" data-pane="distribucion">Distribución</span>
+        <span class="sub-tab" data-section="mora" data-pane="cuotas">Cuotas emitidas/cobradas</span>
+      </div>
+      <div id="mpane-clientes" class="sub-pane active">
+        <div class="card">
+          <div class="card-header"><span class="card-title">Clientes con mayor deuda vencida</span></div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Cliente</th><th>Teléfono</th><th class="num">Vencido</th><th class="num">Días mora</th><th>Estado</th></tr></thead>
+              <tbody id="tbody-mora-clientes"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <div id="mpane-distribucion" class="sub-pane">
+        <div class="row-2">
+          <div class="card">
+            <div class="card-header"><span class="card-title">Por tramo de mora</span></div>
+            <div class="chart-box" style="height:240px"><canvas id="chart-mora-dist"></canvas></div>
+          </div>
+          <div class="card">
+            <div class="card-header"><span class="card-title">Composición</span></div>
+            <div class="chart-box" style="height:240px"><canvas id="chart-mora-comp"></canvas></div>
+          </div>
+        </div>
+      </div>
+      <div id="mpane-cuotas" class="sub-pane">
+        <div class="card" style="margin-bottom:12px">
+          <div class="card-header">
+            <span class="card-title">Crédito Chemes — cuotas emitidas vs cobradas</span>
+          </div>
+          <div class="kpi-grid" id="kpi-cuotas-cc" style="margin-bottom:12px"></div>
+          <div class="chart-box" style="height:200px"><canvas id="chart-cuotas-cc"></canvas></div>
+          <div class="legend" id="legend-cuotas-cc" style="margin-top:8px"></div>
         </div>
         <div class="card">
-          <div class="card-header"><span class="card-title">Por depósito</span></div>
-          <div class="chart-box" style="height:220px"><canvas id="chart-ventas-fam"></canvas></div>
+          <div class="card-header">
+            <span class="card-title">Cuenta corriente — cuotas emitidas vs cobradas</span>
+          </div>
+          <div class="kpi-grid" id="kpi-cuotas-cta" style="margin-bottom:12px"></div>
+          <div class="chart-box" style="height:200px"><canvas id="chart-cuotas-cta"></canvas></div>
+          <div class="legend" id="legend-cuotas-cta" style="margin-top:8px"></div>
         </div>
       </div>
     </div>
-    <div id="vpane-familias" class="sub-pane" style="display:none!important"></div>
-    <div id="vpane-ranking" class="sub-pane">
-      <div class="card">
-        <div class="card-header">
-          <span class="card-title">Top 30 artículos</span>
-          <span class="card-badge" id="badge-ranking-periodo">—</span>
-        </div>
-        <div class="table-wrap">
-          <table>
-            <thead><tr><th>#</th><th>SKU</th><th>Artículo</th><th class="num">Unidades</th><th class="num">Neto s/imp.</th></tr></thead>
-            <tbody id="tbody-top-art"></tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-    <div id="vpane-vendedor" class="sub-pane">
-      <div class="card">
-        <div class="card-header">
-          <span class="card-title">Ranking por vendedor — mes actual</span>
-          <span class="card-badge" id="badge-vendedor-mes">—</span>
-        </div>
-        <div class="table-wrap">
-          <table>
-            <thead><tr>
-              <th>#</th><th>Vendedor</th>
-              <th class="num">Venta neta</th>
-              <th class="num">Intangibles $</th>
-              <th class="num">% Part.</th>
-              <th class="num">% Alcance</th>
-              <th class="num">Pólizas $</th>
-              <th class="num">% Part.</th>
-              <th class="num">Pólizas u.</th>
-              <th class="num">FAC</th>
-            </tr></thead>
-            <tbody id="tbody-vendedor"></tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-  </div>
 
-  <!-- ── STOCK ─────────────────────────────────────────────────────── -->
-  <div id="sec-stock" class="section">
-    <div class="kpi-grid" id="kpi-stock"></div>
-    <div class="sub-nav">
-      <span class="sub-tab active" data-section="stock" data-pane="criticos">Críticos</span>
-      <span class="sub-tab" data-section="stock" data-pane="distribucion">Distribución</span>
-      <span class="sub-tab" data-section="stock" data-pane="inmovilizado">Inmovilizado</span>
-    </div>
-    <div id="spane-criticos" class="sub-pane active">
-      <div class="card">
-        <div class="card-header">
-          <span class="card-title">Artículos críticos</span>
-          <span class="card-badge" id="badge-stock-criticos">—</span>
-        </div>
-        <div id="stock-criticos-chips" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px"></div>
-        <div class="table-wrap">
-          <table>
-            <thead><tr><th>SKU</th><th>Artículo</th><th>Depósito</th><th class="num">Stock</th><th class="num">P.Pedido</th><th>Estado</th></tr></thead>
-            <tbody id="tbody-criticos"></tbody>
-          </table>
-        </div>
+    <!-- ── OBJETIVOS ──────────────────────────────────────────────────── -->
+    <div id="sec-objetivos" class="section">
+      <div class="kpi-grid" id="kpi-objetivos"></div>
+      <div class="sub-nav">
+        <span class="sub-tab active" data-section="obj" data-pane="progreso">Progreso</span>
+        <span class="sub-tab" data-section="obj" data-pane="historico">Histórico</span>
       </div>
-    </div>
-    <div id="spane-distribucion" class="sub-pane">
-      <div class="row-2">
+      <div id="opane-progreso" class="sub-pane active">
         <div class="card">
-          <div class="card-header"><span class="card-title">Stock por familia/depósito</span></div>
-          <div class="chart-box" style="height:260px"><canvas id="chart-stock-fam"></canvas></div>
+          <div class="card-header">
+            <span class="card-title">Cumplimiento por categoría</span>
+            <span class="card-badge" id="badge-obj-mes">—</span>
+          </div>
+          <div class="prog-list" id="prog-obj"></div>
+          <div class="legend" style="margin-top:12px;">
+            <span class="legend-item"><span class="legend-dot" style="background:var(--teal)"></span>Superado</span>
+            <span class="legend-item"><span class="legend-dot" style="background:var(--blue)"></span>En camino</span>
+            <span class="legend-item"><span class="legend-dot" style="background:var(--amber)"></span>En riesgo</span>
+            <span class="legend-item"><span class="legend-dot" style="background:var(--red)"></span>Crítico</span>
+          </div>
         </div>
         <div class="card">
-          <div class="card-header"><span class="card-title">Antigüedad del stock</span></div>
-          <div class="chart-box" style="height:260px"><canvas id="chart-stock-antig"></canvas></div>
+          <div class="card-header"><span class="card-title">Avance acumulado vs meta</span></div>
+          <div class="chart-box" style="height:200px"><canvas id="chart-obj-acum"></canvas></div>
         </div>
       </div>
-    </div>
-    <div id="spane-inmovilizado" class="sub-pane">
-      <div class="card">
-        <div class="card-header"><span class="card-title">Stock inmovilizado — +90 días sin movimiento</span></div>
-        <div class="table-wrap">
-          <table>
-            <thead><tr><th>SKU</th><th>Artículo</th><th class="num">Stock</th><th class="num">Días sin mov.</th></tr></thead>
-            <tbody id="tbody-inmovilizado"></tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ── MOROSIDAD ─────────────────────────────────────────────────── -->
-  <div id="sec-morosidad" class="section">
-    <div class="kpi-grid" id="kpi-morosidad"></div>
-    <div class="sub-nav">
-      <span class="sub-tab active" data-section="mora" data-pane="clientes">Clientes</span>
-      <span class="sub-tab" data-section="mora" data-pane="distribucion">Distribución</span>
-      <span class="sub-tab" data-section="mora" data-pane="cuotas">Cuotas emitidas/cobradas</span>
-    </div>
-    <div id="mpane-clientes" class="sub-pane active">
-      <div class="card">
-        <div class="card-header"><span class="card-title">Clientes con mayor deuda vencida</span></div>
-        <div class="table-wrap">
-          <table>
-            <thead><tr><th>Cliente</th><th>Teléfono</th><th class="num">Vencido</th><th class="num">Días mora</th><th>Estado</th></tr></thead>
-            <tbody id="tbody-mora-clientes"></tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-    <div id="mpane-distribucion" class="sub-pane">
-      <div class="row-2">
+      <div id="opane-historico" class="sub-pane">
         <div class="card">
-          <div class="card-header"><span class="card-title">Por tramo de mora</span></div>
-          <div class="chart-box" style="height:240px"><canvas id="chart-mora-dist"></canvas></div>
+          <div class="card-header"><span class="card-title">Cumplimiento — últimos 6 meses</span></div>
+          <div class="chart-box" style="height:240px"><canvas id="chart-obj-hist"></canvas></div>
         </div>
+      </div>
+    </div>
+
+    <!-- ── SEGUROS ────────────────────────────────────────────────────── -->
+    <div id="sec-seguros" class="section">
+      <div class="kpi-grid" id="kpi-seguros"></div>
+      <div class="sub-nav">
+        <span class="sub-tab active" data-section="seg" data-pane="polizas">Pólizas Qualia</span>
+        <span class="sub-tab" data-section="seg" data-pane="evolucion">Evolución</span>
+      </div>
+      <div id="sgpane-polizas" class="sub-pane active">
         <div class="card">
-          <div class="card-header"><span class="card-title">Composición</span></div>
-          <div class="chart-box" style="height:240px"><canvas id="chart-mora-comp"></canvas></div>
+          <div class="card-header"><span class="card-title">Últimas pólizas emitidas — mes actual</span></div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Fecha</th><th>Cliente</th><th>Artículo</th><th class="num">Prima</th><th>Estado</th></tr></thead>
+              <tbody id="tbody-seg-detalle"></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="card" style="margin-top:12px">
+          <div class="card-header"><span class="card-title">Distribución por tipo de servicio</span></div>
+          <div class="chart-box" style="height:220px"><canvas id="chart-seg-fam"></canvas></div>
+        </div>
+      </div>
+      <div id="sgpane-evolucion" class="sub-pane">
+        <div class="card">
+          <div class="card-header"><span class="card-title">Evolución mensual — pólizas y garantías</span></div>
+          <div class="chart-box" style="height:240px"><canvas id="chart-seg-ev"></canvas></div>
         </div>
       </div>
     </div>
-    <div id="mpane-cuotas" class="sub-pane">
-      <!-- Crédito Chemes -->
-      <div class="card" style="margin-bottom:12px">
-        <div class="card-header">
-          <span class="card-title">Crédito Chemes — cuotas emitidas vs cobradas</span>
-        </div>
-        <div class="kpi-grid" id="kpi-cuotas-cc" style="margin-bottom:12px"></div>
-        <div class="chart-box" style="height:200px"><canvas id="chart-cuotas-cc"></canvas></div>
-        <div class="legend" id="legend-cuotas-cc" style="margin-top:8px"></div>
-      </div>
-      <!-- Cuenta Corriente -->
-      <div class="card">
-        <div class="card-header">
-          <span class="card-title">Cuenta corriente — cuotas emitidas vs cobradas</span>
-        </div>
-        <div class="kpi-grid" id="kpi-cuotas-cta" style="margin-bottom:12px"></div>
-        <div class="chart-box" style="height:200px"><canvas id="chart-cuotas-cta"></canvas></div>
-        <div class="legend" id="legend-cuotas-cta" style="margin-top:8px"></div>
-      </div>
-    </div>
-  </div>
 
-  <!-- ── OBJETIVOS ─────────────────────────────────────────────────── -->
-  <div id="sec-objetivos" class="section">
-    <div class="kpi-grid" id="kpi-objetivos"></div>
-    <div class="sub-nav">
-      <span class="sub-tab active" data-section="obj" data-pane="progreso">Progreso</span>
-      <span class="sub-tab" data-section="obj" data-pane="historico">Histórico</span>
-    </div>
-    <div id="opane-progreso" class="sub-pane active">
+    <!-- ── RESUMEN ────────────────────────────────────────────────────── -->
+    <div id="sec-resumen" class="section">
+      <div class="kpi-grid" id="kpi-resumen"></div>
       <div class="card">
-        <div class="card-header">
-          <span class="card-title">Cumplimiento por categoría</span>
-          <span class="card-badge" id="badge-obj-mes">—</span>
-        </div>
-        <div class="prog-list" id="prog-obj"></div>
-        <div class="legend" style="margin-top:12px;">
-          <span class="legend-item"><span class="legend-dot" style="background:var(--teal)"></span>Superado</span>
-          <span class="legend-item"><span class="legend-dot" style="background:var(--blue)"></span>En camino</span>
-          <span class="legend-item"><span class="legend-dot" style="background:var(--amber)"></span>En riesgo</span>
-          <span class="legend-item"><span class="legend-dot" style="background:var(--red)"></span>Crítico</span>
-        </div>
+        <div class="card-header"><span class="card-title">Estado general de la sucursal</span></div>
+        <div class="prog-list" id="prog-resumen"></div>
       </div>
       <div class="card">
-        <div class="card-header"><span class="card-title">Avance acumulado vs meta</span></div>
-        <div class="chart-box" style="height:200px"><canvas id="chart-obj-acum"></canvas></div>
+        <div class="card-header"><span class="card-title">Alertas y acciones recomendadas</span></div>
+        <div class="alert-list" id="alert-list"></div>
       </div>
+      <div class="timestamp" id="timestamp-bottom"></div>
     </div>
-    <div id="opane-historico" class="sub-pane">
-      <div class="card">
-        <div class="card-header"><span class="card-title">Cumplimiento — últimos 6 meses</span></div>
-        <div class="chart-box" style="height:240px"><canvas id="chart-obj-hist"></canvas></div>
-      </div>
-    </div>
-  </div>
 
-  <!-- ── SEGUROS ───────────────────────────────────────────────────── -->
-  <div id="sec-seguros" class="section">
-    <div class="kpi-grid" id="kpi-seguros"></div>
-    <div class="sub-nav">
-      <span class="sub-tab active" data-section="seg" data-pane="polizas">Pólizas Qualia</span>
-      <span class="sub-tab" data-section="seg" data-pane="evolucion">Evolución</span>
-    </div>
-    <div id="sgpane-polizas" class="sub-pane active">
-      <div class="card">
-        <div class="card-header"><span class="card-title">Últimas pólizas emitidas — mes actual</span></div>
-        <div class="table-wrap">
-          <table>
-            <thead><tr><th>Fecha</th><th>Cliente</th><th>Artículo</th><th class="num">Prima</th><th>Estado</th></tr></thead>
-            <tbody id="tbody-seg-detalle"></tbody>
-          </table>
-        </div>
-      </div>
-      <div class="card" style="margin-top:12px">
-        <div class="card-header"><span class="card-title">Distribución por tipo de servicio</span></div>
-        <div class="chart-box" style="height:220px"><canvas id="chart-seg-fam"></canvas></div>
-      </div>
-    </div>
-    <div id="sgpane-evolucion" class="sub-pane">
-      <div class="card">
-        <div class="card-header"><span class="card-title">Evolución mensual — pólizas y garantías</span></div>
-        <div class="chart-box" style="height:240px"><canvas id="chart-seg-ev"></canvas></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ── RESUMEN ───────────────────────────────────────────────────── -->
-  <div id="sec-resumen" class="section">
-    <div class="kpi-grid" id="kpi-resumen"></div>
-    <div class="card">
-      <div class="card-header"><span class="card-title">Estado general de la sucursal</span></div>
-      <div class="prog-list" id="prog-resumen"></div>
-    </div>
-    <div class="card">
-      <div class="card-header"><span class="card-title">Alertas y acciones recomendadas</span></div>
-      <div class="alert-list" id="alert-list"></div>
-    </div>
-    <div class="timestamp" id="timestamp-bottom"></div>
-  </div>
-
-</main>
+  </main>
+</div><!-- /main-wrap -->
+</div><!-- /shell -->
 
 <script>
+// ═══════════════════════════════════════════════════════════════════════
+// SYNC: Sincronizar nav-item activo con showSection
+// ═══════════════════════════════════════════════════════════════════════
+var SECTION_TITLES = {
+  ventas:    "Ventas",
+  stock:     "Stock",
+  morosidad: "Morosidad",
+  objetivos: "Objetivos",
+  seguros:   "Seguros",
+  resumen:   "Resumen"
+};
+
+// Override showSection para actualizar sidebar + topbar title
+var _origShowSection;
+document.addEventListener("DOMContentLoaded", function() {
+  // Patch showSection después de que el script original lo defina
+  setTimeout(function() {
+    var origShow = window.showSection;
+    window.showSection = function(tab) {
+      // Actualizar nav-items
+      document.querySelectorAll(".nav-item[data-tab]").forEach(function(el) {
+        el.classList.toggle("active", el.getAttribute("data-tab") === tab);
+      });
+      // Actualizar título topbar
+      var tt = document.getElementById("topbar-section-title");
+      if (tt) tt.textContent = SECTION_TITLES[tab] || tab;
+      // Llamar original
+      if (origShow) origShow(tab);
+    };
+  }, 0);
+});
+
+// Actualizar brand-sub (sidebar bottom)
+var _origOnDataReady;
+var origOnDataReady = window.onDataReady;
+
 // ═══════════════════════════════════════════════════════════════════════
 // CONFIGURACIÓN — leer ID de sucursal desde URL (?id=3)
 // ═══════════════════════════════════════════════════════════════════════
@@ -884,15 +1147,14 @@ var CONFIG = (function() {
 })();
 
 // ═══════════════════════════════════════════════════════════════════════
-// PERÍODO — calcula fechas según selección
+// PERÍODO
 // ═══════════════════════════════════════════════════════════════════════
 var PERIODO = {
   tipo:  "mes_actual",
   desde: "",
   hasta: "",
-
   calcular: function(tipo) {
-    var hoy   = new Date();
+    var hoy = new Date();
     var d, h;
     switch (tipo) {
       case "mes_actual":
@@ -915,20 +1177,17 @@ var PERIODO = {
         d = new Date(hoy.getFullYear(), 0, 1);
         h = new Date(hoy.getFullYear(), 11, 31);
         break;
-      default:
-        return; // custom — no recalcular
+      default: return;
     }
     this.tipo  = tipo;
     this.desde = this.fmt(d);
     this.hasta = this.fmt(h);
   },
-
   fmt: function(d) {
     return d.getFullYear() + "-" +
       String(d.getMonth() + 1).padStart(2, "0") + "-" +
       String(d.getDate()).padStart(2, "0");
   },
-
   label: function() {
     var labels = {
       mes_actual:   "Mes actual",
@@ -938,13 +1197,9 @@ var PERIODO = {
       anio:         "Año " + new Date().getFullYear(),
       custom:       ""
     };
-    if (this.tipo === "custom") {
-      return this.desde + "  →  " + this.hasta;
-    }
+    if (this.tipo === "custom") return this.desde + "  →  " + this.hasta;
     return labels[this.tipo] || "";
   },
-
-  // Filtra un array de filas por campo de fecha (string yyyy-mm-dd)
   filtrar: function(rows, campoFecha) {
     var d = this.desde, h = this.hasta;
     return rows.filter(function(r) {
@@ -953,19 +1208,12 @@ var PERIODO = {
     });
   }
 };
-
-// Inicializar con mes actual
 PERIODO.calcular("mes_actual");
 
 // ═══════════════════════════════════════════════════════════════════════
 // ESTADO GLOBAL
 // ═══════════════════════════════════════════════════════════════════════
-var STATE = {
-  data:      null,
-  loading:   true,
-  activeTab: "ventas",
-  charts:    {}
-};
+var STATE = { data: null, loading: true, activeTab: "ventas", charts: {} };
 
 // ═══════════════════════════════════════════════════════════════════════
 // PALETA
@@ -999,11 +1247,8 @@ function fmtNum(n) {
 }
 function escapeHtml(v) {
   return String(v == null ? "" : v)
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;");
+    .replace(/&/g,"&amp;").replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;");
 }
 function fmtPct(n) { return Math.round(n) + "%"; }
 function pill(txt, cls) { return '<span class="pill pill-' + cls + '">' + txt + '</span>'; }
@@ -1027,11 +1272,9 @@ function hide(id) { var el=document.getElementById(id); if(el) el.style.display=
 function html(id, h) { var el=document.getElementById(id); if(el) el.innerHTML=h; }
 
 // ═══════════════════════════════════════════════════════════════════════
-// DATOS DEMO (cuando no hay Web App configurado)
+// DATOS DEMO
 // ═══════════════════════════════════════════════════════════════════════
 function getDemoData() {
-  // Valores de referencia escala real CHEMES — Marzo 2026
-  // Total ventas mes: $346.535.647 (confirmado vs Tango live)
   var meses = ["Oct 2025","Nov 2025","Dic 2025","Ene 2026","Feb 2026","Mar 2026"];
   return {
     ok: true,
@@ -1055,16 +1298,16 @@ function getDemoData() {
         {mes:"Mar 2026",total:346535647,neto:289245635,cant:1169}
       ],
       top_articulos: [
-        {desc:"HEL SAMSUNG SBS RS27T5561B1",     unidades:1,  importe:4692561},
-        {desc:"REFINANCIACION DE DEUDA",          unidades:1,  importe:3728926},
-        {desc:"MOTO SIAM NOMAD 150CC ENDURO",     unidades:1,  importe:5018182},
-        {desc:"PLANC GA-MA LED BELLA TOURMALINE", unidades:1,  importe:4490000},
-        {desc:"SILLA MILANO NEGRA SML017",        unidades:6,  importe:2280991},
-        {desc:"COL APP 80x20 EX CONSTANZA",       unidades:2,  importe:1652893},
-        {desc:"PROTECCION CHEMES 2 AÑOS",         unidades:1,  importe:2400803},
-        {desc:"PROTECCION CHEMES 1 AÑO",          unidades:1,  importe:2371860},
-        {desc:"HEL LG GT57BPSX 595L",             unidades:1,  importe:1199999},
-        {desc:"S02017039",                        unidades:6,  importe:2289917}
+        {desc:"HEL SAMSUNG SBS RS27T5561B1",     unidades:1, importe:4692561},
+        {desc:"REFINANCIACION DE DEUDA",          unidades:1, importe:3728926},
+        {desc:"MOTO SIAM NOMAD 150CC ENDURO",     unidades:1, importe:5018182},
+        {desc:"PLANC GA-MA LED BELLA TOURMALINE", unidades:1, importe:4490000},
+        {desc:"SILLA MILANO NEGRA SML017",        unidades:6, importe:2280991},
+        {desc:"COL APP 80x20 EX CONSTANZA",       unidades:2, importe:1652893},
+        {desc:"PROTECCION CHEMES 2 AÑOS",         unidades:1, importe:2400803},
+        {desc:"PROTECCION CHEMES 1 AÑO",          unidades:1, importe:2371860},
+        {desc:"HEL LG GT57BPSX 595L",             unidades:1, importe:1199999},
+        {desc:"S02017039",                        unidades:6, importe:2289917}
       ],
       por_familia: [
         {familia:"Línea Blanca",   importe:120000000},
@@ -1084,15 +1327,15 @@ function getDemoData() {
         total_valor:        0
       },
       criticos: [
-        {desc:"SILLA MILANO NEGRA SML017",      stock:-2, minimo:0, estado:"NEGATIVO",    dias:5},
-        {desc:"LAV INV DREAN LFDR0814SB0",      stock:-1, minimo:0, estado:"NEGATIVO",    dias:8},
-        {desc:"HEL LG GT57BPSX 595L",           stock:0,  minimo:1, estado:"SIN_STOCK",   dias:12},
-        {desc:"MOTO SIAM NOMAD 150CC",          stock:0,  minimo:2, estado:"SIN_STOCK",   dias:15},
-        {desc:"PLANC GA-MA LED BELLA",          stock:1,  minimo:3, estado:"BAJO_MINIMO", dias:3}
+        {desc:"SILLA MILANO NEGRA SML017",  stock:-2, minimo:0, estado:"NEGATIVO",    dias:5},
+        {desc:"LAV INV DREAN LFDR0814SB0",  stock:-1, minimo:0, estado:"NEGATIVO",    dias:8},
+        {desc:"HEL LG GT57BPSX 595L",       stock:0,  minimo:1, estado:"SIN_STOCK",   dias:12},
+        {desc:"MOTO SIAM NOMAD 150CC",       stock:0,  minimo:2, estado:"SIN_STOCK",   dias:15},
+        {desc:"PLANC GA-MA LED BELLA",       stock:1,  minimo:3, estado:"BAJO_MINIMO", dias:3}
       ],
       inmovilizados: [],
       por_familia: [
-        {familia:"Línea Blanca", valor:0},{familia:"Tecnología",valor:0},
+        {familia:"Línea Blanca",valor:0},{familia:"Tecnología",valor:0},
         {familia:"Muebles",valor:0},{familia:"Colchones",valor:0}
       ],
       por_antiguedad: [
@@ -1135,16 +1378,11 @@ function getDemoData() {
         {categoria:"Garantías ext.", obj_garantias:700},
         {categoria:"Seguros Qualia", obj_polizas:500}
       ],
-      realVentas:  [120000000,80000000,55000000,45000000,30000000,20000000],
+      realVentas: [120000000,80000000,55000000,45000000,30000000,20000000],
       realEtiquetas: ["Línea Blanca","Tecnología","Muebles","Colchones","Climatización","Telefonía"]
     },
     seguros: {
-      kpis: {
-        total_polizas:     0,
-        importe_polizas:   0,
-        total_garantias:   0,
-        importe_garantias: 0
-      },
+      kpis: { total_polizas:0, importe_polizas:0, total_garantias:0, importe_garantias:0 },
       polizas_por_familia:   [],
       evolucion_mensual: meses.map(function(m){ return {mes:m,polizas:0,garantias:0}; }),
       detalle_polizas:       []
@@ -1153,7 +1391,7 @@ function getDemoData() {
 }
 
 // ═══════════════════════════════════════════════════════════════════════
-// SUB-TABS — navegación interna por sección
+// SUB-TABS
 // ═══════════════════════════════════════════════════════════════════════
 var PANE_MAP = {
   ventas: { prefix: "vpane", default: "evolucion" },
@@ -1162,83 +1400,59 @@ var PANE_MAP = {
   obj:    { prefix: "opane", default: "progreso"  },
   seg:    { prefix: "sgpane",default: "polizas"   }
 };
-
 document.addEventListener("click", function(e) {
   var t = e.target;
   if (!t.classList.contains("sub-tab")) return;
   var section = t.getAttribute("data-section");
   var pane    = t.getAttribute("data-pane");
   if (!section || !pane) return;
-
   var map = PANE_MAP[section];
   if (!map) return;
-
-  // Desactivar tabs del mismo grupo
-  t.closest(".sub-nav").querySelectorAll(".sub-tab").forEach(function(st) {
-    st.classList.remove("active");
-  });
+  t.closest(".sub-nav").querySelectorAll(".sub-tab").forEach(function(st){ st.classList.remove("active"); });
   t.classList.add("active");
-
-  // Mostrar pane correspondiente, ocultar hermanos
   var prefix = map.prefix;
-  // Buscar todos los panes con este prefijo dentro del mismo section container
   var container = t.closest(".section");
-  container.querySelectorAll('[id^="' + prefix + '"]').forEach(function(p) {
-    p.classList.remove("active");
-  });
+  container.querySelectorAll('[id^="' + prefix + '"]').forEach(function(p){ p.classList.remove("active"); });
   var target = document.getElementById(prefix + "-" + pane);
   if (target) {
     target.classList.add("active");
-    // Forzar re-render de charts al hacerse visibles
     setTimeout(function() {
-      Object.values(STATE.charts).forEach(function(ch) {
-        if (ch && ch.resize) ch.resize();
-      });
+      Object.values(STATE.charts).forEach(function(ch){ if(ch && ch.resize) ch.resize(); });
     }, 50);
   }
 });
 
 // ═══════════════════════════════════════════════════════════════════════
-// EVENTOS DEL SELECTOR DE PERÍODO
+// PERÍODO — eventos
 // ═══════════════════════════════════════════════════════════════════════
 function actualizarBadgePeriodo() {
   var badge = document.getElementById("period-badge");
   if (badge) badge.textContent = PERIODO.label();
 }
-
 function seleccionarPeriodo(tipo) {
-  document.querySelectorAll(".period-pill").forEach(function(p) {
+  document.querySelectorAll(".period-pill").forEach(function(p){
     p.classList.toggle("active", p.getAttribute("data-period") === tipo);
   });
   var custom = document.getElementById("period-custom");
   if (custom) custom.classList.toggle("visible", tipo === "custom");
-
   if (tipo !== "custom") {
     PERIODO.calcular(tipo);
     actualizarBadgePeriodo();
-    // Actualizar chip del panel de comando
     var cp = document.getElementById("cmd-periodo");
     if (cp) cp.textContent = PERIODO.label();
-    // Re-renderizar sección activa con el nuevo período
     if (STATE.data) renderSection(STATE.activeTab);
   }
 }
-
 function aplicarPeriodoCustom() {
   var desde = document.getElementById("fecha-desde").value;
   var hasta = document.getElementById("fecha-hasta").value;
-  if (!desde || !hasta || desde > hasta) {
-    alert("Seleccioná un rango de fechas válido.");
-    return;
-  }
+  if (!desde || !hasta || desde > hasta) { alert("Seleccioná un rango de fechas válido."); return; }
   PERIODO.tipo  = "custom";
   PERIODO.desde = desde;
   PERIODO.hasta = hasta;
   actualizarBadgePeriodo();
   if (STATE.data) renderSection(STATE.activeTab);
 }
-
-// Inicializar fechas del input custom con mes actual
 (function() {
   var hoy = new Date();
   var primerDia = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
@@ -1251,94 +1465,71 @@ function aplicarPeriodoCustom() {
   document.getElementById("fecha-desde").value = fmt(primerDia);
   document.getElementById("fecha-hasta").value  = fmt(ultimoDia);
 })();
-
 document.querySelectorAll(".period-pill").forEach(function(pill) {
-  pill.addEventListener("click", function() {
-    seleccionarPeriodo(this.getAttribute("data-period"));
-  });
+  pill.addEventListener("click", function(){ seleccionarPeriodo(this.getAttribute("data-period")); });
 });
-
 actualizarBadgePeriodo();
 
 // ═══════════════════════════════════════════════════════════════════════
-// HELPERS DE FILTRADO POR PERÍODO — aplican PERIODO.filtrar() a los datos
+// HELPERS DE FILTRADO
 // ═══════════════════════════════════════════════════════════════════════
 function calcularTopArticulos(filas) {
-  var topArt = {}, porFam = {};
+  var topArt = {};
   filas.forEach(function(r) {
     var cod  = r.CodArticulo || "";
     var desc = r.DescripcionLarga || r.Descripcion || cod;
     var dep  = r.Deposito || "S/D";
     var imp  = parseFloat(r.ImporteNeto || 0);
     var cant = parseFloat(r.Cantidad    || 0);
-    if (!topArt[cod]) topArt[cod] = { cod: cod, desc: desc, familia: dep, importe: 0, unidades: 0 };
+    if (!topArt[cod]) topArt[cod] = { cod:cod, desc:desc, familia:dep, importe:0, unidades:0 };
     topArt[cod].importe  += imp;
     topArt[cod].unidades += cant;
   });
   return Object.values(topArt)
     .filter(function(a){ return a.importe !== 0; })
     .sort(function(a,b){ return b.importe - a.importe; })
-    .slice(0, 30);
+    .slice(0,30);
 }
-
 function calcularKpisVentas(filas) {
-  var ventasMes = 0, netoMes = 0, cntMes = 0, ncCant = 0, ncImporte = 0;
+  var ventasMes=0, netoMes=0, cntMes=0, ncCant=0, ncImporte=0;
   var porMes = {};
-
   filas.forEach(function(r) {
     var total = parseFloat(r.Total || 0);
     var neto  = parseFloat(r.Neto  || 0);
     var tipo  = r.TipoComprobante || "";
-    var mes   = r.MesAnio || (r.Fecha || "").slice(0, 7);
-
+    var mes   = r.MesAnio || (r.Fecha || "").slice(0,7);
     if (tipo === "FAC" || tipo === "FCE") {
-      ventasMes += total;
-      netoMes   += neto;
-      cntMes++;
-      if (!porMes[mes]) porMes[mes] = { total: 0, neto: 0, cant: 0 };
-      porMes[mes].total += total;
-      porMes[mes].neto  += neto;
-      porMes[mes].cant++;
+      ventasMes += total; netoMes += neto; cntMes++;
+      if (!porMes[mes]) porMes[mes] = {total:0,neto:0,cant:0};
+      porMes[mes].total += total; porMes[mes].neto += neto; porMes[mes].cant++;
     } else if (tipo === "N/C") {
-      ventasMes += total;
-      netoMes   += neto;
-      ncCant++;
+      ventasMes += total; netoMes += neto; ncCant++;
       ncImporte += Math.abs(total);
-      if (!porMes[mes]) porMes[mes] = { total: 0, neto: 0, cant: 0 };
-      porMes[mes].total += total;
-      porMes[mes].neto  += neto;
+      if (!porMes[mes]) porMes[mes] = {total:0,neto:0,cant:0};
+      porMes[mes].total += total; porMes[mes].neto += neto;
     }
   });
-
-  // top_articulos se calcula en renderSection desde _raw_ventas_art
-  // No recalcular aquí para evitar doble lógica y conflictos
-  var topArr = [];
-  var famArr = [];
-
   var ticketProm = cntMes > 0 ? ventasMes / cntMes : 0;
-  var evolucion  = Object.keys(porMes).sort().map(function(m) {
-    return { mes: m, total: Math.round(porMes[m].total), neto: Math.round(porMes[m].neto), cant: porMes[m].cant };
+  var evolucion  = Object.keys(porMes).sort().map(function(m){
+    return {mes:m, total:Math.round(porMes[m].total), neto:Math.round(porMes[m].neto), cant:porMes[m].cant};
   });
-
   return {
     kpis: {
-      ventas_mes:        Math.round(ventasMes),
-      ventas_neto:       Math.round(netoMes),
-      ticket_promedio:   Math.round(ticketProm),
-      comprobantes_mes:  cntMes,
-      nc_cantidad:       ncCant,
-      nc_importe:        Math.round(ncImporte)
+      ventas_mes:       Math.round(ventasMes),
+      ventas_neto:      Math.round(netoMes),
+      ticket_promedio:  Math.round(ticketProm),
+      comprobantes_mes: cntMes,
+      nc_cantidad:      ncCant,
+      nc_importe:       Math.round(ncImporte)
     },
     evolucion_mensual: evolucion,
-    top_articulos:     [],   // se asigna en renderSection
-    por_familia:       []    // se asigna en renderSection
+    top_articulos: [],
+    por_familia:   []
   };
 }
-
 function calcularKpisMorosidad(filas) {
-  var saldoTotal = 0, mora130 = 0, mora3190 = 0, moraMas90 = 0;
+  var saldoTotal=0, mora130=0, mora3190=0, moraMas90=0;
   var clientes = {};
-
   filas.forEach(function(r) {
     var imp   = parseFloat(r.ImporteCuota || 0);
     var tramo = (r.TramoMora || "").trim();
@@ -1346,55 +1537,21 @@ function calcularKpisMorosidad(filas) {
     var nom   = (r.NombreCliente || cod || "SIN NOMBRE").trim();
     var tel   = (r.Telefono || "").trim();
     var dias  = parseInt(r.DiasVencido || 0, 10);
-
-    if (isNaN(imp))  imp = 0;
+    if (isNaN(imp)) imp = 0;
     if (isNaN(dias)) dias = 0;
-
     saldoTotal += imp;
-
     if (tramo === "MORA_1_30")   mora130   += imp;
     if (tramo === "MORA_31_90")  mora3190  += imp;
     if (tramo === "MORA_MAS_90") moraMas90 += imp;
-
     if (tramo !== "VIGENTE") {
-      if (!clientes[cod]) {
-        clientes[cod] = {
-          cod: cod,
-          nom: nom,
-          tel: tel,
-          vencido: 0,
-          diasMax: 0
-        };
-      }
+      if (!clientes[cod]) clientes[cod] = {cod:cod,nom:nom,tel:tel,vencido:0,diasMax:0};
       clientes[cod].vencido += imp;
       if (dias > clientes[cod].diasMax) clientes[cod].diasMax = dias;
     }
   });
-
   var vencidoTotal = mora130 + mora3190 + moraMas90;
-  var pctMora = saldoTotal > 0
-    ? parseFloat((vencidoTotal / saldoTotal * 100).toFixed(1))
-    : 0;
-
-  var clientesBase = Object.values(clientes)
-    .sort(function(a, b) { return b.vencido - a.vencido; });
-
-  var totalClientesMorosos = clientesBase.length;
-
-  var clientesArr = clientesBase
-    .slice(0, 20)
-    .map(function(c) {
-      return {
-        nombre:    c.nom,
-        telefono:  c.tel,
-        vencido:   Math.round(c.vencido),
-        dias_mora: c.diasMax,
-        estado:    c.diasMax > 90 ? "ALTO RIESGO"
-                  : c.diasMax > 30 ? "SEGUIMIENTO"
-                  : "GESTION"
-      };
-    });
-
+  var pctMora = saldoTotal > 0 ? parseFloat((vencidoTotal/saldoTotal*100).toFixed(1)) : 0;
+  var clientesBase = Object.values(clientes).sort(function(a,b){ return b.vencido - a.vencido; });
   return {
     kpis: {
       saldo_total:      Math.round(saldoTotal),
@@ -1403,116 +1560,101 @@ function calcularKpisMorosidad(filas) {
       mora_1_30:        Math.round(mora130),
       mora_31_90:       Math.round(mora3190),
       mora_mas_90:      Math.round(moraMas90),
-      clientes_morosos: totalClientesMorosos
+      clientes_morosos: clientesBase.length
     },
     distribucion: [
-      { tramo: "1–30 días",  importe: Math.round(mora130)   },
-      { tramo: "31–90 días", importe: Math.round(mora3190)  },
-      { tramo: "+90 días",   importe: Math.round(moraMas90) }
+      {tramo:"1–30 días",  importe:Math.round(mora130)},
+      {tramo:"31–90 días", importe:Math.round(mora3190)},
+      {tramo:"+90 días",   importe:Math.round(moraMas90)}
     ],
-    clientes: clientesArr
+    clientes: clientesBase.slice(0,20).map(function(c){
+      return {
+        nombre:   c.nom, telefono: c.tel,
+        vencido:  Math.round(c.vencido), dias_mora: c.diasMax,
+        estado:   c.diasMax > 90 ? "ALTO RIESGO" : c.diasMax > 30 ? "SEGUIMIENTO" : "GESTION"
+      };
+    })
   };
 }
-
 function calcularKpisSeguros(filasS, filasG) {
-  var totPol = 0, impPol = 0, totGar = 0, impGar = 0;
-  var polFam = {}, garFam = {}, evol = {}, detalle = [];
-
-  filasS.forEach(function(r) {
-    var imp = parseFloat(r.ImporteTotal || 0);
-    var fam = r.Descripcion || "SEGURO";
-    var mes = (r.FechaEmision || "").slice(0, 7);
-    totPol++; impPol += imp;
-    polFam[fam] = (polFam[fam] || 0) + 1;
-    if (!evol[mes]) evol[mes] = { polizas: 0, garantias: 0 };
+  var totPol=0,impPol=0,totGar=0,impGar=0;
+  var polFam={}, garFam={}, evol={}, detalle=[];
+  filasS.forEach(function(r){
+    var imp=parseFloat(r.ImporteTotal||0);
+    var fam=r.Descripcion||"SEGURO";
+    var mes=(r.FechaEmision||"").slice(0,7);
+    totPol++; impPol+=imp;
+    polFam[fam]=(polFam[fam]||0)+1;
+    if(!evol[mes]) evol[mes]={polizas:0,garantias:0};
     evol[mes].polizas++;
-    detalle.push({
-      fecha:    r.FechaEmision || "",
-      cliente:  r.NombreCliente || "",
-      articulo: r.Descripcion  || "",
-      prima:    parseFloat(r.PrimaMensual || 0),
-      vigencia: "—",
-      estado:   r.Estado || "ACTIVA"
-    });
+    detalle.push({fecha:r.FechaEmision||"",cliente:r.NombreCliente||"",
+      articulo:r.Descripcion||"",prima:parseFloat(r.PrimaMensual||0),vigencia:"—",estado:r.Estado||"ACTIVA"});
   });
-
-  filasG.forEach(function(r) {
-    var imp  = parseFloat(r.Importe || 0);
-    var cant = parseFloat(r.Cantidad || 1);
-    var fam  = r.Descripcion || "GARANTIA";
-    var mes  = (r.FechaEmision || "").slice(0, 7);
-    totGar += cant; impGar += imp;
-    garFam[fam] = (garFam[fam] || 0) + cant;
-    if (!evol[mes]) evol[mes] = { polizas: 0, garantias: 0 };
-    evol[mes].garantias += cant;
+  filasG.forEach(function(r){
+    var imp=parseFloat(r.Importe||0);
+    var cant=parseFloat(r.Cantidad||1);
+    var fam=r.Descripcion||"GARANTIA";
+    var mes=(r.FechaEmision||"").slice(0,7);
+    totGar+=cant; impGar+=imp;
+    garFam[fam]=(garFam[fam]||0)+cant;
+    if(!evol[mes]) evol[mes]={polizas:0,garantias:0};
+    evol[mes].garantias+=cant;
   });
-
   return {
-    kpis: {
-      total_polizas:     totPol,
-      importe_polizas:   Math.round(impPol),
-      total_garantias:   Math.round(totGar),
-      importe_garantias: Math.round(impGar)
-    },
-    polizas_por_familia: Object.entries(polFam)
-      .map(function(e){ return { familia: e[0], cantidad: e[1] }; })
-      .sort(function(a,b){ return b.cantidad - a.cantidad; }).slice(0,8),
-    evolucion_mensual: Object.keys(evol).sort().map(function(m){
-      return { mes: m, polizas: evol[m].polizas, garantias: evol[m].garantias };
-    }),
-    detalle_polizas: detalle.slice(0, 10)
+    kpis:{total_polizas:totPol,importe_polizas:Math.round(impPol),total_garantias:Math.round(totGar),importe_garantias:Math.round(impGar)},
+    polizas_por_familia:Object.entries(polFam).map(function(e){return{familia:e[0],cantidad:e[1]};}).sort(function(a,b){return b.cantidad-a.cantidad;}).slice(0,8),
+    evolucion_mensual:Object.keys(evol).sort().map(function(m){return{mes:m,polizas:evol[m].polizas,garantias:evol[m].garantias};}),
+    detalle_polizas:detalle.slice(0,10)
   };
 }
+
+// ═══════════════════════════════════════════════════════════════════════
+// FETCH
+// ═══════════════════════════════════════════════════════════════════════
 function fetchData() {
   if (CONFIG.WEB_APP_URL.indexOf("PEGAR_URL") !== -1 || CONFIG.DEMO_MODE) {
-    setTimeout(function() {
+    setTimeout(function(){
       STATE.data = getDemoData();
       STATE.loading = false;
       onDataReady();
     }, 900);
     return;
   }
-
   var url = CONFIG.WEB_APP_URL + "?modulo=todos&id=" + CONFIG.SUCURSAL_ID + "&_=" + Date.now();
   fetch(url)
     .then(function(r){ return r.json(); })
-    .then(function(d) {
+    .then(function(d){
       if (d.error) throw new Error(d.mensaje || "Error del servidor");
       STATE.data = d;
       STATE.loading = false;
       onDataReady();
       cargarRawData();
     })
-    .catch(function(err) {
+    .catch(function(err){
       STATE.loading = false;
-      html("global-error", "Error al cargar datos: " + err.message +
-        " — Verificar SOURCE_FOLDER_ID en Apps Script.");
+      html("global-error","Error al cargar datos: " + err.message + " — Verificar SOURCE_FOLDER_ID en Apps Script.");
       show("global-error");
       hide("global-loading");
     });
 }
-
 function cargarRawData() {
   var modulos = [
-    { mod: "raw_ventas",      key: "_raw_ventas",      tabs: ["ventas","resumen"] },
-    { mod: "raw_ventas_art",  key: "_raw_ventas_art",  tabs: ["ventas"] },
-    { mod: "raw_seguros",     key: "_raw_seguros",     tabs: ["seguros","resumen"] },
-    { mod: "raw_garantias",   key: "_raw_garantias",   tabs: ["seguros","resumen"] }
+    {mod:"raw_ventas",     key:"_raw_ventas",     tabs:["ventas","resumen"]},
+    {mod:"raw_ventas_art", key:"_raw_ventas_art", tabs:["ventas"]},
+    {mod:"raw_seguros",    key:"_raw_seguros",    tabs:["seguros","resumen"]},
+    {mod:"raw_garantias",  key:"_raw_garantias",  tabs:["seguros","resumen"]}
   ];
-  modulos.forEach(function(m) {
-    var url = CONFIG.WEB_APP_URL + "?modulo=" + m.mod +
-              "&id=" + CONFIG.SUCURSAL_ID + "&_=" + Date.now();
+  modulos.forEach(function(m){
+    var url = CONFIG.WEB_APP_URL + "?modulo=" + m.mod + "&id=" + CONFIG.SUCURSAL_ID + "&_=" + Date.now();
     fetch(url)
       .then(function(r){ return r.json(); })
-      .then(function(d) {
+      .then(function(d){
         if (d.ok && d.rows && d.rows.length) {
           STATE.data[m.key] = d.rows;
-          if (m.tabs.indexOf(STATE.activeTab) !== -1) {
-            renderSection(STATE.activeTab);
-          }
+          if (m.tabs.indexOf(STATE.activeTab) !== -1) renderSection(STATE.activeTab);
         }
       })
-      .catch(function() {});
+      .catch(function(){});
   });
 }
 
@@ -1523,102 +1665,75 @@ function onDataReady() {
   hide("global-loading");
   var d = STATE.data;
 
-  if (d._raw_ventas)    STATE.data._raw_ventas    = d._raw_ventas;
-  if (d._raw_morosidad) STATE.data._raw_morosidad = d._raw_morosidad;
-  if (d._raw_seguros)   STATE.data._raw_seguros   = d._raw_seguros;
-  if (d._raw_garantias) STATE.data._raw_garantias = d._raw_garantias;
-
-  // Topbar — nombre de sucursal devuelto por el servidor
+  // Nombre de sucursal
   var nombre = d.sucursal_nombre || d.sucursal || ("Sucursal #" + CONFIG.SUCURSAL_ID);
-  var el = document.getElementById("chip-sucursal");
-  if (el) el.textContent = nombre;
-
-  // Actualizar título de la página y brand-sub con el nombre real
+  var chipSuc = document.getElementById("chip-sucursal");
+  if (chipSuc) chipSuc.textContent = nombre;
   document.title = "Chemes — " + nombre;
-  var brandSub = document.querySelector(".brand-sub");
-  if (brandSub) brandSub.textContent = nombre;
 
+  // Update timestamp en sidebar
   var upd = document.getElementById("chip-update");
   if (upd && d.ultima_actualizacion) {
     var ts = d.ultima_actualizacion.replace("T"," ").slice(0,16);
-    upd.textContent = ts;
-    upd.title = "Última actualización: " + ts;
+    upd.textContent = "Actualizado " + ts;
   }
 
   actualizarBadgePeriodo();
-  // Calcular ventasData filtrado para el panel de comando
   var initVentas = (d._raw_ventas && d._raw_ventas.length)
-    ? calcularKpisVentas(PERIODO.filtrar(d._raw_ventas, "Fecha"))
+    ? calcularKpisVentas(PERIODO.filtrar(d._raw_ventas,"Fecha"))
     : d.ventas;
   renderCommandPanel(d, initVentas);
   renderNavCommandStrip(d, initVentas);
   showSection(STATE.activeTab);
-
   var now = new Date().toLocaleString("es-AR");
-  html("timestamp-bottom", "Datos actualizados: " + (d.ultima_actualizacion||now) + " | Generado: " + now);
+  html("timestamp-bottom","Datos actualizados: " + (d.ultima_actualizacion||now) + " | Generado: " + now);
 }
 
 function showSection(tab) {
   document.querySelectorAll(".section").forEach(function(s){ s.classList.remove("active"); });
-  document.querySelectorAll(".nav-tab").forEach(function(t){ t.classList.remove("active"); });
+  document.querySelectorAll(".nav-item[data-tab]").forEach(function(t){
+    t.classList.toggle("active", t.getAttribute("data-tab") === tab);
+  });
   var sec = document.getElementById("sec-" + tab);
-  var navTab = document.querySelector('[data-tab="' + tab + '"]');
   if (sec) sec.classList.add("active");
-  if (navTab) navTab.classList.add("active");
+  // Actualizar título del topbar
+  var tt = document.getElementById("topbar-section-title");
+  if (tt) tt.textContent = SECTION_TITLES[tab] || tab;
   STATE.activeTab = tab;
   if (STATE.data) renderSection(tab);
 }
 
 function renderSection(tab) {
   var d = STATE.data;
-
   var ventasData, moraData, segurosData;
-
   if (d._raw_ventas && d._raw_ventas.length) {
-    var vf = PERIODO.filtrar(d._raw_ventas, "Fecha");
+    var vf = PERIODO.filtrar(d._raw_ventas,"Fecha");
     ventasData = calcularKpisVentas(vf);
-    // top_articulos — solo sobreescribir si hay raw art filtrado con datos
     if (d._raw_ventas_art && d._raw_ventas_art.length) {
-      var af = PERIODO.filtrar(d._raw_ventas_art, "Fecha");
+      var af = PERIODO.filtrar(d._raw_ventas_art,"Fecha");
       var topFiltrado = calcularTopArticulos(af);
-      // usar el filtrado solo si tiene datos; si no, usar el del servidor
-      ventasData.top_articulos = topFiltrado.length
-        ? topFiltrado
-        : (d.ventas ? (d.ventas.top_articulos || []) : []);
+      ventasData.top_articulos = topFiltrado.length ? topFiltrado : (d.ventas ? (d.ventas.top_articulos||[]) : []);
     } else {
-      // raw art no disponible aún — usar el del servidor
-      ventasData.top_articulos = d.ventas ? (d.ventas.top_articulos || []) : [];
+      ventasData.top_articulos = d.ventas ? (d.ventas.top_articulos||[]) : [];
     }
-    ventasData.por_familia = d.ventas ? (d.ventas.por_familia || []) : [];
+    ventasData.por_familia = d.ventas ? (d.ventas.por_familia||[]) : [];
   } else {
     ventasData = d.ventas;
   }
-
-  // MOROSIDAD: nunca se filtra por período — es deuda acumulada histórica
   moraData = d.morosidad;
-
   if (d._raw_seguros && d._raw_seguros.length) {
-    var sf = PERIODO.filtrar(d._raw_seguros, "FechaEmision");
-    var gf = PERIODO.filtrar(d._raw_garantias || [], "FechaEmision");
+    var sf = PERIODO.filtrar(d._raw_seguros,"FechaEmision");
+    var gf = PERIODO.filtrar(d._raw_garantias||[],"FechaEmision");
     segurosData = calcularKpisSeguros(sf, gf);
   } else {
     segurosData = d.seguros;
   }
-
-  // Actualizar panel de comando con los datos del período actual
   renderCommandPanel(d, ventasData);
   renderNavCommandStrip(d, ventasData);
-
   switch(tab) {
-    case "ventas":
-      renderVentas(ventasData);
-      renderVendedor(d.vendedor);
-      break;
+    case "ventas":    renderVentas(ventasData); renderVendedor(d.vendedor); break;
     case "stock":     renderStock(d.stock);                                  break;
-    case "morosidad":
-      renderMorosidad(moraData, d.cuotas);
-      renderCuotas(d.cuotas);
-      break;
+    case "morosidad": renderMorosidad(moraData, d.cuotas); renderCuotas(d.cuotas); break;
     case "objetivos": renderObjetivos(d.objetivos, ventasData, segurosData); break;
     case "seguros":   renderSeguros(segurosData);                            break;
     case "resumen":   renderResumen(d, ventasData, moraData, segurosData);   break;
@@ -1626,143 +1741,91 @@ function renderSection(tab) {
 }
 
 // ═══════════════════════════════════════════════════════════════════════
-// NAV COMMAND STRIP — panel de comando integrado en la barra de navegación
-// Visible en desktop (> 768px). En móvil se usa el command-panel clásico.
+// NAV COMMAND STRIP
 // ═══════════════════════════════════════════════════════════════════════
 function renderNavCommandStrip(d, ventasData) {
   var strip = document.getElementById("nav-command-strip");
   if (!strip) return;
-
   var isMobile = window.innerWidth <= 768;
-
-  var v  = ventasData || d.ventas    || {};
-  var s  = d.stock    || {};
-  var o  = d.objetivos|| {};
-  var vk = v.kpis || {};
-  var sk = s.kpis || {};
-  var ok = o.kpis || {};
-
-  // Ventas netas
-  var el = document.getElementById("ncs-ventas");
-  var es = document.getElementById("ncs-ventas-sub");
-  if (el) el.textContent = fmtPeso(vk.ventas_neto || 0);
-  if (es) es.textContent = fmtNum(vk.comprobantes_mes||0) + " FAC";
-
-  // Objetivo — barra de progreso
-  var objV  = ok.obj_ventas || 0;
-  var realV = vk.ventas_neto || 0;
-  var pct   = objV > 0 ? Math.min(Math.round(realV / objV * 100), 100) : 0;
-  var fill  = document.getElementById("ncs-obj-fill");
-  var lbl   = document.getElementById("ncs-obj-label");
-  var real  = document.getElementById("ncs-obj-real");
-  var ppct  = document.getElementById("ncs-obj-pct");
-  if (fill) {
-    var color = pct >= 100 ? "var(--teal)" : pct >= 70 ? "var(--blue)" : pct >= 50 ? "var(--amber)" : "var(--red)";
-    fill.style.width    = pct + "%";
-    fill.style.background = color;
-  }
-  if (lbl)  lbl.textContent  = (o.mes_nombre || "Objetivo") + " " + (o.anio || "");
-  if (real) real.textContent = fmtPeso(realV);
-  if (ppct) { ppct.textContent = pct + "%"; ppct.style.color = pct >= 100 ? "var(--teal)" : pct < 50 ? "var(--red)" : "var(--blue)"; }
-
-  // Stock crítico
-  var neg   = sk.negativos   || 0;
-  var sinSt = sk.sin_stock   || 0;
-  var total = neg + sinSt;
-  var sv    = document.getElementById("ncs-stock");
-  var ss    = document.getElementById("ncs-stock-sub");
-  var skpi  = document.getElementById("ncs-stock-kpi");
-  if (sv)   sv.textContent   = total;
-  if (ss)   ss.textContent   = neg + " neg. · " + sinSt + " sin st.";
-  if (skpi) skpi.querySelector(".nav-cmd-value").className =
-    "nav-cmd-value " + (neg > 0 ? "danger-hi" : total > 0 ? "danger-hi" : "highlight");
-
-  // Mostrar strip en desktop, ocultar panel clásico
-  if (!isMobile) {
-    strip.style.display = "flex";
-    var panel = document.getElementById("command-panel");
-    if (panel) panel.style.display = "none";
+  var v=ventasData||d.ventas||{}, s=d.stock||{}, o=d.objetivos||{};
+  var vk=v.kpis||{}, sk=s.kpis||{}, ok=o.kpis||{};
+  var el=document.getElementById("ncs-ventas"), es=document.getElementById("ncs-ventas-sub");
+  if(el) el.textContent = fmtPeso(vk.ventas_neto||0);
+  if(es) es.textContent = fmtNum(vk.comprobantes_mes||0) + " FAC";
+  var objV=ok.obj_ventas||0, realV=vk.ventas_neto||0;
+  var pct=objV>0?Math.min(Math.round(realV/objV*100),100):0;
+  var fill=document.getElementById("ncs-obj-fill");
+  var lbl=document.getElementById("ncs-obj-label");
+  var real=document.getElementById("ncs-obj-real");
+  var ppct=document.getElementById("ncs-obj-pct");
+  if(fill){ var color=pct>=100?"var(--teal)":pct>=70?"var(--blue)":pct>=50?"var(--amber)":"var(--red)"; fill.style.width=pct+"%"; fill.style.background=color; }
+  if(lbl)  lbl.textContent=(o.mes_nombre||"Objetivo")+" "+(o.anio||"");
+  if(real) real.textContent=fmtPeso(realV);
+  if(ppct){ ppct.textContent=pct+"%"; ppct.style.color=pct>=100?"var(--teal)":pct<50?"var(--red)":"var(--blue)"; }
+  var neg=sk.negativos||0, sinSt=sk.sin_stock||0, total=neg+sinSt;
+  var sv=document.getElementById("ncs-stock"), ss=document.getElementById("ncs-stock-sub");
+  var skpi=document.getElementById("ncs-stock-kpi");
+  if(sv) sv.textContent=total;
+  if(ss) ss.textContent=neg+" neg. · "+sinSt+" sin st.";
+  if(skpi) skpi.querySelector(".nav-cmd-value").className="nav-cmd-value "+(neg>0?"danger-hi":total>0?"danger-hi":"highlight");
+  if(!isMobile){
+    strip.style.display="flex";
+    var panel=document.getElementById("command-panel");
+    if(panel) panel.style.display="none";
   }
 }
 
 // ═══════════════════════════════════════════════════════════════════════
-// PANEL DE COMANDO — resumen ejecutivo visible en todo momento
+// PANEL DE COMANDO
 // ═══════════════════════════════════════════════════════════════════════
 function renderCommandPanel(d, ventasData) {
   var panel = document.getElementById("command-panel");
   if (!panel) return;
-  panel.style.display = "block";
-
-  var v  = ventasData  || d.ventas    || {};
-  var s  = d.stock     || {};
-  var o  = d.objetivos || {};
-  var vk = v.kpis || {};
-  var sk = s.kpis || {};
-  var ok = o.kpis || {};
-
-  // Período
-  var cp = document.getElementById("cmd-periodo");
-  if (cp) cp.textContent = PERIODO.label();
-
-  // Ventas netas
-  var cv = document.getElementById("cmd-ventas");
-  var cs = document.getElementById("cmd-ventas-sub");
-  if (cv) cv.textContent = fmtPeso(vk.ventas_neto || 0);
-  if (cs) cs.textContent = fmtNum(vk.comprobantes_mes || 0) + " FAC — " + fmtNum(vk.nc_cantidad || 0) + " NC";
-
-  // Objetivo %
-  var objV = ok.obj_ventas || 0;
-  var realV = vk.ventas_neto || 0;
-  var pctObj = objV > 0 ? Math.min(Math.round(realV / objV * 100), 150) : 0;
-  var cmdObj = document.getElementById("cmd-obj-kpi");
-  var cmdObjPct = document.getElementById("cmd-obj-pct");
-  var cmdObjSub = document.getElementById("cmd-obj-sub");
-  if (objV > 0) {
-    if (cmdObjPct) cmdObjPct.textContent = pctObj + "%";
-    if (cmdObjSub) cmdObjSub.textContent = "meta: " + fmtPeso(objV);
-    if (cmdObj) cmdObj.className = "cmd-kpi " + (pctObj >= 100 ? "success-hi" : pctObj < 60 ? "danger-hi" : "highlight");
-    // Barra de progreso
-    var bar = document.getElementById("cmd-obj-bar");
-    if (bar) {
-      bar.style.display = "block";
-      var fill = document.getElementById("cmd-obj-fill");
-      var color = pctObj >= 100 ? "var(--teal)" : pctObj >= 70 ? "var(--blue)" : pctObj >= 50 ? "var(--amber)" : "var(--red)";
-      if (fill) { fill.style.width = Math.min(pctObj, 100) + "%"; fill.style.background = color; }
-      var p2 = document.getElementById("cmd-obj-pct2"); if (p2) p2.textContent = pctObj + "%";
-      var lbl = document.getElementById("cmd-obj-label"); if (lbl) lbl.textContent = (o.mes_nombre || "") + " " + (o.anio || "");
-      var real = document.getElementById("cmd-obj-real"); if (real) real.textContent = "Real: " + fmtPeso(realV);
-      // Días restantes y ritmo
-      var hoy = new Date();
-      var diasMes = new Date(hoy.getFullYear(), hoy.getMonth()+1, 0).getDate();
-      var diasRest = diasMes - hoy.getDate();
-      var ritmo = diasRest > 0 ? Math.round((objV - realV) / diasRest) : 0;
-      var mr = document.getElementById("cmd-obj-meta-right");
-      if (mr) mr.textContent = pctObj >= 100 ? "✓ Objetivo cumplido" : (diasRest + "d restantes — " + fmtPeso(ritmo) + "/día");
+  panel.style.display="block";
+  var v=ventasData||d.ventas||{}, s=d.stock||{}, o=d.objetivos||{};
+  var vk=v.kpis||{}, sk=s.kpis||{}, ok=o.kpis||{};
+  var cp=document.getElementById("cmd-periodo"); if(cp) cp.textContent=PERIODO.label();
+  var cv=document.getElementById("cmd-ventas"), cs=document.getElementById("cmd-ventas-sub");
+  if(cv) cv.textContent=fmtPeso(vk.ventas_neto||0);
+  if(cs) cs.textContent=fmtNum(vk.comprobantes_mes||0)+" FAC — "+fmtNum(vk.nc_cantidad||0)+" NC";
+  var objV=ok.obj_ventas||0, realV=vk.ventas_neto||0;
+  var pctObj=objV>0?Math.min(Math.round(realV/objV*100),150):0;
+  var cmdObj=document.getElementById("cmd-obj-kpi");
+  var cmdObjPct=document.getElementById("cmd-obj-pct");
+  var cmdObjSub=document.getElementById("cmd-obj-sub");
+  if(objV>0){
+    if(cmdObjPct) cmdObjPct.textContent=pctObj+"%";
+    if(cmdObjSub) cmdObjSub.textContent="meta: "+fmtPeso(objV);
+    if(cmdObj) cmdObj.className="cmd-kpi "+(pctObj>=100?"success-hi":pctObj<60?"danger-hi":"highlight");
+    var bar=document.getElementById("cmd-obj-bar");
+    if(bar){
+      bar.style.display="block";
+      var fill=document.getElementById("cmd-obj-fill");
+      var color=pctObj>=100?"var(--teal)":pctObj>=70?"var(--blue)":pctObj>=50?"var(--amber)":"var(--red)";
+      if(fill){ fill.style.width=Math.min(pctObj,100)+"%"; fill.style.background=color; }
+      var p2=document.getElementById("cmd-obj-pct2"); if(p2) p2.textContent=pctObj+"%";
+      var lbl=document.getElementById("cmd-obj-label"); if(lbl) lbl.textContent=(o.mes_nombre||"")+" "+(o.anio||"");
+      var re=document.getElementById("cmd-obj-real"); if(re) re.textContent="Real: "+fmtPeso(realV);
+      var hoy=new Date(), diasMes=new Date(hoy.getFullYear(),hoy.getMonth()+1,0).getDate();
+      var diasRest=diasMes-hoy.getDate();
+      var ritmo=diasRest>0?Math.round((objV-realV)/diasRest):0;
+      var mr=document.getElementById("cmd-obj-meta-right");
+      if(mr) mr.textContent=pctObj>=100?"✓ Objetivo cumplido":(diasRest+"d restantes — "+fmtPeso(ritmo)+"/día");
     }
   } else {
-    if (cmdObjPct) cmdObjPct.textContent = "Sin obj.";
-    if (cmdObjSub) cmdObjSub.textContent = "cargar planilla";
+    if(cmdObjPct) cmdObjPct.textContent="Sin obj.";
+    if(cmdObjSub) cmdObjSub.textContent="cargar planilla";
   }
-
-  // Stock crítico
-  var neg   = sk.negativos  || 0;
-  var sinSt = sk.sin_stock  || 0;
-  var bajo  = sk.bajo_minimo|| 0;
-  var total = neg + sinSt;
-  var csvSt = document.getElementById("cmd-stock-val");
-  var cssSub= document.getElementById("cmd-stock-sub");
-  var cskpi = document.getElementById("cmd-stock-kpi");
-  if (csvSt) csvSt.textContent = total;
-  if (cssSub) cssSub.textContent = neg + " neg. · " + sinSt + " sin st. · " + bajo + " bajo";
-  if (cskpi) cskpi.className = "cmd-kpi " + (neg > 0 ? "danger-hi" : total > 0 ? "danger-hi" : "highlight");
-
-  // Badge en tab Stock si hay negativos
-  var tabBadge = document.querySelector('[data-tab="stock"] .tab-badge');
-  if (neg > 0) {
-    if (!tabBadge) {
-      var stockTab = document.querySelector('[data-tab="stock"]');
-      if (stockTab) stockTab.innerHTML += '<span class="tab-badge">' + neg + '</span>';
-    }
+  var neg=sk.negativos||0, sinSt=sk.sin_stock||0, bajo=sk.bajo_minimo||0, total=neg+sinSt;
+  var csvSt=document.getElementById("cmd-stock-val"), cssSub=document.getElementById("cmd-stock-sub");
+  var cskpi=document.getElementById("cmd-stock-kpi");
+  if(csvSt) csvSt.textContent=total;
+  if(cssSub) cssSub.textContent=neg+" neg. · "+sinSt+" sin st. · "+bajo+" bajo";
+  if(cskpi) cskpi.className="cmd-kpi "+(neg>0?"danger-hi":total>0?"danger-hi":"highlight");
+  var tabBadge=document.querySelector('[data-tab="stock"] .nav-badge');
+  if(neg>0 && !tabBadge){
+    var stockTab=document.querySelector('[data-tab="stock"]');
+    if(stockTab) stockTab.innerHTML+='<span class="nav-badge">'+neg+'</span>';
   }
 }
 
@@ -1770,90 +1833,80 @@ function renderCommandPanel(d, ventasData) {
 // VENTAS
 // ═══════════════════════════════════════════════════════════════════════
 function renderVentas(v) {
-  if (!v || v.error) { html("kpi-ventas","<p style='color:var(--text-muted);font-size:13px;padding:12px'>Sin datos de ventas.</p>"); return; }
-  var k = v.kpis;
-  var sparkNeto = (v.evolucion_mensual||[]).map(function(e){ return e.neto||0; });
-  var sparkNC   = (v.evolucion_mensual||[]).map(function(e){ return Math.abs(e.neto - (e.total||0)); });
+  if(!v||v.error){ html("kpi-ventas","<p style='color:var(--ink3);font-size:13px;padding:12px'>Sin datos de ventas.</p>"); return; }
+  var k=v.kpis;
+  var sparkNeto=(v.evolucion_mensual||[]).map(function(e){ return e.neto||0; });
+  var sparkNC=(v.evolucion_mensual||[]).map(function(e){ return Math.abs(e.neto-(e.total||0)); });
   html("kpi-ventas",
-    kpiCard("Ventas del período",  fmtPeso(k.ventas_neto),    fmtNum(k.comprobantes_mes) + " FAC — " + fmtNum(k.nc_cantidad) + " NC", "up",   "accent", sparkNeto) +
-    kpiCard("Ticket promedio",     fmtPeso(k.ticket_promedio),"sin IVA",                                    "flat", "accent") +
-    kpiCard("Notas de crédito",    k.nc_cantidad,             fmtPeso(k.nc_importe) + " en NC",             k.nc_cantidad>10?"down":"flat","warn", sparkNC)
+    kpiCard("Ventas del período",fmtPeso(k.ventas_neto),fmtNum(k.comprobantes_mes)+" FAC — "+fmtNum(k.nc_cantidad)+" NC","up","accent",sparkNeto)+
+    kpiCard("Ticket promedio",fmtPeso(k.ticket_promedio),"sin IVA","flat","accent")+
+    kpiCard("Notas de crédito",k.nc_cantidad,fmtPeso(k.nc_importe)+" en NC",k.nc_cantidad>10?"down":"flat","warn",sparkNC)
   );
-
-  var meses = v.evolucion_mensual.map(function(e){ return e.mes; });
-  var tots  = v.evolucion_mensual.map(function(e){ return e.total; });
-  var netos = v.evolucion_mensual.map(function(e){ return e.neto  || 0; });
-  var ult   = document.getElementById("badge-ventas-mes");
-  if (ult) ult.textContent = PERIODO.label();
-
+  var meses=v.evolucion_mensual.map(function(e){ return e.mes; });
+  var tots=v.evolucion_mensual.map(function(e){ return e.total; });
+  var netos=v.evolucion_mensual.map(function(e){ return e.neto||0; });
+  var ult=document.getElementById("badge-ventas-mes");
+  if(ult) ult.textContent=PERIODO.label();
   mkChart("chart-ventas-ev",{type:"bar",data:{labels:meses,datasets:[
-    {label:"Total c/IVA", data:tots,  backgroundColor:C.blue,    borderRadius:5, barThickness:20},
-    {label:"Sin impuestos",data:netos,backgroundColor:C.celeste, borderRadius:5, barThickness:20}
+    {label:"Total c/IVA",data:tots,backgroundColor:C.blue,borderRadius:5,barThickness:20},
+    {label:"Sin impuestos",data:netos,backgroundColor:C.celeste,borderRadius:5,barThickness:20}
   ]},options:{responsive:true,maintainAspectRatio:false,
     plugins:{legend:{display:false}},
-    scales:{x:{ticks:{autoSkip:false}}, y:{ticks:{callback:function(v){return fmtPeso(v);}}}}}});
-
+    scales:{x:{ticks:{autoSkip:false}},y:{ticks:{callback:function(v){return fmtPeso(v);}}}}}});
   html("legend-ventas-ev",
-    '<span class="legend-item"><span class="legend-dot" style="background:'+C.blue+'"></span>Total c/IVA</span>' +
+    '<span class="legend-item"><span class="legend-dot" style="background:'+C.blue+'"></span>Total c/IVA</span>'+
     '<span class="legend-item"><span class="legend-dot" style="background:'+C.celeste+'"></span>Sin impuestos</span>'
   );
-
-  if (v.por_familia && v.por_familia.length) {
-    var fams = v.por_familia.slice(0,6);
+  if(v.por_familia && v.por_familia.length){
+    var fams=v.por_familia.slice(0,6);
     mkChart("chart-ventas-fam",{type:"bar",data:{labels:fams.map(function(f){return f.familia;}),
       datasets:[{data:fams.map(function(f){return f.importe;}),backgroundColor:C.FAMS.slice(0,fams.length),borderRadius:4}]},
       options:{indexAxis:"y",responsive:true,maintainAspectRatio:false,
         plugins:{legend:{display:false}},scales:{x:{ticks:{callback:function(v){return fmtPeso(v);}}}}}});
   }
-
   mkChart("chart-ventas-mp",{type:"doughnut",data:{labels:["Financiado propio","Tarjeta crédito","Efectivo/QR","Transferencia"],
     datasets:[{data:[45,21,26,8],backgroundColor:[C.blue,C.celeste,"#5DCAA5","#B5D4F4"],borderWidth:0}]},
     options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:"bottom",labels:{font:{size:11},boxWidth:10}}}}});
-
-  var topArt = (v.top_articulos||[]).slice(0,30);
-  var maxImp  = topArt.length ? Math.max.apply(null, topArt.map(function(a){ return Math.abs(a.importe||0); })) : 1;
-  var rows = "";
+  var topArt=(v.top_articulos||[]).slice(0,30);
+  var maxImp=topArt.length?Math.max.apply(null,topArt.map(function(a){return Math.abs(a.importe||0);})):1;
+  var rows="";
   topArt.forEach(function(a,i){
-    var pct = maxImp > 0 ? Math.round(Math.abs(a.importe||0) / maxImp * 100) : 0;
-    rows += "<tr>" +
-      "<td style='color:var(--text-muted);font-size:11px;width:28px'>" + (i+1) + "</td>" +
-      "<td style='font-family:var(--font-mono,monospace);font-size:11px;color:var(--text-muted);white-space:nowrap'>" + (a.cod||"—") + "</td>" +
-      "<td style='max-width:260px'>" +
-        "<div style='font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis'>" + (a.desc||a.cod||"—") + "</div>" +
-        "<div style='height:3px;background:var(--gray-200);border-radius:2px;margin-top:3px'>" +
-          "<div style='height:100%;width:" + pct + "%;background:var(--blue);border-radius:2px'></div>" +
-        "</div>" +
-      "</td>" +
-      '<td class="num" style="font-size:12px">' + fmtNum(a.unidades) + "</td>" +
-      '<td class="num" style="font-size:12px;font-weight:500">' + fmtPeso(a.importe) + "</td></tr>";
+    var pct=maxImp>0?Math.round(Math.abs(a.importe||0)/maxImp*100):0;
+    rows+="<tr>"+
+      "<td style='color:var(--ink3);font-size:11px;width:28px'>"+(i+1)+"</td>"+
+      "<td style='font-family:var(--font-mono);font-size:11px;color:var(--ink3);white-space:nowrap'>"+(a.cod||"—")+"</td>"+
+      "<td style='max-width:260px'>"+
+        "<div style='font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis'>"+(a.desc||a.cod||"—")+"</div>"+
+        "<div style='height:3px;background:var(--surf2);border-radius:2px;margin-top:3px'>"+
+          "<div style='height:100%;width:"+pct+"%;background:var(--blue);border-radius:2px'></div>"+
+        "</div>"+
+      "</td>"+
+      '<td class="num" style="font-size:12px">'+fmtNum(a.unidades)+"</td>"+
+      '<td class="num" style="font-size:12px;font-weight:600">'+fmtPeso(a.importe)+"</td></tr>";
   });
-  html("tbody-top-art", rows || "<tr><td colspan='5' style='text-align:center;color:var(--text-muted);padding:20px'>Sin datos de artículos</td></tr>");
-  var br = document.getElementById("badge-ranking-periodo");
-  if (br) br.textContent = PERIODO.label();
+  html("tbody-top-art",rows||"<tr><td colspan='5' style='text-align:center;color:var(--ink3);padding:20px'>Sin datos de artículos</td></tr>");
+  var br=document.getElementById("badge-ranking-periodo"); if(br) br.textContent=PERIODO.label();
 }
 
 // ═══════════════════════════════════════════════════════════════════════
 // STOCK
 // ═══════════════════════════════════════════════════════════════════════
 function renderStock(s) {
-  if (!s || s.error) return;
-  var k = s.kpis;
+  if(!s||s.error) return;
+  var k=s.kpis;
   html("kpi-stock",
-    kpiCard("SKUs activos",    fmtNum(k.skus_activos || 0),   "en esta sucursal",            "flat",  "accent") +
-    kpiCard("Sin stock",       k.sin_stock    || 0,            "agotados",                    "down",  "danger") +
-    kpiCard("Stock negativo",  k.negativos    || 0,            "descargas sin existencia",    "down",  "danger") +
-    kpiCard("Bajo punto pedido",k.bajo_minimo || 0,            "requieren reposición",        "down",  "warn")   +
-    kpiCard("Inmovilizados",   k.inmovilizados|| 0,            "artículos +90 días sin mov.", "down",  "warn")
+    kpiCard("SKUs activos",fmtNum(k.skus_activos||0),"en esta sucursal","flat","accent")+
+    kpiCard("Sin stock",k.sin_stock||0,"agotados","down","danger")+
+    kpiCard("Stock negativo",k.negativos||0,"descargas sin existencia","down","danger")+
+    kpiCard("Bajo punto pedido",k.bajo_minimo||0,"requieren reposición","down","warn")+
+    kpiCard("Inmovilizados",k.inmovilizados||0,"artículos +90 días sin mov.","down","warn")
   );
-
-  if (s.por_familia && s.por_familia.length) {
-    var fams = s.por_familia.slice(0,8);
+  if(s.por_familia && s.por_familia.length){
+    var fams=s.por_familia.slice(0,8);
     mkChart("chart-stock-fam",{type:"doughnut",data:{
       labels:fams.map(function(f){return f.familia;}),
-      datasets:[{data:fams.map(function(f){
-        // Apps Script devuelve f.stock (cantidad) — f.valor es siempre 0 (sin precio en STA19)
-        return f.stock || f.valor || f.cantidad || 0;
-      }),backgroundColor:C.FAMS.slice(0,fams.length),borderWidth:0}]},
+      datasets:[{data:fams.map(function(f){return f.stock||f.valor||f.cantidad||0;}),
+        backgroundColor:C.FAMS.slice(0,fams.length),borderWidth:0}]},
       options:{responsive:true,maintainAspectRatio:false,
         plugins:{legend:{position:"bottom",labels:{font:{size:11},boxWidth:10,
           generateLabels:function(chart){
@@ -1864,690 +1917,398 @@ function renderStock(s) {
           }
         }}}}});
   }
-
-  if (s.por_antiguedad) {
-    var antig = s.por_antiguedad;
+  if(s.por_antiguedad){
+    var antig=s.por_antiguedad;
     mkChart("chart-stock-antig",{type:"bar",data:{
       labels:antig.map(function(a){return a.tramo;}),
-      datasets:[{data:antig.map(function(a){
-        // Apps Script devuelve cantidad de artículos (no valor monetario)
-        return a.valor || a.cantidad || 0;
-      }),backgroundColor:[C.teal,C.blue,C.amber,C.red],borderRadius:5}]},
+      datasets:[{data:antig.map(function(a){return a.valor||a.cantidad||0;}),
+        backgroundColor:[C.teal,C.blue,C.amber,C.red],borderRadius:5}]},
       options:{responsive:true,maintainAspectRatio:false,
-        plugins:{legend:{display:false},
-          tooltip:{callbacks:{label:function(ctx){ return ctx.parsed.y + ' artículos'; }}}},
-        scales:{y:{ticks:{callback:function(v){return v + ' art.';}}}}}});
+        plugins:{legend:{display:false},tooltip:{callbacks:{label:function(ctx){return ctx.parsed.y+' artículos';}}}},
+        scales:{y:{ticks:{callback:function(v){return v+' art.';}}}}
+      }});
   }
-
-  var rowsCrit = "";
-  var cntNeg = 0, cntSin = 0, cntBajo = 0;
+  var rowsCrit="", cntNeg=0, cntSin=0, cntBajo=0;
   (s.criticos||[]).forEach(function(a){
     var cls, rowCls;
-    if (a.estado === "NEGATIVO")    { cls = "danger"; rowCls = "row-danger"; cntNeg++; }
-    else if (a.estado === "SIN STOCK") { cls = "danger"; rowCls = "row-danger"; cntSin++; }
-    else                            { cls = "warn";   rowCls = "row-warn";   cntBajo++; }
-    var p = pill(a.estado, cls);
-    rowsCrit += '<tr class="' + rowCls + '">' +
-      "<td style='font-family:var(--font-mono,monospace);font-size:11px;color:var(--text-muted)'>" + (a.cod||"—") + "</td>" +
-      "<td>" + (a.desc||a.cod) + "</td>" +
-      "<td style='font-size:12px;color:var(--text-muted)'>" + (a.deposito||"—") + "</td>" +
-      '<td class="num" style="color:' + (a.stock < 0 ? 'var(--red)' : 'inherit') + ';font-weight:600">' + fmtNum(a.stock) + "</td>" +
-      '<td class="num">' + fmtNum(a.minimo) + "</td><td>" + p + "</td></tr>";
+    if(a.estado==="NEGATIVO")     { cls="danger"; rowCls="row-danger"; cntNeg++; }
+    else if(a.estado==="SIN STOCK"){ cls="danger"; rowCls="row-danger"; cntSin++; }
+    else                           { cls="warn";   rowCls="row-warn";   cntBajo++; }
+    var p=pill(a.estado,cls);
+    rowsCrit+='<tr class="'+rowCls+'">'+
+      "<td style='font-family:var(--font-mono);font-size:11px;color:var(--ink3)'>"+(a.cod||"—")+"</td>"+
+      "<td>"+(a.desc||a.cod)+"</td>"+
+      "<td style='font-size:12px;color:var(--ink3)'>"+(a.deposito||"—")+"</td>"+
+      '<td class="num" style="color:'+(a.stock<0?"var(--red)":"inherit")+';font-weight:600">'+fmtNum(a.stock)+"</td>"+
+      '<td class="num">'+fmtNum(a.minimo)+"</td><td>"+p+"</td></tr>";
   });
-  html("tbody-criticos", rowsCrit || "<tr><td colspan='6' style='text-align:center;color:var(--text-muted);padding:20px'>Sin artículos críticos</td></tr>");
-
-  // Badge total y chips por estado
-  var total = cntNeg + cntSin + cntBajo;
-  var badge = document.getElementById("badge-stock-criticos");
-  if (badge) badge.textContent = total + " artículos";
-  var chips = document.getElementById("stock-criticos-chips");
-  if (chips) {
-    chips.innerHTML =
-      (cntNeg  > 0 ? '<span class="count-chip danger">' + cntNeg  + ' negativos</span>' : '') +
-      (cntSin  > 0 ? '<span class="count-chip danger">' + cntSin  + ' sin stock</span>'  : '') +
-      (cntBajo > 0 ? '<span class="count-chip warn">'   + cntBajo + ' bajo mínimo</span>': '');
-  }
-
-  var rowsInm = "";
+  html("tbody-criticos",rowsCrit||"<tr><td colspan='6' style='text-align:center;color:var(--ink3);padding:20px'>Sin artículos críticos</td></tr>");
+  var total=cntNeg+cntSin+cntBajo;
+  var badge=document.getElementById("badge-stock-criticos"); if(badge) badge.textContent=total+" artículos";
+  var chips=document.getElementById("stock-criticos-chips");
+  if(chips) chips.innerHTML=
+    (cntNeg>0?'<span class="count-chip danger">'+cntNeg+' negativos</span>':'')+
+    (cntSin>0?'<span class="count-chip danger">'+cntSin+' sin stock</span>':'')+
+    (cntBajo>0?'<span class="count-chip warn">'+cntBajo+' bajo mínimo</span>':'');
+  var rowsInm="";
   (s.inmovilizados||[]).forEach(function(a){
-    rowsInm += "<tr>" +
-      "<td style='font-family:var(--font-mono,monospace);font-size:11px;color:var(--text-muted)'>" + (a.cod||"—") + "</td>" +
-      "<td>" + (a.desc||a.cod) + "</td>" +
-      '<td class="num">' + fmtNum(a.stock) + "</td>" +
-      '<td class="num">' + a.dias + " días</td></tr>";
+    rowsInm+="<tr>"+
+      "<td style='font-family:var(--font-mono);font-size:11px;color:var(--ink3)'>"+(a.cod||"—")+"</td>"+
+      "<td>"+(a.desc||a.cod)+"</td>"+
+      '<td class="num">'+fmtNum(a.stock)+"</td>"+
+      '<td class="num">'+a.dias+" días</td></tr>";
   });
-  html("tbody-inmovilizado", rowsInm || "<tr><td colspan='4' style='text-align:center;color:var(--text-muted);padding:16px'>Sin stock inmovilizado</td></tr>");
+  html("tbody-inmovilizado",rowsInm||"<tr><td colspan='4' style='text-align:center;color:var(--ink3);padding:16px'>Sin stock inmovilizado</td></tr>");
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// VENDEDOR
+// ═══════════════════════════════════════════════════════════════════════
+function renderVendedor(vd) {
+  if(!vd||vd.error||!vd.vendedores) return;
+  var badge=document.getElementById("badge-vendedor-mes"); if(badge) badge.textContent=vd.mes||"—";
+  var vends=vd.vendedores;
+  var totalNeto=vends.reduce(function(s,v){return s+(v.venta_neto||0);},0);
+  var totalIntangibles=vends.reduce(function(s,v){return s+(v.intangibles||0);},0);
+  var totalPolizas=vends.reduce(function(s,v){return s+(v.polizas||0);},0);
+  var baseAlcanceTotal=totalNeto-totalIntangibles;
+  var ratioIntTotal=baseAlcanceTotal>0?(totalIntangibles/baseAlcanceTotal*100).toFixed(1):"—";
+  var rows="";
+  vends.forEach(function(v,i){
+    var barW=totalNeto>0?Math.round((v.venta_neto||0)/totalNeto*100):0;
+    var pctVenta=totalNeto>0?((v.venta_neto||0)/totalNeto*100).toFixed(1):0;
+    var pctPartInt=totalIntangibles>0&&v.intangibles>0?(v.intangibles/totalIntangibles*100).toFixed(1):null;
+    var baseAlcance=v.venta_neto-(v.intangibles||0);
+    var pctAlcance=baseAlcance>0&&v.intangibles>0?(v.intangibles/baseAlcance*100).toFixed(1):null;
+    var pctPartPol=totalPolizas>0&&v.polizas>0?(v.polizas/totalPolizas*100).toFixed(1):null;
+    var ratioGeneral=parseFloat(ratioIntTotal)||0;
+    var alcanceVal=parseFloat(pctAlcance)||0;
+    var alcanceColor=alcanceVal===0?"var(--ink3)":alcanceVal>=ratioGeneral*1.1?"var(--teal)":alcanceVal>=ratioGeneral*0.7?"var(--blue)":"var(--amber)";
+    rows+="<tr>"+
+      "<td><b>"+(i+1)+"</b></td>"+
+      "<td>"+
+        "<div style='font-size:13px;font-weight:600'>"+v.nombre+"</div>"+
+        "<div style='height:3px;background:var(--surf2);border-radius:2px;margin-top:4px;width:100%'>"+
+          "<div style='height:100%;width:"+barW+"%;background:var(--blue);border-radius:2px'></div>"+
+        "</div>"+
+        "<div style='font-size:10px;color:var(--ink3);margin-top:2px'>"+pctVenta+"% del total &middot; "+v.cant_fac+" FAC</div>"+
+      "</td>"+
+      '<td class="num" style="font-weight:700">'+fmtPeso(v.venta_neto)+"</td>"+
+      '<td class="num" style="color:var(--blue-dk)">'+(v.intangibles>0?fmtPeso(v.intangibles):"<span style='color:var(--ink3)'>—</span>")+"</td>"+
+      '<td class="num">'+(pctPartInt!==null?
+        "<div style='display:flex;align-items:center;gap:5px;justify-content:flex-end'>"+
+          "<div style='width:40px;height:5px;background:var(--surf2);border-radius:3px;border:1px solid var(--line)'>"+
+            "<div style='height:100%;width:"+Math.min(parseFloat(pctPartInt),100)+"%;background:var(--blue);border-radius:3px'></div>"+
+          "</div>"+
+          "<span style='font-size:11px;font-weight:700;color:var(--blue-dk);min-width:34px;text-align:right'>"+pctPartInt+"%</span>"+
+        "</div>"
+        :"<span style='color:var(--ink3)'>—</span>")+"</td>"+
+      '<td class="num">'+(pctAlcance!==null?
+        "<span style='font-size:12px;font-weight:700;color:"+alcanceColor+"'>"+pctAlcance+"%</span>"
+        :"<span style='color:var(--ink3)'>—</span>")+"</td>"+
+      '<td class="num" style="color:var(--teal)">'+(v.polizas>0?fmtPeso(v.polizas):"<span style='color:var(--ink3)'>—</span>")+"</td>"+
+      '<td class="num">'+(pctPartPol!==null?
+        "<div style='display:flex;align-items:center;gap:5px;justify-content:flex-end'>"+
+          "<div style='width:40px;height:5px;background:var(--surf2);border-radius:3px;border:1px solid var(--line)'>"+
+            "<div style='height:100%;width:"+Math.min(parseFloat(pctPartPol),100)+"%;background:var(--teal);border-radius:3px'></div>"+
+          "</div>"+
+          "<span style='font-size:11px;font-weight:700;color:var(--teal);min-width:34px;text-align:right'>"+pctPartPol+"%</span>"+
+        "</div>"
+        :"<span style='color:var(--ink3)'>—</span>")+"</td>"+
+      '<td class="num">'+(v.cant_polizas>0?v.cant_polizas:"<span style='color:var(--ink3)'>—</span>")+"</td>"+
+      '<td class="num">'+v.cant_fac+"</td>"+
+      "</tr>";
+  });
+  rows+="<tr style='background:var(--surf2);border-top:2px solid var(--line2)'>"+
+    "<td colspan='2' style='font-size:11px;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:.04em;padding:8px'>TOTAL</td>"+
+    "<td class='num' style='font-weight:700'>"+fmtPeso(totalNeto)+"</td>"+
+    "<td class='num' style='font-weight:700;color:var(--blue-dk)'>"+fmtPeso(totalIntangibles)+"</td>"+
+    "<td class='num' style='font-size:11px;color:var(--ink3)'>100%</td>"+
+    "<td class='num'><span style='font-size:11px;font-weight:700;color:var(--ink3)'>"+
+      (ratioIntTotal!=="—"?ratioIntTotal+"%":"—")+
+    "</span><br><span style='font-size:9px;color:var(--ink3)'>ratio gral.</span></td>"+
+    "<td class='num' style='font-weight:700;color:var(--teal)'>"+fmtPeso(totalPolizas)+"</td>"+
+    "<td class='num' style='font-size:11px;color:var(--ink3)'>100%</td>"+
+    "<td class='num' style='font-weight:700'>"+vends.reduce(function(s,v){return s+(v.cant_polizas||0);},0)+"</td>"+
+    "<td class='num' style='font-weight:700'>"+vends.reduce(function(s,v){return s+(v.cant_fac||0);},0)+"</td>"+
+    "</tr>";
+  html("tbody-vendedor",rows||"<tr><td colspan='10' style='text-align:center;color:var(--ink3);padding:20px'>Sin datos de vendedores</td></tr>");
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// CUOTAS
+// ═══════════════════════════════════════════════════════════════════════
+function renderCuotas(cuotas) {
+  if(!cuotas) return;
+  function renderBloque(data, prefijo) {
+    if(!data||data.error) return;
+    var k=data.kpis||{};
+    var pct=k.pct_cobro||0;
+    html("kpi-cuotas-"+prefijo,
+      kpiCard("Emitido 6m",fmtPeso(k.emitido||0),fmtNum(k.cant_cuotas||0)+" cuotas","flat","accent")+
+      kpiCard("Cobrado 6m",fmtPeso(k.cobrado||0),fmtPct(pct)+" cobrado","up","ok")+
+      kpiCard("Saldo pendiente",fmtPeso(k.saldo||0),"sin cobrar","down","warn")
+    );
+    var meses=(data.meses||[]).map(function(m){return m.mes;});
+    var emit=(data.meses||[]).map(function(m){return m.emitido;});
+    var cobr=(data.meses||[]).map(function(m){return m.cobrado;});
+    mkChart("chart-cuotas-"+prefijo,{type:"bar",data:{labels:meses,datasets:[
+      {label:"Emitido",data:emit,backgroundColor:"rgba(37,150,190,0.3)",borderColor:C.blue,borderWidth:1.5,borderRadius:4},
+      {label:"Cobrado",data:cobr,backgroundColor:C.teal,borderRadius:4}
+    ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+      scales:{y:{ticks:{callback:function(v){return fmtPeso(v);}}}}}});
+    html("legend-cuotas-"+prefijo,
+      '<span class="legend-item"><span class="legend-dot" style="background:rgba(37,150,190,0.4)"></span>Emitido</span>'+
+      '<span class="legend-item"><span class="legend-dot" style="background:'+C.teal+'"></span>Cobrado</span>'
+    );
+  }
+  renderBloque(cuotas.cred_chemes,"cc");
+  renderBloque(cuotas.cta_cte,"cta");
 }
 
 // ═══════════════════════════════════════════════════════════════════════
 // MOROSIDAD
 // ═══════════════════════════════════════════════════════════════════════
-// ═══════════════════════════════════════════════════════════════════════
-// VENDEDOR
-// ═══════════════════════════════════════════════════════════════════════
-function renderVendedor(vd) {
-  if (!vd || vd.error || !vd.vendedores) return;
-  var badge = document.getElementById("badge-vendedor-mes");
-  if (badge) badge.textContent = vd.mes || "—";
-
-  var vends = vd.vendedores;
-
-  // Totales para calcular % de participación
-  var totalNeto       = vends.reduce(function(s,v){ return s + (v.venta_neto  || 0); }, 0);
-  var totalIntangibles= vends.reduce(function(s,v){ return s + (v.intangibles || 0); }, 0);
-  var totalPolizas    = vends.reduce(function(s,v){ return s + (v.polizas     || 0); }, 0);
-
-  // Ratio general del equipo — misma fórmula: intangibles / (venta_neta - intangibles)
-  var baseAlcanceTotal = totalNeto - totalIntangibles;
-  var ratioIntTotal = baseAlcanceTotal > 0
-    ? (totalIntangibles / baseAlcanceTotal * 100).toFixed(1)
-    : "—";
-
-  var rows = "";
-  vends.forEach(function(v, i) {
-    // % participación en ventas
-    var pctVenta = totalNeto > 0 ? Math.round(v.venta_neto / totalNeto * 100) : 0;
-    var barW     = Math.max(pctVenta, 2);
-
-    // % participación en intangibles — cuánto del total de intangibles es este vendedor
-    var pctPartInt = totalIntangibles > 0 && v.intangibles > 0
-      ? (v.intangibles / totalIntangibles * 100).toFixed(1)
-      : null;
-
-    // % alcance (ratio) — intangibles / (venta_neta - intangibles)
-    // Fórmula comercial: penetración de intangibles sobre ventas tangibles
-    var baseAlcance = v.venta_neto - (v.intangibles || 0);
-    var pctAlcance = baseAlcance > 0 && v.intangibles > 0
-      ? (v.intangibles / baseAlcance * 100).toFixed(1)
-      : null;
-
-    // % participación en pólizas
-    var pctPartPol = totalPolizas > 0 && v.polizas > 0
-      ? (v.polizas / totalPolizas * 100).toFixed(1)
-      : null;
-
-    // Color alcance — verde si supera el ratio general, ámbar si está cerca, rojo si está lejos
-    var ratioGeneral = parseFloat(ratioIntTotal) || 0;
-    var alcanceVal   = parseFloat(pctAlcance)    || 0;
-    var alcanceColor = alcanceVal === 0   ? "var(--text-muted)"
-                     : alcanceVal >= ratioGeneral * 1.1 ? "var(--teal)"
-                     : alcanceVal >= ratioGeneral * 0.7 ? "var(--blue)"
-                     : "var(--amber)";
-
-    rows += "<tr>" +
-      "<td><b>" + (i+1) + "</b></td>" +
-      // Vendedor + barra participación en ventas
-      "<td>" +
-        "<div style='font-size:13px;font-weight:500'>" + v.nombre + "</div>" +
-        "<div style='height:3px;background:var(--gray-100);border-radius:2px;margin-top:4px;width:100%'>" +
-          "<div style='height:100%;width:" + barW + "%;background:var(--blue);border-radius:2px'></div>" +
-        "</div>" +
-        "<div style='font-size:10px;color:var(--text-muted);margin-top:2px'>" +
-          pctVenta + "% del total &middot; " + v.cant_fac + " FAC" +
-        "</div>" +
-      "</td>" +
-      // Venta neta
-      '<td class="num" style="font-weight:600">' + fmtPeso(v.venta_neto) + "</td>" +
-      // Intangibles $
-      '<td class="num" style="color:var(--blue)">' +
-        (v.intangibles > 0 ? fmtPeso(v.intangibles) : "<span style='color:var(--text-muted)'>—</span>") +
-      "</td>" +
-      // % Participación intangibles — barra proporcional
-      '<td class="num">' +
-        (pctPartInt !== null
-          ? "<div style='display:flex;align-items:center;gap:5px;justify-content:flex-end'>" +
-              "<div style='width:40px;height:5px;background:var(--gray-100);border-radius:3px;flex-shrink:0'>" +
-                "<div style='height:100%;width:" + Math.min(parseFloat(pctPartInt),100) + "%;background:var(--blue);border-radius:3px'></div>" +
-              "</div>" +
-              "<span style='font-size:11px;font-weight:600;color:var(--blue);min-width:34px;text-align:right'>" + pctPartInt + "%</span>" +
-            "</div>"
-          : "<span style='color:var(--text-muted)'>—</span>") +
-      "</td>" +
-      // % Alcance — ratio intangibles/venta propia
-      '<td class="num">' +
-        (pctAlcance !== null
-          ? "<span style='font-size:12px;font-weight:700;color:" + alcanceColor + "'>" + pctAlcance + "%</span>"
-          : "<span style='color:var(--text-muted)'>—</span>") +
-      "</td>" +
-      // Pólizas $
-      '<td class="num" style="color:var(--teal)">' +
-        (v.polizas > 0 ? fmtPeso(v.polizas) : "<span style='color:var(--text-muted)'>—</span>") +
-      "</td>" +
-      // % Participación pólizas — barra proporcional
-      '<td class="num">' +
-        (pctPartPol !== null
-          ? "<div style='display:flex;align-items:center;gap:5px;justify-content:flex-end'>" +
-              "<div style='width:40px;height:5px;background:var(--gray-100);border-radius:3px;flex-shrink:0'>" +
-                "<div style='height:100%;width:" + Math.min(parseFloat(pctPartPol),100) + "%;background:var(--teal);border-radius:3px'></div>" +
-              "</div>" +
-              "<span style='font-size:11px;font-weight:600;color:var(--teal);min-width:34px;text-align:right'>" + pctPartPol + "%</span>" +
-            "</div>"
-          : "<span style='color:var(--text-muted)'>—</span>") +
-      "</td>" +
-      // Pólizas unidades
-      '<td class="num">' + (v.cant_polizas > 0 ? v.cant_polizas : "<span style='color:var(--text-muted)'>—</span>") + "</td>" +
-      // FAC
-      '<td class="num">' + v.cant_fac + "</td>" +
-      "</tr>";
-  });
-
-  // Fila de totales
-  rows += "<tr style='background:var(--gray-50);border-top:2px solid var(--gray-200)'>" +
-    "<td colspan='2' style='font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.04em;padding:8px'>TOTAL</td>" +
-    "<td class='num' style='font-weight:700'>" + fmtPeso(totalNeto) + "</td>" +
-    "<td class='num' style='font-weight:700;color:var(--blue)'>" + fmtPeso(totalIntangibles) + "</td>" +
-    "<td class='num' style='font-size:11px;color:var(--text-muted)'>100%</td>" +
-    "<td class='num'><span style='font-size:11px;font-weight:700;color:var(--text-muted)'>" +
-      (ratioIntTotal !== "—" ? ratioIntTotal + "%" : "—") +
-    "</span><br><span style='font-size:9px;color:var(--text-muted)'>ratio gral.</span></td>" +
-    "<td class='num' style='font-weight:700;color:var(--teal)'>" + fmtPeso(totalPolizas) + "</td>" +
-    "<td class='num' style='font-size:11px;color:var(--text-muted)'>100%</td>" +
-    "<td class='num' style='font-weight:700'>" +
-      vends.reduce(function(s,v){ return s + (v.cant_polizas||0); }, 0) +
-    "</td>" +
-    "<td class='num' style='font-weight:700'>" +
-      vends.reduce(function(s,v){ return s + (v.cant_fac||0); }, 0) +
-    "</td>" +
-    "</tr>";
-
-  html("tbody-vendedor", rows || "<tr><td colspan='10' style='text-align:center;color:var(--text-muted);padding:20px'>Sin datos de vendedores</td></tr>");
-}
-
-// ═══════════════════════════════════════════════════════════════════════
-// CUOTAS EMITIDAS VS COBRADAS
-// ═══════════════════════════════════════════════════════════════════════
-function renderCuotas(cuotas) {
-  if (!cuotas) return;
-
-  function renderBloque(data, prefijo) {
-    if (!data || data.error) return;
-    var k = data.kpis || {};
-    var pct = k.pct_cobro || 0;
-    var color = pct >= 80 ? "var(--teal)" : pct >= 60 ? "var(--blue)" : "var(--amber)";
-
-    html("kpi-cuotas-" + prefijo,
-      kpiCard("Emitido 6m",    fmtPeso(k.emitido    || 0), fmtNum(k.cant_cuotas || 0) + " cuotas", "flat", "accent") +
-      kpiCard("Cobrado 6m",    fmtPeso(k.cobrado    || 0), fmtPct(pct) + " cobrado",               "up",   "ok")    +
-      kpiCard("Saldo pendiente",fmtPeso(k.saldo     || 0), "sin cobrar",                            "down", "warn")
-    );
-
-    var meses  = (data.meses || []).map(function(m){ return m.mes; });
-    var emit   = (data.meses || []).map(function(m){ return m.emitido; });
-    var cobr   = (data.meses || []).map(function(m){ return m.cobrado; });
-
-    mkChart("chart-cuotas-" + prefijo, {
-      type: "bar",
-      data: { labels: meses, datasets: [
-        { label: "Emitido",  data: emit, backgroundColor: "rgba(37,150,190,0.3)", borderColor: C.blue,   borderWidth: 1.5, borderRadius: 4 },
-        { label: "Cobrado",  data: cobr, backgroundColor: C.teal,                borderRadius: 4 }
-      ]},
-      options: { responsive: true, maintainAspectRatio: false,
-        plugins: { legend: { display: false } },
-        scales: { y: { ticks: { callback: function(v){ return fmtPeso(v); } } } } }
-    });
-
-    html("legend-cuotas-" + prefijo,
-      '<span class="legend-item"><span class="legend-dot" style="background:rgba(37,150,190,0.4)"></span>Emitido</span>' +
-      '<span class="legend-item"><span class="legend-dot" style="background:' + C.teal + '"></span>Cobrado</span>'
-    );
-  }
-
-  renderBloque(cuotas.cred_chemes, "cc");
-  renderBloque(cuotas.cta_cte,     "cta");
-}
-
 function renderMorosidad(m, cuotas) {
   m = m || {};
   var k = m.kpis || {};
-
-  var kpiMorosidad = document.getElementById("kpi-morosidad");
-  if (kpiMorosidad) {
-    kpiMorosidad.innerHTML = [
-      {
-        cls: "danger",
-        label: "Mora total vencida",
-        value: fmtPeso(k.vencido_total || 0),
-        delta: "▼ " + fmtNum(k.clientes_morosos || 0) + " clientes con deuda vencida"
-      },
-      {
-        cls: "warn",
-        label: "Mora 1–30 días",
-        value: fmtPeso(k.mora_1_30 || 0),
-        delta: "▼ gestión inmediata"
-      },
-      {
-        cls: "warn",
-        label: "Mora 31–90 días",
-        value: fmtPeso(k.mora_31_90 || 0),
-        delta: "▼ seguimiento activo"
-      },
-      {
-        cls: "danger",
-        label: "Mora +90 días",
-        value: fmtPeso(k.mora_mas_90 || 0),
-        delta: "▼ alto riesgo"
-      }
-    ].map(function(x) {
-      return `
-        <div class="kpi-card ${x.cls}">
-          <div class="kpi-label">${x.label}</div>
-          <div class="kpi-value">${x.value}</div>
-          <div class="kpi-delta delta-down">${x.delta}</div>
-        </div>
-      `;
-    }).join("");
-  }
-
-  var tbody = document.getElementById("tbody-mora-clientes");
-  if (tbody) {
-    var rows = (m.clientes || []).map(function(c) {
-      var pillCls = c.estado === "ALTO RIESGO"
-        ? "pill-danger"
-        : c.estado === "SEGUIMIENTO"
-        ? "pill-warn"
-        : "pill-info";
-
-      return `
-        <tr>
-          <td>${escapeHtml(c.nombre || "—")}</td>
-          <td>${escapeHtml(c.telefono || "—")}</td>
-          <td class="num">${fmtPeso(c.vencido || 0)}</td>
-          <td class="num">${fmtNum(c.dias_mora || 0)}d</td>
-          <td><span class="pill ${pillCls}">${escapeHtml(c.estado || "—")}</span></td>
-        </tr>
-      `;
-    }).join("");
-
-    tbody.innerHTML = rows || `
-      <tr>
-        <td colspan="5" style="text-align:center;color:var(--text-muted);padding:16px">
-          Sin datos de morosidad
-        </td>
-      </tr>
-    `;
-  }
-
-  if (m.distribucion && m.distribucion.length) {
-    mkChart("chart-mora-dist", {
-      type: "bar",
-      data: {
-        labels: m.distribucion.map(function(d){ return d.tramo; }),
-        datasets: [{
-          data: m.distribucion.map(function(d){ return d.importe; }),
-          backgroundColor: [C.amber, "#EF9F27", C.red],
-          borderRadius: 5
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: { legend: { display: false } },
-        scales: {
-          y: {
-            ticks: {
-              callback: function(v){ return fmtPeso(v); }
-            }
-          }
-        }
-      }
-    });
-
-    mkChart("chart-mora-comp", {
-      type: "doughnut",
-      data: {
-        labels: m.distribucion.map(function(d){ return d.tramo; }),
-        datasets: [{
-          data: m.distribucion.map(function(d){ return d.importe; }),
-          backgroundColor: [C.amber, "#EF9F27", C.red],
-          borderWidth: 0
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: {
-            position: "bottom",
-            labels: { font: { size: 11 }, boxWidth: 10 }
-          }
-        }
-      }
-    });
+  html("kpi-morosidad",
+    kpiCard("Saldo total CC",fmtPeso(k.saldo_total||0),"Crédito Chemes + Cta. Cte.","flat","accent")+
+    kpiCard("Deuda vencida",fmtPeso(k.vencido_total||0),(k.pct_mora||0)+"% del saldo","down","danger")+
+    kpiCard("Mora 1–30 días",fmtPeso(k.mora_1_30||0),"gestión activa","down","warn")+
+    kpiCard("Mora 31–90 días",fmtPeso(k.mora_31_90||0),"seguimiento urgente","down","warn")+
+    kpiCard("Mora +90 días",fmtPeso(k.mora_mas_90||0),(k.clientes_morosos||0)+" clientes","down","danger")
+  );
+  var rows="";
+  (m.clientes||[]).forEach(function(c){
+    var cls=c.dias_mora>90?"danger":c.dias_mora>30?"warn":"info";
+    rows+="<tr>"+
+      "<td style='font-weight:600'>"+c.nombre+"</td>"+
+      "<td style='font-size:12px;color:var(--ink3)'>"+c.telefono+"</td>"+
+      '<td class="num" style="font-weight:700;color:var(--red)">'+fmtPeso(c.vencido)+"</td>"+
+      '<td class="num">'+c.dias_mora+" días</td>"+
+      "<td>"+pill(c.estado,cls)+"</td></tr>";
+  });
+  html("tbody-mora-clientes",rows||"<tr><td colspan='5' style='text-align:center;color:var(--ink3);padding:20px'>Sin clientes morosos</td></tr>");
+  if(m.distribucion && m.distribucion.length){
+    var dist=m.distribucion;
+    mkChart("chart-mora-dist",{type:"bar",data:{
+      labels:dist.map(function(d){return d.tramo;}),
+      datasets:[{data:dist.map(function(d){return d.importe;}),
+        backgroundColor:[C.amber,C.red,"#8B0000"],borderRadius:5}]},
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+        scales:{y:{ticks:{callback:function(v){return fmtPeso(v);}}}}}});
+    mkChart("chart-mora-comp",{type:"doughnut",data:{
+      labels:dist.map(function(d){return d.tramo;}),
+      datasets:[{data:dist.map(function(d){return d.importe;}),
+        backgroundColor:[C.amber,C.red,"#8B0000"],borderWidth:0}]},
+      options:{responsive:true,maintainAspectRatio:false,
+        plugins:{legend:{position:"bottom",labels:{font:{size:11},boxWidth:10}}}}});
   }
 }
 
 // ═══════════════════════════════════════════════════════════════════════
 // OBJETIVOS
 // ═══════════════════════════════════════════════════════════════════════
-function renderObjetivos(obj, ventas, seguros) {
-  if (!obj || obj.error) {
-    html("kpi-objetivos", "<p style='color:var(--text-muted);font-size:13px;padding:12px'>" +
-      (obj && obj.error ? obj.error : "Sin datos de objetivos.") + "</p>");
-    return;
-  }
-
-  var ventasMes = ventas && ventas.kpis ? ventas.kpis.ventas_neto : 0; // sin IVA — igual que el objetivo
-
-  // Objetivos desde Google Sheets
-  var ok  = obj.kpis || {};
-  var objVentas = ok.obj_ventas        || 0;
-  var objColab  = ok.obj_colaboradores || 0;
-  var objM2     = ok.obj_m2            || 0;
-
-  // % de cumplimiento — ventas sin impuestos vs objetivo (que también es neto)
-  var pctV = objVentas > 0 ? Math.min(Math.round(ventasMes / objVentas * 100), 150) : 0;
-
-  var badge = document.getElementById("badge-obj-mes");
-  if (badge) badge.textContent = (obj.mes_nombre || "") + " " + (obj.anio || "");
-
+function renderObjetivos(o, ventasData, segurosData) {
+  if(!o) return;
+  var vk=(ventasData&&ventasData.kpis)||{};
+  var sgk=(segurosData&&segurosData.kpis)||{};
+  var totalObj=0;
+  (o.categorias||[]).forEach(function(c){ totalObj+=(c.obj_ventas||0); });
+  var pct=totalObj>0?Math.min(Math.round((vk.ventas_neto||0)/totalObj*100),150):0;
   html("kpi-objetivos",
-    kpiCard("Ventas vs objetivo",
-      fmtPct(pctV),
-      fmtPeso(ventasMes) + " / " + fmtPeso(objVentas),
-      pctV>=100?"up":pctV>=70?"flat":"down",
-      pctV>=100?"ok":pctV>=70?"accent":"warn") +
-    kpiCard("Objetivo del mes",
-      fmtPeso(objVentas),
-      "meta s/imp. — " + (obj.mes_nombre||""),
-      "flat","accent") +
-    (objColab > 0 ? kpiCard("Colaboradores",
-      objColab,
-      "planilla del mes",
-      "flat","accent") : "") +
-    (objM2 > 0 ? kpiCard("M² objetivo",
-      fmtNum(objM2) + " m²",
-      "superficie planificada",
-      "flat","accent") : "")
+    kpiCard("Objetivo total ventas",fmtPeso(totalObj),"todas las categorías","flat","accent")+
+    kpiCard("Avance actual",fmtPeso(vk.ventas_neto||0),pct+"% del objetivo",pct>=100?"up":"flat",pct>=100?"ok":pct>=70?"accent":"warn")+
+    kpiCard("Pólizas Qualia",sgk.total_polizas||0,fmtPeso(sgk.importe_polizas||0),"flat","ok")+
+    kpiCard("Garantías ext.",sgk.total_garantias||0,fmtPeso(sgk.importe_garantias||0),"flat","ok")
   );
-
-  // Barra principal — ventas sin impuestos vs objetivo
-  var progHtml = "";
-  if (objVentas > 0) {
-    var c = progColor(pctV);
-    progHtml += '<div class="prog-item">' +
-      '<span class="prog-label">Ventas netas vs objetivo ' + (obj.mes_nombre||"") + '</span>' +
-      '<div class="prog-track"><div class="prog-fill" style="width:' + Math.min(pctV,100) + '%;background:' + c + '"></div></div>' +
-      '<span class="prog-pct">' + pctV + '%</span>' +
+  var badge=document.getElementById("badge-obj-mes");
+  if(badge) badge.textContent=(o.mes_nombre||"Mes")+" "+o.anio;
+  var progHtml="";
+  (o.categorias||[]).forEach(function(cat){
+    var obj=cat.obj_ventas||0;
+    if(!obj) return;
+    var idx=(o.realEtiquetas||[]).indexOf(cat.categoria);
+    var real=idx>=0?(o.realVentas||[])[idx]||(vk.ventas_neto||0):0;
+    var p=obj>0?Math.min(Math.round(real/obj*100),130):0;
+    var color=progColor(p);
+    progHtml+='<div class="prog-item">'+
+      '<span class="prog-label">'+cat.categoria+'</span>'+
+      '<div class="prog-track"><div class="prog-fill" style="width:'+Math.min(p,100)+'%;background:'+color+'"></div></div>'+
+      '<span class="prog-pct">'+p+'%</span>'+
       '</div>';
-
-    // Días transcurridos del mes → proyección lineal
-    var hoy     = new Date();
-    var diasMes = new Date(hoy.getFullYear(), hoy.getMonth()+1, 0).getDate();
-    var diaAct  = hoy.getDate();
-    var pctDias = Math.round(diaAct / diasMes * 100);
-    var ritmoNec= Math.round((objVentas - ventasMes) / Math.max(diasMes - diaAct, 1));
-    progHtml += '<div class="prog-item">' +
-      '<span class="prog-label">Días transcurridos del mes</span>' +
-      '<div class="prog-track"><div class="prog-fill" style="width:' + pctDias + '%;background:var(--text-muted)"></div></div>' +
-      '<span class="prog-pct">' + pctDias + '%</span>' +
-      '</div>';
-
-    if (pctV < 100) {
-      progHtml += '<p style="font-size:12px;color:var(--text-muted);margin-top:8px;padding:0 4px">' +
-        'Ritmo diario necesario para llegar al objetivo: <strong>' + fmtPeso(ritmoNec) + '/día</strong>' +
-        '</p>';
-    } else {
-      progHtml += '<p style="font-size:12px;color:var(--teal);margin-top:8px;padding:0 4px">✓ Objetivo cumplido</p>';
-    }
-  } else {
-    progHtml = '<p style="font-size:12px;color:var(--text-muted);padding:8px 0">Sin objetivo cargado para este mes.</p>';
+  });
+  if(!progHtml) progHtml='<p style="font-size:12px;color:var(--ink3);padding:8px 0">Cargá objetivos en objetivos.csv para ver el progreso.</p>';
+  html("prog-obj",progHtml);
+  if(o.realVentas && o.realVentas.length){
+    mkChart("chart-obj-acum",{type:"bar",data:{
+      labels:o.realEtiquetas||[],
+      datasets:[
+        {label:"Real",data:o.realVentas,backgroundColor:C.blue,borderRadius:4,barThickness:18},
+        {label:"Objetivo",data:(o.categorias||[]).slice(0,o.realVentas.length).map(function(c){return c.obj_ventas||0;}),
+          backgroundColor:"rgba(37,150,190,0.2)",borderColor:C.blue,borderWidth:1.5,borderRadius:4,barThickness:18}
+      ]},options:{responsive:true,maintainAspectRatio:false,
+        plugins:{legend:{display:false}},
+        scales:{y:{ticks:{callback:function(v){return fmtPeso(v);}}}}}});
   }
-  html("prog-obj", progHtml);
-
-  // Gráfico acumulado — distribución lineal del objetivo vs real
-  if (objVentas > 0) {
-    var diasMes2  = new Date(new Date().getFullYear(), new Date().getMonth()+1, 0).getDate();
-    var diaAct2   = new Date().getDate();
-    var semanas   = ["Sem 1","Sem 2","Sem 3","Sem 4"];
-    var fracSem   = [Math.min(7,diasMes2)/diasMes2, Math.min(14,diasMes2)/diasMes2,
-                     Math.min(21,diasMes2)/diasMes2, 1];
-    var realAcum  = [], objAcum  = [];
-    fracSem.forEach(function(f, i){
-      var diasSem = Math.round(f * diasMes2);
-      // Real proporcional solo hasta el día actual
-      var real = diasSem <= diaAct2 ? Math.round(ventasMes * (diasSem/diaAct2)) : null;
-      realAcum.push(real);
-      objAcum.push(Math.round(objVentas * f));
-    });
-    mkChart("chart-obj-acum",{type:"line",data:{labels:semanas,datasets:[
-      {label:"Real s/imp.",data:realAcum,borderColor:C.blue,backgroundColor:"rgba(37,150,190,0.07)",
-       fill:true,tension:0.3,borderWidth:2,pointRadius:3,spanGaps:false},
-      {label:"Objetivo",  data:objAcum, borderColor:C.amber,borderDash:[5,3],
-       borderWidth:1.5,pointRadius:0,fill:false}
-    ]},options:{responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{position:"bottom",labels:{font:{size:11},boxWidth:10}}},
-      scales:{y:{ticks:{callback:function(v){return fmtPeso(v);}}}}}});
-  }
-
-  // Histórico — por ahora solo muestra pct actual
-  var histPct   = [0,0,0,0,0,pctV];
-  var histMeses = ["","","","","",obj.mes_nombre||""];
-  mkChart("chart-obj-hist",{type:"bar",data:{labels:histMeses,datasets:[
-    {data:histPct,backgroundColor:histPct.map(function(p){return p>=100?C.teal:p>=70?C.blue:C.amber;}),borderRadius:5}
-  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
-    scales:{y:{min:0,max:130,ticks:{callback:function(v){return v+"%";}}}}}});
 }
 
 // ═══════════════════════════════════════════════════════════════════════
 // SEGUROS
 // ═══════════════════════════════════════════════════════════════════════
-function renderSeguros(s) {
-  if (!s || s.error) return;
-  var k = s.kpis;
+function renderSeguros(seg) {
+  seg=seg||{};
+  var k=seg.kpis||{};
   html("kpi-seguros",
-    kpiCard("Pólizas vendidas", k.total_polizas, "Qualia — mes actual","up","accent") +
-    kpiCard("Importe pólizas", fmtPeso(k.importe_polizas), "total acumulado","up","accent") +
-    kpiCard("Garantías ext.", k.total_garantias, "mes actual","up","ok") +
-    kpiCard("Ingreso garantías", fmtPeso(k.importe_garantias), "total acumulado","up","ok")
+    kpiCard("Pólizas Qualia",k.total_polizas||0,fmtPeso(k.importe_polizas||0)+(k.total_polizas>0?" emitidas":""),k.total_polizas>0?"up":"flat","ok")+
+    kpiCard("Prima total",fmtPeso(k.importe_polizas||0),k.total_polizas+" pólizas","flat","ok")+
+    kpiCard("Garantías ext.",k.total_garantias||0,fmtPeso(k.importe_garantias||0),k.total_garantias>0?"up":"flat","accent")+
+    kpiCard("Importe garantías",fmtPeso(k.importe_garantias||0),k.total_garantias+" garantías","flat","accent")
   );
-
-  if (s.polizas_por_familia) {
-    var pf = s.polizas_por_familia;
-    mkChart("chart-seg-fam",{type:"bar",data:{
-      labels:pf.map(function(f){return f.familia;}),
-      datasets:[{data:pf.map(function(f){return f.cantidad;}),backgroundColor:C.FAMS.slice(0,pf.length),borderRadius:5}]},
-      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}}});
-  }
-
-  if (s.evolucion_mensual) {
-    var ev = s.evolucion_mensual;
-    mkChart("chart-seg-ev",{type:"line",data:{labels:ev.map(function(e){return e.mes;}),datasets:[
-      {label:"Pólizas",data:ev.map(function(e){return e.polizas;}),borderColor:C.blue,backgroundColor:"rgba(37,150,190,0.07)",fill:true,tension:0.3,borderWidth:2,pointRadius:3},
-      {label:"Garantías",data:ev.map(function(e){return e.garantias;}),borderColor:C.teal,backgroundColor:"rgba(29,158,117,0.07)",fill:true,tension:0.3,borderWidth:2,pointRadius:3}
-    ]},options:{responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{position:"bottom",labels:{font:{size:11},boxWidth:10}}}}});
-  }
-
-  var rows = "";
-  (s.detalle_polizas||[]).forEach(function(p){
-    rows += "<tr><td>" + (p.fecha||"").slice(0,10) + "</td><td>" + p.cliente + "</td><td>" + p.articulo + "</td>" +
-      '<td class="num">' + fmtPeso(p.prima) + "</td>" +
-      "<td>" + p.vigencia + " meses</td><td>" + pill(p.estado,"ok") + "</td></tr>";
+  var rows="";
+  (seg.detalle_polizas||[]).forEach(function(p){
+    rows+="<tr><td>"+(p.fecha||"").slice(0,10)+"</td><td>"+p.cliente+"</td><td>"+p.articulo+"</td>"+
+      '<td class="num">'+fmtPeso(p.prima)+"</td>"+
+      "<td>"+p.vigencia+" meses</td><td>"+pill(p.estado,"ok")+"</td></tr>";
   });
-  html("tbody-seg-detalle", rows);
+  html("tbody-seg-detalle",rows||"<tr><td colspan='6' style='text-align:center;color:var(--ink3);padding:20px'>Sin pólizas emitidas en este período</td></tr>");
+  if(seg.polizas_por_familia && seg.polizas_por_familia.length){
+    var fams=seg.polizas_por_familia.slice(0,8);
+    mkChart("chart-seg-fam",{type:"doughnut",data:{
+      labels:fams.map(function(f){return f.familia;}),
+      datasets:[{data:fams.map(function(f){return f.cantidad;}),
+        backgroundColor:C.FAMS.slice(0,fams.length),borderWidth:0}]},
+      options:{responsive:true,maintainAspectRatio:false,
+        plugins:{legend:{position:"bottom",labels:{font:{size:11},boxWidth:10}}}}});
+  }
+  if(seg.evolucion_mensual && seg.evolucion_mensual.length){
+    var ev=seg.evolucion_mensual;
+    mkChart("chart-seg-ev",{type:"bar",data:{labels:ev.map(function(e){return e.mes;}),datasets:[
+      {label:"Pólizas",data:ev.map(function(e){return e.polizas;}),backgroundColor:C.teal,borderRadius:4,barThickness:16},
+      {label:"Garantías",data:ev.map(function(e){return e.garantias;}),backgroundColor:C.celeste,borderRadius:4,barThickness:16}
+    ]},options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{position:"bottom",labels:{font:{size:11},boxWidth:10}}},
+      scales:{y:{ticks:{stepSize:1}}}}});
+  }
 }
 
 // ═══════════════════════════════════════════════════════════════════════
 // RESUMEN EJECUTIVO
 // ═══════════════════════════════════════════════════════════════════════
 function renderResumen(d, ventasData, moraData, segurosData) {
-  var v   = ventasData  || d.ventas    || {};
-  var s   = d.stock     || {};
-  var m   = d.morosidad    || {};
-  var seg = segurosData || d.seguros   || {};
-
-  var vk  = v.kpis   || {};
-  var sk  = s.kpis   || {};
-  var mk  = m.kpis   || {};
-  var sgk = seg.kpis || {};
-
-  // ── KPI cards ──────────────────────────────────────────────────────
+  var v=ventasData||d.ventas||{};
+  var s=d.stock||{};
+  var m=d.morosidad||{};
+  var seg=segurosData||d.seguros||{};
+  var vk=v.kpis||{}, sk=s.kpis||{}, mk=m.kpis||{}, sgk=seg.kpis||{};
   html("kpi-resumen",
-    kpiCard("Ventas " + PERIODO.label(),
-      fmtPeso(vk.ventas_neto  || 0), fmtNum(vk.comprobantes_mes||0) + " FAC", "up",   "accent") +
-    kpiCard("Mora vencida",
-      fmtPeso(mk.vencido_total|| 0), (mk.pct_mora||"—") + "% del saldo",          "down", "danger") +
-    kpiCard("Stock crítico",
-      (sk.sin_stock||0) + (sk.negativos||0),
-      (sk.bajo_minimo||0) + " bajo mínimo",                                        "down", "danger") +
-    kpiCard("Garantías / Pólizas",
-      (sgk.total_garantias||0) + " / " + (sgk.total_polizas||0),
-      fmtPeso((sgk.importe_garantias||0)+(sgk.importe_polizas||0)),                "up",   "ok")
+    kpiCard("Ventas "+PERIODO.label(),fmtPeso(vk.ventas_neto||0),fmtNum(vk.comprobantes_mes||0)+" FAC","up","accent")+
+    kpiCard("Mora vencida",fmtPeso(mk.vencido_total||0),(mk.pct_mora||"—")+"% del saldo","down","danger")+
+    kpiCard("Stock crítico",(sk.sin_stock||0)+(sk.negativos||0),(sk.bajo_minimo||0)+" bajo mínimo","down","danger")+
+    kpiCard("Garantías / Pólizas",(sgk.total_garantias||0)+" / "+(sgk.total_polizas||0),fmtPeso((sgk.importe_garantias||0)+(sgk.importe_polizas||0)),"up","ok")
   );
-
-  // ── Barras de estado — calculadas desde datos reales ───────────────
-  // Objetivos: si existen datos de objetivos, calcular pct real
-  var objV = 0, objP = 0, objG = 0;
-  if (d.objetivos && d.objetivos.categorias) {
+  var objV=0, objP=0, objG=0;
+  if(d.objetivos && d.objetivos.categorias){
     d.objetivos.categorias.forEach(function(c){
-      objV += (c.obj_ventas    || 0);
-      objP += (c.obj_polizas   || 0);
-      objG += (c.obj_garantias || 0);
+      objV+=(c.obj_ventas||0); objP+=(c.obj_polizas||0); objG+=(c.obj_garantias||0);
     });
   }
-  var pctVentas  = objV > 0 ? Math.min(Math.round((vk.ventas_neto||0)/objV*100),130) : 0;
-  var pctPolizas = objP > 0 ? Math.min(Math.round((sgk.total_polizas||0)/objP*100),130) : 0;
-  var pctGarant  = objG > 0 ? Math.min(Math.round((sgk.total_garantias||0)/objG*100),130) : 0;
-
-  // Cobro puntual = % cobrado sobre total emitido (Crédito Chemes + Cta Cte)
-  // Fuente: módulo cuotas — emitido vs cobrado de los últimos 6 meses
-  var pctCobro = 0;
-  var showCobro = false;
-  if (d.cuotas) {
-    var cc  = (d.cuotas.cred_chemes && d.cuotas.cred_chemes.kpis) || {};
-    var cta = (d.cuotas.cta_cte     && d.cuotas.cta_cte.kpis)     || {};
-    var totalEmitido = (cc.emitido || 0) + (cta.emitido || 0);
-    var totalCobrado = (cc.cobrado || 0) + (cta.cobrado || 0);
-    if (totalEmitido > 0) {
-      pctCobro  = Math.round(totalCobrado / totalEmitido * 100);
-      showCobro = true;
-    }
+  var pctVentas=objV>0?Math.min(Math.round((vk.ventas_neto||0)/objV*100),130):0;
+  var pctPolizas=objP>0?Math.min(Math.round((sgk.total_polizas||0)/objP*100),130):0;
+  var pctGarant=objG>0?Math.min(Math.round((sgk.total_garantias||0)/objG*100),130):0;
+  var pctCobro=0, showCobro=false;
+  if(d.cuotas){
+    var cc=(d.cuotas.cred_chemes&&d.cuotas.cred_chemes.kpis)||{};
+    var cta=(d.cuotas.cta_cte&&d.cuotas.cta_cte.kpis)||{};
+    var totalEmitido=(cc.emitido||0)+(cta.emitido||0);
+    var totalCobrado=(cc.cobrado||0)+(cta.cobrado||0);
+    if(totalEmitido>0){ pctCobro=Math.round(totalCobrado/totalEmitido*100); showCobro=true; }
   }
-
-  var progItems = [
-    { label: "Ventas vs obj.",  pct: pctVentas,  show: objV > 0 },
-    { label: "Cobro cuotas",    pct: pctCobro,   show: showCobro },
-    { label: "Garantías ext.",  pct: pctGarant,  show: objG > 0 },
-    { label: "Pólizas Qualia",  pct: pctPolizas, show: objP > 0 }
+  var progItems=[
+    {label:"Ventas vs obj.",pct:pctVentas,show:objV>0},
+    {label:"Cobro cuotas",pct:pctCobro,show:showCobro},
+    {label:"Garantías ext.",pct:pctGarant,show:objG>0},
+    {label:"Pólizas Qualia",pct:pctPolizas,show:objP>0}
   ];
-  var progR = "";
-  progItems.forEach(function(it) {
-    if (!it.show) return;
-    var c = progColor(it.pct);
-    progR += '<div class="prog-item">' +
-      '<span class="prog-label">' + it.label + '</span>' +
-      '<div class="prog-track"><div class="prog-fill" style="width:' + Math.min(it.pct,100) + '%;background:' + c + '"></div></div>' +
-      '<span class="prog-pct">' + it.pct + '%</span>' +
+  var progR="";
+  progItems.forEach(function(it){
+    if(!it.show) return;
+    var c=progColor(it.pct);
+    progR+='<div class="prog-item">'+
+      '<span class="prog-label">'+it.label+'</span>'+
+      '<div class="prog-track"><div class="prog-fill" style="width:'+Math.min(it.pct,100)+'%;background:'+c+'"></div></div>'+
+      '<span class="prog-pct">'+it.pct+'%</span>'+
       '</div>';
   });
-  if (!progR) progR = '<p style="font-size:12px;color:var(--text-muted);padding:8px 0">Cargá objetivos en objetivos.csv para ver el progreso.</p>';
-  html("prog-resumen", progR);
-
-  // ── Alertas generadas dinámicamente desde datos reales ─────────────
-  var alerts = [];
-
-  // Stock negativo
-  if ((sk.negativos || 0) > 0) {
-    alerts.push({ area:"Stock", nivel:"alta",
-      txt: (sk.negativos) + " artículo(s) con stock negativo — verificar descargas sin existencia" });
-  }
-  // Sin stock
-  if ((sk.sin_stock || 0) > 0) {
-    alerts.push({ area:"Stock", nivel:"alta",
-      txt: (sk.sin_stock) + " artículo(s) sin stock" +
-        (s.criticos && s.criticos.length ? " — ej: " + s.criticos.slice(0,2).map(function(c){return c.desc;}).join(", ") : "") });
-  }
-  // Mora alta
-  if ((mk.mora_mas_90 || 0) > 0) {
-    alerts.push({ area:"Morosidad", nivel:"alta",
-      txt: "Mora +90 días: " + fmtPeso(mk.mora_mas_90) +
-        (m.clientes && m.clientes.length ? " — " + m.clientes[0].nombre : "") });
-  }
-  if ((mk.mora_31_90 || 0) > 0) {
-    alerts.push({ area:"Morosidad", nivel:"media",
-      txt: "Mora 31–90 días: " + fmtPeso(mk.mora_31_90) + " — requiere seguimiento" });
-  }
-  // Objetivos ventas en riesgo
-  if (objV > 0 && pctVentas < 70) {
-    alerts.push({ area:"Ventas", nivel:"media",
-      txt: "Ventas al " + pctVentas + "% del objetivo — meta: " + fmtPeso(objV) });
-  }
-  // Objetivos pólizas
-  if (objP > 0 && pctPolizas < 70) {
-    alerts.push({ area:"Seguros", nivel:"media",
-      txt: "Pólizas Qualia al " + pctPolizas + "% del objetivo (" + (sgk.total_polizas||0) + "/" + objP + ")" });
-  }
-  // Bajo mínimo
-  if ((sk.bajo_minimo || 0) > 0) {
-    alerts.push({ area:"Stock", nivel:"media",
-      txt: (sk.bajo_minimo) + " artículo(s) bajo punto de pedido — revisar reposición" });
-  }
-  // Positivos
-  if (pctVentas >= 100) {
-    alerts.push({ area:"Ventas", nivel:"ok",
-      txt: "Objetivo de ventas cumplido al " + pctVentas + "% — " + fmtPeso(vk.ventas_neto) });
-  }
-  if ((sgk.total_garantias || 0) > 0) {
-    alerts.push({ area:"Garantías", nivel:"ok",
-      txt: (sgk.total_garantias) + " garantías extendidas vendidas — " + fmtPeso(sgk.importe_garantias) });
-  }
-
-  if (!alerts.length) {
-    alerts.push({ area:"Info", nivel:"ok", txt:"Sin alertas activas para el período seleccionado." });
-  }
-
-  var alertHtml = "";
-  alerts.forEach(function(a) {
-    alertHtml += '<div class="alert-item ' + a.nivel + '">' +
-      '<span class="alert-area">' + a.area + '</span>' +
-      '<span class="alert-text">' + a.txt + '</span>' +
+  if(!progR) progR='<p style="font-size:12px;color:var(--ink3);padding:8px 0">Cargá objetivos en objetivos.csv para ver el progreso.</p>';
+  html("prog-resumen",progR);
+  var alerts=[];
+  if((sk.negativos||0)>0) alerts.push({area:"Stock",nivel:"alta",txt:(sk.negativos)+" artículo(s) con stock negativo — verificar descargas sin existencia"});
+  if((sk.sin_stock||0)>0) alerts.push({area:"Stock",nivel:"alta",txt:(sk.sin_stock)+" artículo(s) sin stock"+(s.criticos&&s.criticos.length?" — ej: "+s.criticos.slice(0,2).map(function(c){return c.desc;}).join(", "):"")});
+  if((mk.mora_mas_90||0)>0) alerts.push({area:"Morosidad",nivel:"alta",txt:"Mora +90 días: "+fmtPeso(mk.mora_mas_90)+(m.clientes&&m.clientes.length?" — "+m.clientes[0].nombre:"")});
+  if((mk.mora_31_90||0)>0) alerts.push({area:"Morosidad",nivel:"media",txt:"Mora 31–90 días: "+fmtPeso(mk.mora_31_90)+" — requiere seguimiento"});
+  if(objV>0&&pctVentas<70) alerts.push({area:"Ventas",nivel:"media",txt:"Ventas al "+pctVentas+"% del objetivo — meta: "+fmtPeso(objV)});
+  if(objP>0&&pctPolizas<70) alerts.push({area:"Seguros",nivel:"media",txt:"Pólizas Qualia al "+pctPolizas+"% del objetivo ("+(sgk.total_polizas||0)+"/"+objP+")"});
+  if((sk.bajo_minimo||0)>0) alerts.push({area:"Stock",nivel:"media",txt:(sk.bajo_minimo)+" artículo(s) bajo punto de pedido — revisar reposición"});
+  if(pctVentas>=100) alerts.push({area:"Ventas",nivel:"ok",txt:"Objetivo de ventas cumplido al "+pctVentas+"% — "+fmtPeso(vk.ventas_neto)});
+  if((sgk.total_garantias||0)>0) alerts.push({area:"Garantías",nivel:"ok",txt:(sgk.total_garantias)+" garantías extendidas vendidas — "+fmtPeso(sgk.importe_garantias)});
+  if(!alerts.length) alerts.push({area:"Info",nivel:"ok",txt:"Sin alertas activas para el período seleccionado."});
+  var alertHtml="";
+  alerts.forEach(function(a){
+    alertHtml+='<div class="alert-item '+a.nivel+'">'+
+      '<span class="alert-area">'+a.area+'</span>'+
+      '<span class="alert-text">'+a.txt+'</span>'+
       '</div>';
   });
-  html("alert-list", alertHtml);
+  html("alert-list",alertHtml);
 }
 
 // ═══════════════════════════════════════════════════════════════════════
-// HELPERS — KPI CARD
+// HELPER — KPI CARD (con barra de color top en vez de borde lateral)
 // ═══════════════════════════════════════════════════════════════════════
 function kpiCard(label, value, sub, delta, type, sparkData) {
-  var deltaIcon  = delta==="up" ? "▲" : delta==="down" ? "▼" : "";
-  var deltaClass = delta==="up" ? "delta-up" : delta==="down" ? "delta-down" : "delta-flat";
-  var cardClass  = "kpi-card " + (type||"accent");
+  var deltaIcon  = delta==="up"?"▲":delta==="down"?"▼":"";
+  var deltaClass = delta==="up"?"delta-up":delta==="down"?"delta-down":"delta-flat";
+  var cardClass  = "kpi-card "+(type||"accent");
 
   var sparkHtml = "";
-  if (sparkData && sparkData.length > 1) {
-    var max = Math.max.apply(null, sparkData.map(Math.abs));
-    if (max > 0) {
-      var pts = sparkData.map(function(v,i){
-        var x = Math.round(i / (sparkData.length-1) * 54);
-        var y = Math.round(22 - (Math.abs(v) / max) * 18);
+  if(sparkData && sparkData.length > 1){
+    var max=Math.max.apply(null, sparkData.map(Math.abs));
+    if(max > 0){
+      var pts=sparkData.map(function(v,i){
+        var x=Math.round(i/(sparkData.length-1)*54);
+        var y=Math.round(22-(Math.abs(v)/max)*18);
         return x+","+y;
       }).join(" ");
-      var sparkColor = type==="danger" ? "var(--red)" : type==="ok" ? "var(--teal)" : type==="warn" ? "var(--amber)" : "var(--blue)";
-      sparkHtml = '<svg width="56" height="24" style="flex-shrink:0;opacity:0.7">' +
-        '<polyline points="' + pts + '" fill="none" stroke="' + sparkColor + '" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>' +
+      var sparkColor=type==="danger"?"var(--red)":type==="ok"?"var(--teal)":type==="warn"?"var(--amber)":"var(--blue)";
+      sparkHtml='<svg width="56" height="24" style="flex-shrink:0;opacity:0.7">'+
+        '<polyline points="'+pts+'" fill="none" stroke="'+sparkColor+'" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>'+
         '</svg>';
     }
   }
 
-  return '<div class="' + cardClass + '">' +
-    '<div class="kpi-label">' + label + '</div>' +
-    '<div style="display:flex;align-items:flex-end;justify-content:space-between;gap:6px">' +
-      '<div class="kpi-value">' + value + '</div>' +
-      sparkHtml +
-    '</div>' +
-    '<div class="kpi-delta ' + deltaClass + '">' +
-      (deltaIcon ? '<span style="font-size:9px;margin-right:2px">' + deltaIcon + '</span>' : '') +
-      sub +
-    '</div>' +
+  return '<div class="'+cardClass+'">'+
+    '<div class="kpi-top-bar"></div>'+
+    '<div class="kpi-inner">'+
+      '<div class="kpi-label">'+label+'</div>'+
+      '<div style="display:flex;align-items:flex-end;justify-content:space-between;gap:6px">'+
+        '<div class="kpi-value">'+value+'</div>'+
+        sparkHtml+
+      '</div>'+
+      '<div class="kpi-delta '+deltaClass+'">'+
+        (deltaIcon?'<span style="font-size:9px;margin-right:2px">'+deltaIcon+'</span>':'')+
+        sub+
+      '</div>'+
+    '</div>'+
     '</div>';
 }
 
 // ═══════════════════════════════════════════════════════════════════════
-// EVENTOS
+// EVENTOS NAV
 // ═══════════════════════════════════════════════════════════════════════
-document.querySelectorAll(".nav-tab").forEach(function(tab) {
-  tab.addEventListener("click", function() {
+document.querySelectorAll(".nav-tab").forEach(function(tab){
+  tab.addEventListener("click", function(){
     showSection(this.getAttribute("data-tab"));
   });
 });
@@ -2559,4 +2320,3 @@ fetchData();
 </script>
 </body>
 </html>
-
