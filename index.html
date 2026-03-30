@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <meta name="theme-color" content="#2596be">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-webhttps://script.google.com/macros/s/AKfycbw8VRgav8fM6hGmaK_FpL7ciTxE3zlTiAr7vIbdcrtkzFifzHBoC_Vte78CEDd4LnIkXA/exec-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <title>Chemes — Panel Gerencial</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -1137,7 +1137,7 @@ var CONFIG = (function() {
   var id     = parseInt(params.get("id") || "3", 10);
   var demo   = params.get("demo") === "1";
   return {
-    WEB_APP_URL: "https://script.google.com/macros/s/AKfycbyaDF1IWOdTceS-rXuzrQnxE4nolMdkhxNA0T5_iDM710AZCjEY79BG2t6YQeyAeCHjwQ/exec",
+    WEB_APP_URL: "https://script.google.com/macros/s/AKfycbw8VRgav8fM6hGmaK_FpL7ciTxE3zlTiAr7vIbdcrtkzFifzHBoC_Vte78CEDd4LnIkXA/exec",
     SUCURSAL_ID: id,
     DEMO_MODE:   demo
   };
@@ -2111,43 +2111,68 @@ function renderObjetivos(o, ventasData, segurosData) {
   if(!o) return;
   var vk=(ventasData&&ventasData.kpis)||{};
   var sgk=(segurosData&&segurosData.kpis)||{};
+  var categorias=(o.categorias||[]).map(function(c){
+    return Object.assign({}, c, { obj_ventas: (c.obj_ventas!=null ? c.obj_ventas : (c.objetivo||0)) });
+  });
   var totalObj=0;
-  (o.categorias||[]).forEach(function(c){ totalObj+=(c.obj_ventas||0); });
-  var pct=totalObj>0?Math.min(Math.round((vk.ventas_neto||0)/totalObj*100),150):0;
+  categorias.forEach(function(c){ totalObj += (c.obj_ventas||0); });
+  var ventasNetas = vk.ventas_neto || 0;
+  var pct=totalObj>0?Math.min(Math.round(ventasNetas/totalObj*100),150):0;
   html("kpi-objetivos",
     kpiCard("Objetivo total ventas",fmtPeso(totalObj),"todas las categorías","flat","accent")+
-    kpiCard("Avance actual",fmtPeso(vk.ventas_neto||0),pct+"% del objetivo",pct>=100?"up":"flat",pct>=100?"ok":pct>=70?"accent":"warn")+
+    kpiCard("Avance actual",fmtPeso(ventasNetas),pct+"% del objetivo",pct>=100?"up":"flat",pct>=100?"ok":pct>=70?"accent":"warn")+
     kpiCard("Pólizas Qualia",sgk.total_polizas||0,fmtPeso(sgk.importe_polizas||0),"flat","ok")+
     kpiCard("Garantías ext.",sgk.total_garantias||0,fmtPeso(sgk.importe_garantias||0),"flat","ok")
   );
   var badge=document.getElementById("badge-obj-mes");
   if(badge) badge.textContent=(o.mes_nombre||"Mes")+" "+o.anio;
+
+  var labels = (o.realEtiquetas && o.realEtiquetas.length) ? o.realEtiquetas.slice() : ["VENTAS"];
+  var realSeries = (o.realVentas && o.realVentas.length) ? o.realVentas.slice() : [ventasNetas];
+  var objetivosMap = {};
+  categorias.forEach(function(cat){ objetivosMap[cat.categoria] = cat.obj_ventas || 0; });
+  if(!objetivosMap["VENTAS"] && totalObj){ objetivosMap["VENTAS"] = totalObj; }
+
   var progHtml="";
-  (o.categorias||[]).forEach(function(cat){
-    var obj=cat.obj_ventas||0;
+  labels.forEach(function(label, idx){
+    var obj = objetivosMap[label] || (idx===0 ? totalObj : 0);
     if(!obj) return;
-    var idx=(o.realEtiquetas||[]).indexOf(cat.categoria);
-    var real=idx>=0?(o.realVentas||[])[idx]||(vk.ventas_neto||0):0;
+    var real = realSeries[idx] || 0;
     var p=obj>0?Math.min(Math.round(real/obj*100),130):0;
     var color=progColor(p);
     progHtml+='<div class="prog-item">'+
-      '<span class="prog-label">'+cat.categoria+'</span>'+
+      '<span class="prog-label">'+label+'</span>'+
       '<div class="prog-track"><div class="prog-fill" style="width:'+Math.min(p,100)+'%;background:'+color+'"></div></div>'+
       '<span class="prog-pct">'+p+'%</span>'+
       '</div>';
   });
-  if(!progHtml) progHtml='<p style="font-size:12px;color:var(--ink3);padding:8px 0">Cargá objetivos en objetivos.csv para ver el progreso.</p>';
+  if(!progHtml) progHtml='<p style="font-size:12px;color:var(--ink3);padding:8px 0">No hay objetivos configurados para el período actual.</p>';
   html("prog-obj",progHtml);
-  if(o.realVentas && o.realVentas.length){
+
+  var chartLabels=[];
+  var chartReal=[];
+  var chartObj=[];
+  labels.forEach(function(label, idx){
+    var obj = objetivosMap[label] || (idx===0 ? totalObj : 0);
+    if(!obj) return;
+    chartLabels.push(label);
+    chartReal.push(realSeries[idx] || 0);
+    chartObj.push(obj);
+  });
+
+  if(chartLabels.length){
+    html("chart-obj-acum-wrap", '<canvas id="chart-obj-acum"></canvas>');
     mkChart("chart-obj-acum",{type:"bar",data:{
-      labels:o.realEtiquetas||[],
+      labels:chartLabels,
       datasets:[
-        {label:"Real",data:o.realVentas,backgroundColor:C.blue,borderRadius:4,barThickness:18},
-        {label:"Objetivo",data:(o.categorias||[]).slice(0,o.realVentas.length).map(function(c){return c.obj_ventas||0;}),
+        {label:"Real",data:chartReal,backgroundColor:C.blue,borderRadius:4,barThickness:18},
+        {label:"Objetivo",data:chartObj,
           backgroundColor:"rgba(37,150,190,0.2)",borderColor:C.blue,borderWidth:1.5,borderRadius:4,barThickness:18}
       ]},options:{responsive:true,maintainAspectRatio:false,
         plugins:{legend:{display:false}},
         scales:{y:{ticks:{callback:function(v){return fmtPeso(v);}}}}}});
+  } else {
+    html("chart-obj-acum-wrap", '<div style="display:flex;align-items:center;justify-content:center;height:240px;color:var(--ink3);font-size:12px;">No hay datos de avance para graficar.</div>');
   }
 }
 
